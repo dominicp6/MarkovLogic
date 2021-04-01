@@ -752,7 +752,6 @@ class UndirectedHypergraph(object):
 
         return new_H
 
-    #TODO: Produce a version of this to read from .db files
     def read(self, file_name, delim=',', sep='\t'):
         """Reads an undirected hypergraph from a file, where nodes are
         represented as strings.

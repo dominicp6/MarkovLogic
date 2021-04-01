@@ -4,7 +4,8 @@ from itertools import combinations
 from collections import defaultdict
 from Hypergraph import UndirectedHypergraph
 from EnhancedGraph import EnhancedGraph
-
+from RandomWalker import RandomWalker
+from Node import Node
 
 class EnhancedUndirectedHypergraph(UndirectedHypergraph):
     """
@@ -32,6 +33,8 @@ class EnhancedUndirectedHypergraph(UndirectedHypergraph):
         self._predicate_set = set()
         self._predicate_counts = defaultdict(lambda: 0)
         self._node_to_hyperedge_ids = defaultdict(lambda: set())
+        self.node_name_to_node_object = defaultdict(lambda: Node)
+        self.community = None
 
     def __str__(self): 
         output = '''Undirected hypergraph object
@@ -39,11 +42,29 @@ class EnhancedUndirectedHypergraph(UndirectedHypergraph):
 #nodes     : {} 
 #hyperedges: {}
 #predicates: {} 
---------------------------------'''.format(str(len(self.get_node_set())),
-str(len(self.get_hyperedge_id_set())),
-str(len(self._predicate_set)))
+--------------------------------'''.format(str(self.order()),
+str(self.size()),
+str(self.num_predicates()))
 
         return output
+
+    def _create_nodes(self, nodes):
+        """
+        Creates a new hypergraph node object for each node in nodes, providing the 
+        node isn't already in the hypergraph's node set
+        """
+        #TODO: implement node typing
+        node_type = 'default'
+        for node in nodes:
+            #only create a new node if it isn't already in the node set
+            if node not in self.get_node_set():
+                self.node_name_to_node_object[node] = Node(node_name = node, node_type = node_type)
+
+    def _delete_node(self, node):
+        """
+        Removes a node object from the hypergraph
+        """
+        del self.node_name_to_node_object[node]
 
     def _update_node_to_hyperedge_id_dict(self, nodes, hyperedge_id, operation='add'):
         """
@@ -62,6 +83,9 @@ str(len(self._predicate_set)))
 
             elif operation == 'remove':
                 self._node_to_hyperedge_ids[node].remove(hyperedge_id)
+                #also delete the node if it has no associated hyperedges remaining
+                if len(self._node_to_hyperedge_ids[node]) == 0:
+                    self._delete_node(node)
 
             else:
                 raise ValueError('_update_node_to_hyperedge_id_dict operation parameter must be one of: "add", "remove"')
@@ -89,6 +113,19 @@ str(len(self._predicate_set)))
         else:
             raise ValueError('_update_predicate_list operation parameter must be one of: "add", "remove"')
 
+    def reset_nodes(self, max_length : int, walk_number: int, hard_reset = False):
+        """
+        Resets the 'first_visit' property of each node in the hypergraph to True. 
+        If the node wasn't visited during the last random walk, then updates its 
+        ave_hitting_time property using the max length of the random walk.
+
+        :param: max_length (int)  - the maximum length of the random walk 
+        :param: walk_number(int)  - =k if this is the kth random walk on this hypergraph 
+        :param: hard_reset (bool) - hard reset = True to reset *all* node properties
+        """
+        for node_obj in self.node_name_to_node_object.values():
+            node_obj.reset(max_length = max_length, walk_number = walk_number, hard_reset = hard_reset)
+
     def get_predicate_of_hyperedge(self, hyperedge_id):
         """
         Returns the predicate corresponding to a given hyperedge_id, if a predicate is 
@@ -107,6 +144,7 @@ str(len(self._predicate_set)))
         """
         if attr_dict["predicate"] is not None:
             self._update_predicate_list(attr_dict["predicate"], operation='add')
+        self._create_nodes(nodes)
         hyperedge_id = super().add_hyperedge(nodes, attr_dict, **attr)
         self._update_node_to_hyperedge_id_dict(nodes, hyperedge_id)
         
@@ -125,6 +163,7 @@ str(len(self._predicate_set)))
         #update node to hyperedge dict
         for nodes, hyperedge_id in zip(hyperedges, hyperedge_ids):
             self._update_node_to_hyperedge_id_dict(nodes, hyperedge_id)
+            self._create_nodes(nodes)
         
         return hyperedge_ids
 
@@ -180,6 +219,24 @@ str(len(self._predicate_set)))
         """
         return dict(self._node_to_hyperedge_ids)
 
+    def order(self):
+        """
+        Returns the number of nodes in the Hypergraph
+        """
+        return len(self.get_node_set())
+
+    def size(self):
+        """
+        Returns the number of hyperedges in the Hypergraph
+        """
+        return len(self.get_hyperedge_id_set())
+
+    def num_predicates(self):
+        """
+        Returns the number of predicates in the Hypergraph
+        """
+        return len(self.get_predicates())
+
     #TODO: Extend to also read in the info and type files
     def read_from_alchemy_db(self, file_name: str):
         """
@@ -210,12 +267,6 @@ str(len(self._predicate_set)))
             node_string = line_fragments[1][0:-1]
             node_list= [node.strip() for node in node_string.split(',')]
             nodes = set(node_list)
-
-            # if len(nodes) != len(node_list):
-            #      warnings.warn("Line {} [{}]".format(line_number, line)
-            #                 +"has repeat constants in the predicate \n"+
-            #                 "Hyperedge will have a smaller node set than"+
-            #                 " the number of constant slots in the predicate")
     
             self.add_hyperedge(nodes, weight=1, attr_dict = {"predicate": str(predicate)})
 
@@ -224,18 +275,12 @@ str(len(self._predicate_set)))
         print("Successfully imported hypergraph from "+file_name)
 
 
-    def convert_to_graph(self, sum_weights_for_multi_edges = True):
+    def convert_to_graph(self, sum_weights_for_multi_edges = True, verbose = True):
         """
         Converts the undirected hypergraph to a graph by replacing all 
         k-hyperedges with k-cliques (a k-clique is a fully connected 
         subgraph with k nodes). This is useful as a pre-processing 
         step for applying graph-based clustering algorithms.
-
-        Returns the Graph as well as a dictionary mapping from nodes
-        to hyperedge ids which will 
-
-        Note that information is lost in the process as we can no longer 
-        identify the parent hyperedges of a node.
 
         :param sum_weights_for_multi_edges: if True then replaces any
             multi-edges generated in the hypergraph -> graph conversion
@@ -259,31 +304,40 @@ str(len(self._predicate_set)))
                         G.add_edge(*e, weight=1)
                 else:
                     G.add_edge(*e, weight=1)
-
-        print("New graph object")
-        print("--------------------------------")
-        print("#nodes               : {}".format(G.order()))
-        print("#edges               : {}".format(G.size()))
-        print("#connected components: {}".format(nx.number_connected_components(G)))
-        print("--------------------------------")
+        
+        if verbose == True:
+            print("New graph object")
+            print("--------------------------------")
+            print("#nodes               : {}".format(G.order()))
+            print("#edges               : {}".format(G.size()))
+            print("#connected components: {}".format(nx.number_connected_components(G)))
+            print("--------------------------------")
 
         #Check that the graph is connected
         assert nx.is_connected(G)
 
         return G
 
-    def convert_graph_to_hypergraph(self, G):
+    def convert_to_hypergraph(self, G):
         """
-        Converts an undirected graph into a undirected hypergraph using an
-        instance of EnhancedUndirectedHypergraph as a template.
+        Converts an undirected graph, or simply a set of graph nodes,
+        into a undirected hypergraph using an instance of EnhancedUndirectedHypergraph 
+        as a template.
 
-        :param G: The graph to be converted to a hypergraph
+        :param G: The graph (or node set) to be converted to a hypergraph
 
         """
         #initialise a new hypergraph
         H = EnhancedUndirectedHypergraph()
+        
+        if isinstance(G, EnhancedGraph):
+            nodes = G.nodes()
+        elif isinstance(G, set):
+            nodes = G
+        else:
+            raise ValueError('Input must be either of type Graph or Set')
 
-        for node in G.nodes():
+        for node in nodes:
             #for each node in the graph, find the sets of hyperedge nodes from the
             #template hypergraph which contain that node
             for hyperedge_id in self._node_to_hyperedge_ids[node]:
@@ -291,3 +345,15 @@ str(len(self._predicate_set)))
                 H.add_hyperedge(self.get_hyperedge_nodes(hyperedge_id), weight=1, attr_dict = {"predicate": self.get_hyperedge_attribute(hyperedge_id, "predicate")})
         
         return H
+
+    def generate_community(self, number_of_walks = 100, max_length = 100):
+        """
+        TODO: Add description
+        """
+        rw = RandomWalker(self, number_of_walks = number_of_walks, max_length = max_length)
+        self.community = rw.run_random_walks()
+        
+        return self.community
+
+    
+        
