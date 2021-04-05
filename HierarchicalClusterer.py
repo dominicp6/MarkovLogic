@@ -250,7 +250,7 @@ class HierarchicalClusterer(object):
 
     def _make_tree(self, G, depth=0, position = ''):
         """
-        A recursive function with constructs the hierarchical clustering tree
+        A recursive function which constructs the hierarchical clustering tree
         of a graph or hypergraph.
 
         :param depth (int): the previous depth reached in the hierarchical 
