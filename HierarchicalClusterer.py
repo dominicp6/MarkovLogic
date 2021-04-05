@@ -5,7 +5,7 @@ import cynetworkx as nx
 from scipy import sparse
 from sklearn.cluster import KMeans
 from collections import OrderedDict
-import undirected_matrices as umat
+import graph_utils as graph_util
 from EnhancedGraph import EnhancedGraph
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 
@@ -71,7 +71,7 @@ class HierarchicalClusterer(object):
         assert isinstance(min_cluster_size, int) and min_cluster_size >= 1, "Arg Error: min_cluster size must be a positive integer"
         assert isinstance(n_init, int) and n_init > 0, "Arg Error: n_init must be a positive integer"
         assert isinstance(max_iter, int) and max_iter > 0, "Arg Error: max_iter must be a positive integer"
-        assert isinstance(threshold, float), "Arg Error: threshold must be a real number"
+        assert isinstance(threshold, (int, float)), "Arg Error: threshold must be a real number"
         
         self.stop_criterion = stop_criterion
         self.min_ssev = min_ssev
@@ -89,9 +89,9 @@ class HierarchicalClusterer(object):
 
     def diagnose_no_partition_error(self):
         """
-        Determine plausible reasons why the hierarchical clustering 
+        Determines plausible reasons why the hierarchical clustering 
         terminated prematurely and suggest how the user should change
-        hyperparameters accordingly
+        hyperparameters accordingly.
         """
         
         if self.stop_criterion == 'eigenvalue':
@@ -116,15 +116,18 @@ class HierarchicalClusterer(object):
         into two disjoint components.
 
         :param H: the hypergraph to perform the hypergraph-cut algorithm on.
-        :returns: set -- the S1 set of nodes in the first partition
-                  set -- the S2 set of nodes in the second partition
+        :returns: H1 -- the hypergraph derived from the nodes of the first partition
+                  H2 -- the hypergraph derived from the nodes of the second partition
+                  split_again (bool) -- whether or not to continue splitting the 
+                  hypergraph based on the second smallest eigenvalue criterion 
+                  (always 'True' for this algorithm)
         """
-
+        #TODO: implement eigenvalue based split-again criterion?
         # Get index<->node mappings and index<->hyperedge_id mappings for matrices
-        _, nodes_to_indices = umat.get_node_mapping(H)
-        _, hyperedge_ids_to_indices = umat.get_hyperedge_id_mapping(H)
+        _, nodes_to_indices = graph_util.get_node_mapping(H)
+        _, hyperedge_ids_to_indices = graph_util.get_hyperedge_id_mapping(H)
 
-        delta = umat.compute_normalized_laplacian(H,
+        delta = graph_util.compute_normalized_laplacian(H,
                                             nodes_to_indices,
                                             hyperedge_ids_to_indices)
 
@@ -150,13 +153,24 @@ class HierarchicalClusterer(object):
 
     def normalized_graph_cut(self, G):
         """
-        TODO: Add Description
+        Implements the spectral bipartitioning algorithm from:
+        "Normalized Cuts and Image Segmentation", Malik J. and Shi J. (2000), IEEE
+        (https://people.eecs.berkeley.edu/~malik/papers/SM-ncut.pdf)
+
+        The algorithm uses the normalized Laplacian to partition a graph into
+        two disjoint components.
+
+        :param G: graph to perform the spectral bipartitioning on
+        :returns: G1 -- the graph derived from the nodes of the first partition
+                  G2 -- the graph derived from the nodes of the second partition
+                  split_again (bool) -- whether or not to continue splitting the 
+                  graph based on the second smallest eigenvalue criterion 
         """
         split_again = True
 
         #get the L_{RW} spectrum of G by solving the generalised eigenvalue problem
         #NB: number of graph nodes = number of eigenvectors
-        w,U = umat.laplace_RW_spectrum(G)
+        w,U = graph_util.laplace_RW_spectrum(G)
 
         #update most recent second smallest eigenvalue
         self._most_recent_ssev = w[1]
@@ -182,18 +196,20 @@ class HierarchicalClusterer(object):
         self._most_recent_cluster_sizes = [len(S1), len(S2)]
 
         #create subgraphs from the node sets
-        G1 = umat.create_subgraph(G, S1)
-        G2 = umat.create_subgraph(G, S2)
+        G1 = graph_util.create_subgraph(G, S1)
+        G2 = graph_util.create_subgraph(G, S2)
 
         return G1, G2, split_again
 
     def _partition(self, G):
         """
         Takes a graph/hypergraph G as input and splits it into two clusters using 
-        a spectral partitioning algorithm / Normalized Hypergraph Cut respectively
+        a spectral partitioning algorithm / Normalized Hypergraph Cut respectively.
 
-        Graph Partitioning: Shi and Malik clustering, refs: [2],[3]
-        Hypergraph Partitioning: ref [4]
+        :param G: input graph/hypergraph
+        :returns: G1, G2 - the two graphs/hypergraphs resulting from the partitioning
+                  split_again (bool) - whether or not to continue splitting again 
+                  based on the cluster size of second smallest eigenvalue criterion.
         """
         number_of_nodes = G.order()
         #If stopping based on cluster size, don't split if the number of 
@@ -211,9 +227,36 @@ class HierarchicalClusterer(object):
 
         return G1, G2, split_again        
 
+    def _remove_from_tree(self, position):
+        """
+        Removes a graph/hypergraph and its sibling from the hierarchical 
+        clustering tree if it did not satisfy the criterion to be split further.
+
+        :param position: the position of the graph/hypergraph in the tree to be removed.
+        """
+        #if it was a right-split graph then we can remove its left-split sibling which is already in the clusters dict
+        if position[-1] == '1':
+            banned_sibling = position[:-1] + '0'
+            #print('Deleting banned sibling {}'.format(banned_sibling))
+            del self._hierarchical_clustering_tree[banned_sibling]
+        #if it was a left-split graph then add the right-split position to the banned siblings list
+        else:
+            banned_sibling = position[:-1] + '1'
+            #print('Adding banned sibling {}'.format(banned_sibling))
+
+        self._banned_positions.add(banned_sibling)
+        #delete the graph from the clusters dict
+        del self._hierarchical_clustering_tree[position]
+
     def _make_tree(self, G, depth=0, position = ''):
         """
         A recursive function with constructs the hierarchical clustering tree
+        of a graph or hypergraph.
+
+        :param depth (int): the previous depth reached in the hierarchical 
+                            clustering tree
+        :param position (str): the position of the cluster just added to the
+                            (binary) tree (encoded as a binary string).
         """
 
         if G.order() == 0 or G.order() == 1:
@@ -229,42 +272,20 @@ class HierarchicalClusterer(object):
                 if G1.order() > 1 and G2.order() > 1:
                     #increment the depth of the hierarhcial clustering tree
                     depth += 1
-
-                    #print(depth, G1.number_of_nodes(), G2.number_of_nodes())
                     
                     #If stop criterion is 'tree_depth', then only continue splitting if we have not exceeded tree_output_depth
                     if self.stop_criterion in ['eigenvalue', 'cluster_size'] or self.stop_criterion == 'tree_depth' and depth <= self.tree_output_depth:
                         #Add the left-split graph to the clusters dict and split again
-                        #print('Adding left graph {}'.format(position+'0'))
-                        self._hierarchical_clustering_tree[position + '0'] = G1
-                        #print(position+'0')
-                        self._make_tree(G1, depth = depth, position = position + '0')
+                        new_position = position + '0'
+                        self._hierarchical_clustering_tree[new_position] = G1
+                        self._make_tree(G1, depth = depth, position = new_position)
                         #If the right-split graph is not in banned positions, then add the right-split graph to the clusters dict and split again
                         if position + '1' not in self._banned_positions:
-                            #print('Adding right graph {}'.format(position+'1'))
-                            #print(position+'1')
-                            self._hierarchical_clustering_tree[position + '1'] = G2
-                            self._make_tree(G2, depth = depth, position = position + '1')
+                            new_position = position + '1'
+                            self._hierarchical_clustering_tree[new_position] = G2
+                            self._make_tree(G2, depth = depth, position = new_position)
             elif depth != 0:
-                #if we are not splitting again then this means that the 
-                #graph didn't satisfy our criteria for keeping it in the
-                #hierarchical clustering tree, so we remove it and its 
-                #sibling from the tree
-
-                #if it was a right-split graph then we can remove its left-split sibling which is already in the clusters dict
-                if position[-1] == '1':
-                    banned_sibling = position[:-1] + '0'
-                    #print('Deleting banned sibling {}'.format(banned_sibling))
-                    del self._hierarchical_clustering_tree[banned_sibling]
-                #if it was a left-split graph then add the right-split position to the banned siblings list
-                else:
-                    banned_sibling = position[:-1] + '1'
-                    #print('Adding banned sibling {}'.format(banned_sibling))
-
-                self._banned_positions.add(banned_sibling)
-                #delete the graph from the clusters dict
-                #print('Deleting graph {}'.format(position))
-                del self._hierarchical_clustering_tree[position]
+                self._remove_from_tree(position)
             else:
                 #Hyperparameters are such that we have no splitting of the original graph
                 #output an appropriate error message
@@ -272,7 +293,9 @@ class HierarchicalClusterer(object):
 
     def _get_leaf_nodes(self):
         """
-        Extracts the leaf nodes from the Hierarchical clustering tree
+        Extracts just the leaf nodes from the hierarchical clustering tree.
+
+        These leaf nodes constitue the final clusterings.
         """
         leaf_nodes = dict()
         for position, cluster in self._hierarchical_clustering_tree.items():
@@ -287,7 +310,12 @@ class HierarchicalClusterer(object):
 
     def hierarchical_clustering(self, G):
         """
-        Hierarchical cluster a graph/hypergraph G
+        Hierarchical cluster a graph/hypergraph G.
+
+        :param: G (either EnhancedGraph or EnhancedUndirectedGraph)
+                - the object to run hierarchical clustering on
+        :returns: list of leaf node graph/hypergraph objects obtained
+                  after hierarchical clustering
         """
         if isinstance(G, EnhancedGraph):
             pass
@@ -319,4 +347,4 @@ class HierarchicalClusterer(object):
         print(size_of_clusters)
         print(sum(size_of_clusters))
 
-        return leaf_nodes.keys()
+        return leaf_nodes.values()

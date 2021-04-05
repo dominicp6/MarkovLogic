@@ -1,6 +1,6 @@
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 from Community import Community
-import undirected_matrices as umat
+import graph_utils as graph_util
 import numpy as np
 from collections import defaultdict
 
@@ -21,30 +21,28 @@ class RandomWalker(object):
                             when starting from the source node
     """
 
-    def __init__(self,H, number_of_walks = 100, max_length = 100, merge_criterion = 'JS_divergence', source_node = None, merge_threshold = 2):
-        assert isinstance(H, EnhancedUndirectedHypergraph), "Arg Error: H must be of type EnhancedUndirectedHypergraph"
+    def __init__(self, number_of_walks = 100, max_length = 100, merge_criterion = 'truncated_hitting_time', source_node = None, merge_threshold = 2):
         assert isinstance(number_of_walks, int), "Arg Error: number_of_walks must be of type int"
         assert isinstance(max_length, int), "Arg Error: max_length must be of type int"
-        assert merge_criterion in ['JS_divergence', 'truncated_hitting_times'], "Arg Error: merge criterion must be either JS_divergence of truncated_hitting_times"
-        assert isinstance(merge_threshold, float), "Arg Error: merge_threshold must be of type float"
+        assert merge_criterion in ['JS_divergence', 'truncated_hitting_time'], "Arg Error: merge criterion must be either JS_divergence of truncated_hitting_time"
+        assert isinstance(merge_threshold, (int,float)) and merge_threshold > 0, "Arg Error: merge_threshold must be a positive real number"
         
-        self.H = H
         self.number_of_walks = number_of_walks
         self.max_length = max_length
         self.merge_criterion = merge_criterion
-        self.source_node = source_node
         self.merge_threshold = merge_threshold
+        
+    def _setup_params(self, H):
+        self._indices_to_nodes, self._nodes_to_indices = graph_util.get_node_mapping(H)
+        _, self._hyperedge_ids_to_indices = graph_util.get_hyperedge_id_mapping(H)
 
-        #populate dictionary mappings
-        #TODO: change this so that it differentiates between nodes of different types?
-        self._indices_to_nodes, self._nodes_to_indices = umat.get_node_mapping(self.H)
-        _, self._hyperedge_ids_to_indices = umat.get_hyperedge_id_mapping(self.H)
-
-        self.transition_matrix = self._compute_transition_matrix()
+        self.transition_matrix = self._compute_transition_matrix(H)
 
         self.sample_paths = defaultdict(lambda: [])
+        
+        return 
 
-    def _compute_transition_matrix(self):
+    def _compute_transition_matrix(self, H):
         """Computes the transition matrix for a random walk on the given
         hypergraph as described in the paper:
         Zhou, Dengyong, Jiayuan Huang, and Bernhard Scholkopf.
@@ -56,14 +54,14 @@ class RandomWalker(object):
         :returns: sparse.csc_matrix -- the transition matrix as a sparse matrix.
 
         """
-        M = umat.get_incidence_matrix(self.H,
+        M = graph_util.get_incidence_matrix(H,
                                     self._nodes_to_indices, self._hyperedge_ids_to_indices)
-        W = umat.get_hyperedge_weight_matrix(self.H, self._hyperedge_ids_to_indices)
-        D_v = umat.get_vertex_degree_matrix(M, W)
-        D_e = umat.get_hyperedge_degree_matrix(M)
+        W = graph_util.get_hyperedge_weight_matrix(H, self._hyperedge_ids_to_indices)
+        D_v = graph_util.get_vertex_degree_matrix(M, W)
+        D_e = graph_util.get_hyperedge_degree_matrix(M)
 
-        D_v_inv = umat.fast_inverse(D_v)
-        D_e_inv = umat.fast_inverse(D_e)
+        D_v_inv = graph_util.fast_inverse(D_v)
+        D_e_inv = graph_util.fast_inverse(D_e)
         M_trans = M.transpose()
 
         #construct the transition matrix
@@ -74,22 +72,24 @@ class RandomWalker(object):
     def _get_source_node(self):
         """
         Gets a source node from a hypergraph from which to start running random walks
+        by randomly selecting a node from the hypergraph.
 
         :param H: the hypergraph to get the source node from
         :returns: the ID of the source node
         """
-        #TODO: change this so that it uses a more sensible criterion than a random selection
-        if self.source_node == None:
-            self.source_node = np.random.choice(self._nodes_to_indices.values())
-        else:
-            pass
+        #TODO: change this so that it uses a more sensible criterion than a random selection?
+        return np.random.choice(list(self._nodes_to_indices.values()))
 
     def _cluster_nodes(self, node_list):
         """
         Clusters a list of nodes into groups based on the truncated hitting
-        criterion.
+        criterion as follows:
 
-        #TODO: explain the criterion
+        Let h_{j} be the average truncated hitting time of node v_{j}.
+        Nodes v_{j} are grouped into disjoint sets A_{k} such that:
+        for all v_{j} in A_{k} there exists a node v_{j'} in A_{k}
+        such that |h_{j} - h_{j'}| <= merge_threshold.
+        Ref: https://alchemy.cs.washington.edu/papers/kok10/kok10.pdf
         """
 
         #sort the nodes in the hypergraph in increasing order of average hitting time
@@ -101,21 +101,40 @@ class RandomWalker(object):
             if idx == 0:
                 cluster.append(node)
                 t_old = node.ave_hitting_time
+                continue
             
             t_new = node.ave_hitting_time
+            print("T_old {} T_new {}".format(t_old, t_new))
+            cluster.append(node)
+
             if (t_new - t_old) <= self.merge_threshold:
-                cluster.append(node)
                 t_old = t_new
             else:
+                #append the cluster A_{k} to the list of clusters
                 node_clusters.append(cluster)
+                print('** {}'.format(cluster))
                 cluster = []
+        
+        if len(cluster) > 0:
+            node_clusters.append(cluster)
+            print('** {}'.format(cluster))
+            
         
         return node_clusters
 
 
-    def run_random_walks(self):
+    def run_random_walks(self, H):
+        """
+        Runs random walks on the hypergraph H to cluster nodes based on 
+        a merge criterion (either 'truncated_hitting_time' or 'JS_divergence').
+
+        :param: H (EnhancedUndirectedHypergraph) - the hypergraph to run random walks on
+        :returns: Community object of the hypergraph's node clusters
+        """
+        self._setup_params(H)
+
         #get the source node for the random walk
-        self._get_source_node()
+        source_node = self._get_source_node()
 
         node_idx_array = [idx for idx in range(self.transition_matrix.shape[0])]
         sample_path = []
@@ -124,13 +143,13 @@ class RandomWalker(object):
         for walk in range(1, self.number_of_walks + 1):
             for step in range(self.max_length):
                 if step == 0:
-                    current_node_idx = self.source_node
+                    current_node_idx = source_node
                     sample_path.append(current_node_idx)
-                
+            
                 #make a random step using the transition matrix
-                next_node_idx = np.random.choice(node_idx_array, p=self.transition_matrix[current_node_idx][:])
+                next_node_idx = np.random.choice(node_idx_array, p=self.transition_matrix[current_node_idx].toarray()[0])
 
-                node_obj = self.H.node_name_to_node_object[self._indices_to_nodes[next_node_idx]]
+                node_obj = H.node_name_to_node_object[self._indices_to_nodes[next_node_idx]]
                 
                 current_node_idx = next_node_idx
                 sample_path.append(current_node_idx)
@@ -138,21 +157,24 @@ class RandomWalker(object):
                 #update node properties if its a first visit
                 if node_obj.first_visit:
                     node_obj.update_ave_hitting_time(hitting_time = step, walk_number = walk)
-                    node_obj.update_sample_paths(sample_path = sample_path, walk_number = walk)
+                    node_obj.update_sample_paths(path = sample_path, walk_number = walk)
                     node_obj.first_visit = False
 
-            self.H.reset_nodes(max_length = self.max_length, walk_number = walk)
+            H.update_nodes(max_length = self.max_length, walk_number = walk)
 
         #cluster nodes based on their symmetry properties
         if self.merge_criterion == 'truncated_hitting_time':
-            node_list = self.H.node_name_to_node_object.values()
+            node_list = H.node_name_to_node_object.values()
             clusters = self._cluster_nodes(node_list)
 
         elif self.merge_criterion == 'JS_divergence':
             #TODO: Implement JS divergence clustering
             raise NotImplementedError
 
-        return Community(clusters)
+        print('Node List:')
+        print([node.name for node in node_list])
+
+        return Community(clustered_nodes = clusters, source_node = self._indices_to_nodes[source_node])
        
         
 
