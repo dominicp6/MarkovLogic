@@ -3,6 +3,7 @@ from Community import Community
 import graph_utils as graph_util
 import numpy as np
 from collections import defaultdict
+from scipy import sparse
 
 class RandomWalker(object):
     """
@@ -51,7 +52,7 @@ class RandomWalker(object):
         (http://machinelearning.wustl.edu/mlpapers/paper_files/NIPS2006_630.pdf)
 
         :param H: the hypergraph to find the transition matrix of.
-        :returns: sparse.csc_matrix -- the transition matrix as a sparse matrix.
+        :returns: sparse.csr_matrix -- the transition matrix as a sparse matrix.
 
         """
         M = graph_util.get_incidence_matrix(H,
@@ -104,7 +105,6 @@ class RandomWalker(object):
                 continue
             
             t_new = node.ave_hitting_time
-            print("T_old {} T_new {}".format(t_old, t_new))
             cluster.append(node)
 
             if (t_new - t_old) <= self.merge_threshold:
@@ -112,15 +112,27 @@ class RandomWalker(object):
             else:
                 #append the cluster A_{k} to the list of clusters
                 node_clusters.append(cluster)
-                print('** {}'.format(cluster))
                 cluster = []
         
         if len(cluster) > 0:
             node_clusters.append(cluster)
-            print('** {}'.format(cluster))
             
         
         return node_clusters
+
+    def _get_next_node_idx(self, current_node_idx):
+        """
+        Uses the transition matrix of the hypergraph to sample the next node 
+        index in a random walk given the current node idx.
+        """
+
+        #An option which uses the transition matrix
+        row = self.transition_matrix.getrow(current_node_idx)
+        nodes_to_transition_to = row.nonzero()[1]
+        transition_probs = row.data
+        return np.random.choice(nodes_to_transition_to, p=transition_probs)
+
+        #An option which just selects randomly from adjacent nodes
 
 
     def run_random_walks(self, H):
@@ -136,28 +148,27 @@ class RandomWalker(object):
         #get the source node for the random walk
         source_node = self._get_source_node()
 
-        node_idx_array = [idx for idx in range(self.transition_matrix.shape[0])]
-        sample_path = []
+        #sample_path = []
 
         #use transition matix to run random walks
         for walk in range(1, self.number_of_walks + 1):
             for step in range(self.max_length):
                 if step == 0:
                     current_node_idx = source_node
-                    sample_path.append(current_node_idx)
+                    #sample_path.append(current_node_idx)
             
                 #make a random step using the transition matrix
-                next_node_idx = np.random.choice(node_idx_array, p=self.transition_matrix[current_node_idx].toarray()[0])
+                next_node_idx = self._get_next_node_idx(current_node_idx)
 
                 node_obj = H.node_name_to_node_object[self._indices_to_nodes[next_node_idx]]
                 
                 current_node_idx = next_node_idx
-                sample_path.append(current_node_idx)
+                #sample_path.append(current_node_idx)
 
                 #update node properties if its a first visit
                 if node_obj.first_visit:
                     node_obj.update_ave_hitting_time(hitting_time = step, walk_number = walk)
-                    node_obj.update_sample_paths(path = sample_path, walk_number = walk)
+                    #node_obj.update_sample_paths(path = sample_path, walk_number = walk)
                     node_obj.first_visit = False
 
             H.update_nodes(max_length = self.max_length, walk_number = walk)
@@ -170,9 +181,6 @@ class RandomWalker(object):
         elif self.merge_criterion == 'JS_divergence':
             #TODO: Implement JS divergence clustering
             raise NotImplementedError
-
-        print('Node List:')
-        print([node.name for node in node_list])
 
         return Community(clustered_nodes = clusters, source_node = self._indices_to_nodes[source_node])
        

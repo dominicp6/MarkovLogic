@@ -15,19 +15,15 @@ def _populate_node_to_name_map(communities, node_to_node_ids):
               uldb_node_to_name_map - a dictionary mapping from node names to their string
                                     representation for output to the .ldb file
     """
-    for community in communities:
-        print(community)
     ldb_node_to_name_map = dict()
     uldb_node_to_name_map = dict()
     for community in communities:
         for single_node in community.single_nodes:
-            print(single_node.name)
             ldb_node_to_name_map[single_node.name] = 'NODE_'+str(node_to_node_ids[single_node.name])
             uldb_node_to_name_map[single_node.name] = 'NODE_'+str(node_to_node_ids[single_node.name])
         
         for idx, cluster in enumerate(community.clusters):
             for cluster_node in cluster:
-                print(cluster_node.name)
                 ldb_node_to_name_map[cluster_node.name] = 'CLUST_'+str(idx)
                 uldb_node_to_name_map[cluster_node.name] = 'NODE_'+str(node_to_node_ids[cluster_node.name])
 
@@ -78,7 +74,6 @@ def write_communities_files(original_hypergraph, community_hypergraphs, communit
     #Set up preliminary variables and dictionary mappings
     num_of_communities = len(communities)
     _, node_to_node_ids = graph_util.get_node_mapping(original_hypergraph)
-    print(node_to_node_ids.keys())
     ldb_node_to_name_map, uldb_node_to_name_map = _populate_node_to_name_map(communities, node_to_node_ids)
 
     #Open the files
@@ -119,7 +114,6 @@ def write_communities_files(original_hypergraph, community_hypergraphs, communit
         for idx, cluster in enumerate(community.clusters):
             #For each cluster node
             node_ids = []
-            print(cluster)
             for cluster_node in cluster:
                 node_ids.append(str(node_to_node_ids[cluster_node.name]))
                 node_to_hyperedge_ids = community_hypergraph.get_node_to_hyperedge_id_dict()

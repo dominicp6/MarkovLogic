@@ -13,6 +13,9 @@ class Community(object):
     def __str__(self):
         return """Community(single_nodes: {}, clusters: {}, source_node: {})""".format(self.single_nodes, self.clusters, self.source_node)
     
+    def all_nodes(self):
+        return [self.single_nodes]
+    
     def get_single_nodes_and_clusters(self, clustered_nodes):
         """
         Separates a list of lists of node clusters into clusters

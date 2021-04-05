@@ -382,14 +382,6 @@ str(self.num_predicates()))
                 #add the corresponding hyperedges to the new hypergraph instance
                 H.add_hyperedge(self.get_hyperedge_nodes(hyperedge_id), weight=1, attr_dict = {"predicate": self.get_hyperedge_attribute(hyperedge_id, "predicate")})
         
-        print('---')
-        print(self._node_to_hyperedge_ids)
-        print('---')
-        print(H)
-        print(H._node_to_hyperedge_ids)
-        for idx in H.get_hyperedge_id_set():
-            print(idx)
-            print(H.get_hyperedge_nodes(idx))
         return H
 
 

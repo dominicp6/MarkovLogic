@@ -53,9 +53,9 @@ class HierarchicalClusterer(object):
     PARAMETERS FOR HIERARCHICAL CLUSTERING OF GRAPHS
     :param n_init (int): [K-means hyperparameter] The number of times the k-means algorithn will be run
                     with different centroid seeds. The final result will be the best output of 
-                    n_init consecutive runs in terms of inertia
+                    n_init consecutive runs in terms of inertia (default 10)
     :param max_iter (int): [K-means hyperparameter] The maximum number of iterations of the k-means algorithm
-                    for a single run
+                    for a single run (default 300)
 
     PARAMETERS FOR HIERARCHICAL CLUSTERING OF HYPERGRAPHS
     :param threshold (float): The second smallest eigenvalue threshold value for the Normalized Hypergraph Cut 
@@ -344,7 +344,7 @@ class HierarchicalClusterer(object):
         self._original_hypergraph = None
 
         size_of_clusters = [G.order() for G in leaf_nodes.values()]
-        print(size_of_clusters)
-        print(sum(size_of_clusters))
+        #print(size_of_clusters)
+        #print(sum(size_of_clusters))
 
         return leaf_nodes.values()
