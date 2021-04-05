@@ -10,21 +10,8 @@ class EnhancedUndirectedHypergraph(UndirectedHypergraph):
     """
     The EnhancedUndirectedHypergraph class extends the UndirectedHypergraph class
     from the Hypergraphs Algorithm Package (http://murali-group.github.io/halp/)
-    to have additional functionality relevant when working with Alchemy-formatted
-    database files (Alchemy software: http://alchemy.cs.washington.edu/).
-
-    New core functions include:
-    1) read_from_alchemy_db(file_name) 
-    - reads an undirected hypergraph from an Alchemy .db file 
-
-    2) convert_to_graph()          
-    - converts the hypergraph to a graph by replacing hyperedges
-        with fully connected subgraphs     
-
-    Additionally, the class now stores additional information relevant for Alchemy 
-    hypergraphs such as a predicate set, and a dictionary mapping from nodes to 
-    hyperedge ids (useful when converting back and forth between graph and hypergraph 
-    representation) 
+    to have additional functionality relevant to facilitate working with 
+    Alchemy-formatted database files (Alchemy software: http://alchemy.cs.washington.edu/).
     """
     def __init__(self):
         super().__init__()
@@ -146,7 +133,7 @@ str(self.num_predicates()))
     def add_hyperedge(self, nodes, attr_dict=None, **attr):
         """
         Extends the add_hyperedge method implementation in UndirectedHypergraph 
-        to also update the predicate dict and node to hyperedge dict
+        to also update the predicate dict and node to hyperedge dict.
         """
         if attr_dict["predicate"] is not None:
             self._update_predicate_list(attr_dict["predicate"], operation='add')
@@ -159,7 +146,7 @@ str(self.num_predicates()))
     def add_hyperedges(self, hyperedges, attr_dict=None, **attr):
         """
         Extends the add_hyperedges method implementation in UndirectedHypergraph 
-        to also update the predicate dict and node to hyperedge dict
+        to also update the predicate dict and node to hyperedge dict.
         """
         #update predicate dict
         if attr_dict["predicate"] is not None:
@@ -176,7 +163,7 @@ str(self.num_predicates()))
     def remove_hyperedge(self, hyperedge_id):
         """
         Extends the remove_hyperedge method implementation in UndirectedHypergraph 
-        to also update the predicate dict and node to hyperedge dict
+        to also update the predicate dict and node to hyperedge dict.
         """
         #update predicate dict
         predicate = self.get_predicate_of_hyperedge(hyperedge_id)
@@ -191,7 +178,7 @@ str(self.num_predicates()))
     def remove_hyperedges(self, hyperedge_ids):
         """
         Extends the remove_hyperedges method implementation in UndirectedHypergraph 
-        to also update the predicate dict and node to hyperedge dict
+        to also update the predicate dict and node to hyperedge dict.
         """
         #update predicate dict
         predicates = []
@@ -209,37 +196,38 @@ str(self.num_predicates()))
 
     def get_predicates(self):
         """
-        Returns the predicate set of the hypergraph
+        Returns the set of predicates pertaining to the hypergraph.
         """
         return self._predicate_set
 
     def get_predicate_counts(self):
         """
-        Returns the predicate counts dictionary of the hypergraph
+        Returns the predicate counts dictionary (i.e. number of 
+        hyperedges of each predicate type) of the hypergraph.
         """
         return dict(self._predicate_counts)
 
     def get_node_to_hyperedge_id_dict(self):
         """
-        Returns the node to hyperedge id dictionary of the hypergraph
+        Returns the node to hyperedge id dictionary of the hypergraph.
         """
         return dict(self._node_to_hyperedge_ids)
 
     def order(self):
         """
-        Returns the number of nodes in the Hypergraph
+        Returns the number of nodes in the hypergraph.
         """
         return len(self.get_node_set())
 
     def size(self):
         """
-        Returns the number of hyperedges in the Hypergraph
+        Returns the number of hyperedges in the hypergraph.
         """
         return len(self.get_hyperedge_id_set())
 
     def num_predicates(self):
         """
-        Returns the number of predicates in the Hypergraph
+        Returns the number of distinct predicates types of the hypergraph.
         """
         return len(self.get_predicates())
 

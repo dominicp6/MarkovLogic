@@ -1,7 +1,7 @@
 class Community(object):
     """
     A object which wraps the sets of node clusterings in a hypergraph.
-    Output object from the run_random_walks method of RandomWalker.
+    (Output object from the run_random_walks method of RandomWalker)
     """
     def __init__(self, clustered_nodes, source_node):
         self.single_nodes, self.clusters = self.get_single_nodes_and_clusters(clustered_nodes)

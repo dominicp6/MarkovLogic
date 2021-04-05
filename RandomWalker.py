@@ -133,6 +133,7 @@ class RandomWalker(object):
         return np.random.choice(nodes_to_transition_to, p=transition_probs)
 
         #An option which just selects randomly from adjacent nodes
+        #TODO: Implement this
 
 
     def run_random_walks(self, H):
