@@ -279,7 +279,7 @@ class HierarchicalClusterer(object):
                         new_position = position + '0'
                         self._hierarchical_clustering_tree[new_position] = G1
                         self._make_tree(G1, depth = depth, position = new_position)
-                        #If the right-split graph is not in banned positions, then add the right-split graph to the clusters dict and split again
+                        #If the right-split graph is not in banned positions, then add the right-split graph to the tree and split again
                         if position + '1' not in self._banned_positions:
                             new_position = position + '1'
                             self._hierarchical_clustering_tree[new_position] = G2
