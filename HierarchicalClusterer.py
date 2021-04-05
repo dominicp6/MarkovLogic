@@ -302,7 +302,7 @@ class HierarchicalClusterer(object):
             #if the position is not a descendent of a banned position then add it to the leaf nodes
             if not any(position.startswith(banned_position) for banned_position in self._banned_positions):
                 leaf_nodes[position] = cluster
-                #if a parent was is in the leaf node set then remove it as it was not infact a leaf node
+                #if a parent was in the leaf node set then remove it as it was not infact a leaf node
                 if position[:-1] in leaf_nodes.keys():
                     del leaf_nodes[position[:-1]]
 
