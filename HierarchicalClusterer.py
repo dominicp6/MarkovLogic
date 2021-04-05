@@ -343,8 +343,4 @@ class HierarchicalClusterer(object):
         self._banned_positions = set()
         self._original_hypergraph = None
 
-        size_of_clusters = [G.order() for G in leaf_nodes.values()]
-        #print(size_of_clusters)
-        #print(sum(size_of_clusters))
-
         return leaf_nodes.values()
