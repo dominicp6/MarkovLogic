@@ -3,7 +3,6 @@ import cynetworkx as nx
 from itertools import combinations
 from collections import defaultdict
 from Hypergraph import UndirectedHypergraph
-from EnhancedGraph import EnhancedGraph
 from Node import Node
 
 class EnhancedUndirectedHypergraph(UndirectedHypergraph):
@@ -314,7 +313,7 @@ str(self.num_predicates()))
             -edges. If false, give all edges in the graph uniform weight
             regardless of the number of multi-edges.
         """
-        G = EnhancedGraph()
+        G = nx.Graph()
 
         for hyperedge_id in self.get_hyperedge_id_set():
             nodes = self.get_hyperedge_nodes(hyperedge_id)
@@ -356,7 +355,7 @@ str(self.num_predicates()))
         #initialise a new hypergraph
         H = EnhancedUndirectedHypergraph()
         
-        if isinstance(G, EnhancedGraph):
+        if isinstance(G, nx.Graph):
             nodes = G.nodes()
         elif isinstance(G, set):
             nodes = G

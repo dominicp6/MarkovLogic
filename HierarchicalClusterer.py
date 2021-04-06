@@ -6,7 +6,6 @@ from scipy import sparse
 from sklearn.cluster import KMeans
 from collections import OrderedDict
 import graph_utils as graph_util
-from EnhancedGraph import EnhancedGraph
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 
 
@@ -59,11 +58,13 @@ class HierarchicalClusterer(object):
 
     PARAMETERS FOR HIERARCHICAL CLUSTERING OF HYPERGRAPHS
     :param threshold (float): The second smallest eigenvalue threshold value for the Normalized Hypergraph Cut 
-                              algorithm. Typically 0.
+                              algorithm. 
+    :param max_fractional_size (float): Hypergraph splitting stops either either of the partitioned hypergraphs
+    have more than max_fractional_size number of nodes compared to the original input hypergraph
     """
 
     def __init__(self, stop_criterion = 'eigenvalue', min_ssev = 0.01, tree_output_depth = 1,
-                            min_cluster_size = 1, n_init = 10, max_iter = 300, threshold = 0):
+                            min_cluster_size = 1, n_init = 10, max_iter = 300, threshold = 0.01, max_fractional_size = 0.9):
         
         assert stop_criterion in ['eigenvalue', 'cluster_size', 'tree_depth'], "Arg Error: stop_criterion must be one of 'eigenvalue', 'cluster_size', 'tree_depth'"
         assert min_ssev > 0, "Arg Error: min_ssev must be a positive real number"
@@ -72,6 +73,8 @@ class HierarchicalClusterer(object):
         assert isinstance(n_init, int) and n_init > 0, "Arg Error: n_init must be a positive integer"
         assert isinstance(max_iter, int) and max_iter > 0, "Arg Error: max_iter must be a positive integer"
         assert isinstance(threshold, (int, float)), "Arg Error: threshold must be a real number"
+        assert isinstance(max_fractional_size, float) and max_fractional_size < 1 and max_fractional_size > 0, "Arg Error: max_fractional_size must be a number between 0 and 1"
+
         
         self.stop_criterion = stop_criterion
         self.min_ssev = min_ssev
@@ -80,12 +83,15 @@ class HierarchicalClusterer(object):
         self.n_init = n_init
         self.max_iter = max_iter
         self.threshold = threshold
+        self.max_fractional_size = max_fractional_size
 
         self._original_hypergraph = None
         self._hierarchical_clustering_tree = OrderedDict()
         self._banned_positions = set()
         self._most_recent_ssev = 0
         self._most_recent_cluster_sizes = []
+        self._most_recent_graph_size = 0
+        self._clusters_too_big = False
 
     def diagnose_no_partition_error(self):
         """
@@ -93,8 +99,10 @@ class HierarchicalClusterer(object):
         terminated prematurely and suggest how the user should change
         hyperparameters accordingly.
         """
-        
-        if self.stop_criterion == 'eigenvalue':
+        if self._clusters_too_big == True:
+            self._clusters_too_big = False
+            print('max_fractional_size = {} but after one split the two hypergraphs were fractional size {} and {} of the original'.format(self.max_fractional_size, round(self._most_recent_cluster_sizes[0]/self._most_recent_graph_size,2), round(self._most_recent_cluster_sizes[1]/self._most_recent_graph_size,2)))
+        elif self.stop_criterion == 'eigenvalue':
             print('min_ssev = {} but the parent graph had second smallest eigenvalue ssev = {}'.format(self.min_ssev,round(self._most_recent_ssev,3)))
         elif self.stop_criterion == 'cluster_size':
             print('min_cluster_size = {} but after one split the clusters are size {} and {}'.format(self.min_cluster_size, *self._most_recent_cluster_sizes))
@@ -103,7 +111,7 @@ class HierarchicalClusterer(object):
         else:
             raise NotImplementedError
 
-        raise RuntimeError('Bad stop criterion parameters for HierarchicalClusterer')
+        raise RuntimeError('Stop criterion automatically satisfied for the original hypergraph: no splitting occurred')
     
     def normalized_hypergraph_cut(self, H):
         """Executes the min-cut algorithm described in the paper:
@@ -122,7 +130,9 @@ class HierarchicalClusterer(object):
                   hypergraph based on the second smallest eigenvalue criterion 
                   (always 'True' for this algorithm)
         """
-        #TODO: implement eigenvalue based split-again criterion?
+        split_again = True
+        self._most_recent_graph_size = H.order()
+
         # Get index<->node mappings and index<->hyperedge_id mappings for matrices
         _, nodes_to_indices = graph_util.get_node_mapping(H)
         _, hyperedge_ids_to_indices = graph_util.get_hyperedge_id_mapping(H)
@@ -134,6 +144,14 @@ class HierarchicalClusterer(object):
         eigenvalues, eigenvectors = np.linalg.eig(delta.todense())
 
         second_min_index = np.argsort(eigenvalues)[1]
+        self._most_recent_ssev = np.real(eigenvalues[second_min_index])
+        
+        #If stopping based on eigenvalue, don't split if the second smallest 
+        #eigenvalue is below the minimum threshold
+        if self.stop_criterion == 'eigenvalue' and self._most_recent_ssev < self.min_ssev:
+            split_again = False
+            return H, None, split_again
+
         second_eigenvector = eigenvectors[:, second_min_index]
         partition_index = [i for i in range(len(second_eigenvector))
                         if second_eigenvector[i] >= self.threshold]
@@ -145,11 +163,18 @@ class HierarchicalClusterer(object):
             else:
                 S2.add(key)
 
-        self._most_recent_cluster_sizes = [len(S1), len(S2)]
-
         H1 = self._original_hypergraph.convert_to_hypergraph(S1)
         H2 = self._original_hypergraph.convert_to_hypergraph(S2)
-        return H1, H2, True
+
+        self._most_recent_cluster_sizes = [H1.order(), H2.order()]
+        
+        #Don't split again if either of the resulting hypergraphs have more than
+        #self.max_fractional_size of the number of nodes of the original
+        if H1.order() >= self.max_fractional_size * H.order() or H2.order() >= self.max_fractional_size * H.order():
+            split_again = False
+            self._clusters_too_big = True
+
+        return H1, H2, split_again
 
     def normalized_graph_cut(self, G):
         """
@@ -167,6 +192,7 @@ class HierarchicalClusterer(object):
                   graph based on the second smallest eigenvalue criterion 
         """
         split_again = True
+        self._most_recent_graph_size = G.order()
 
         #get the L_{RW} spectrum of G by solving the generalised eigenvalue problem
         #NB: number of graph nodes = number of eigenvectors
@@ -218,12 +244,12 @@ class HierarchicalClusterer(object):
             split_again = False
             return G, None, split_again
         
-        if isinstance(G, EnhancedGraph):
+        if isinstance(G, nx.Graph):
             G1, G2, split_again = self.normalized_graph_cut(G)
         elif isinstance(G, EnhancedUndirectedHypergraph):
             G1, G2, split_again = self.normalized_hypergraph_cut(G)
         else:
-            raise ValueError('Input must be either of type EnhancedGraph or EnhancedUndirectedGraph')
+            raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')
 
         return G1, G2, split_again        
 
@@ -272,7 +298,6 @@ class HierarchicalClusterer(object):
                 if G1.order() > 1 and G2.order() > 1:
                     #increment the depth of the hierarhcial clustering tree
                     depth += 1
-                    
                     #If stop criterion is 'tree_depth', then only continue splitting if we have not exceeded tree_output_depth
                     if self.stop_criterion in ['eigenvalue', 'cluster_size'] or self.stop_criterion == 'tree_depth' and depth <= self.tree_output_depth:
                         #Add the left-split graph to the tree and split again
@@ -297,6 +322,9 @@ class HierarchicalClusterer(object):
 
         These leaf nodes constitue the final clusterings.
         """
+        if len(self._hierarchical_clustering_tree) == 0:
+            raise RuntimeError('Empty hierarchical clustering tree. Try again with different stop criteria.')
+        
         leaf_nodes = dict()
         for position, cluster in self._hierarchical_clustering_tree.items():
             #if the position is not a descendent of a banned position then add it to the leaf nodes
@@ -312,17 +340,17 @@ class HierarchicalClusterer(object):
         """
         Hierarchical cluster a graph/hypergraph G.
 
-        :param: G (either EnhancedGraph or EnhancedUndirectedGraph)
+        :param: G (either Graph or EnhancedUndirectedGraph)
                 - the object to run hierarchical clustering on
         :returns: list of leaf node graph/hypergraph objects obtained
                   after hierarchical clustering
         """
-        if isinstance(G, EnhancedGraph):
+        if isinstance(G, nx.Graph):
             pass
         elif isinstance(G, EnhancedUndirectedHypergraph):
             self._original_hypergraph = G
         else:
-            raise ValueError('Input must be either of type EnhancedGraph or EnhancedUndirectedGraph')
+            raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')
 
         #Get the number of nodes in the graph/hypergraph
         num_nodes = G.order()

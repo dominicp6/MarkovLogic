@@ -37,9 +37,9 @@ class RandomWalker(object):
         self._indices_to_nodes, self._nodes_to_indices = graph_util.get_node_mapping(H)
         _, self._hyperedge_ids_to_indices = graph_util.get_hyperedge_id_mapping(H)
 
-        self.transition_matrix = self._compute_transition_matrix(H)
+        #self.transition_matrix = self._compute_transition_matrix(H)
 
-        self.sample_paths = defaultdict(lambda: [])
+        #self.sample_paths = defaultdict(lambda: [])
         
         return 
 
@@ -79,7 +79,7 @@ class RandomWalker(object):
         :returns: the ID of the source node
         """
         #TODO: change this so that it uses a more sensible criterion than a random selection?
-        return np.random.choice(list(self._nodes_to_indices.values()))
+        return np.random.choice(list(self._nodes_to_indices.keys()))
 
     def _cluster_nodes(self, node_list):
         """
@@ -120,21 +120,36 @@ class RandomWalker(object):
         
         return node_clusters
 
-    def _get_next_node_idx(self, current_node_idx):
+    def _get_next_node_idx(self, H, current_node):
         """
         Uses the transition matrix of the hypergraph to sample the next node 
         index in a random walk given the current node idx.
+
+        :param H: The hypergraph on which to perform the random walk
+        :param current_node_idx: The index of the currently selected node
+
+        :returns next_node_idx: The index of the next node in the random walk
         """
 
         #An option which uses the transition matrix
-        row = self.transition_matrix.getrow(current_node_idx)
-        nodes_to_transition_to = row.nonzero()[1]
-        transition_probs = row.data
-        return np.random.choice(nodes_to_transition_to, p=transition_probs)
+        #row = self.transition_matrix.getrow(current_node_idx)
+        #nodes_to_transition_to = row.nonzero()[1]
+        #transition_probs = row.data
+        #return np.random.choice(nodes_to_transition_to, p=transition_probs)
 
-        #An option which just selects randomly from adjacent nodes
-        #TODO: Implement this
+        #1) Find hyperedges that the node is a member of
+        node_hyperedge_ids = H.get_star(current_node)
+        #2) Select a hyperedge uniformly at random
+        hyperedge_id = np.random.choice(tuple(node_hyperedge_ids))
+        hyperedge = H.get_hyperedge_nodes(hyperedge_id)
+        hyperedge.remove(current_node)
+        #3) Select a node at random from that hyperedge
+        if len(hyperedge) == 0:
+            return current_node
+            
+        next_node = np.random.choice(tuple(hyperedge))
 
+        return next_node
 
     def run_random_walks(self, H):
         """
@@ -155,15 +170,15 @@ class RandomWalker(object):
         for walk in range(1, self.number_of_walks + 1):
             for step in range(self.max_length):
                 if step == 0:
-                    current_node_idx = source_node
+                    current_node = source_node
                     #sample_path.append(current_node_idx)
             
                 #make a random step using the transition matrix
-                next_node_idx = self._get_next_node_idx(current_node_idx)
+                next_node = self._get_next_node_idx(H, current_node)
 
-                node_obj = H.node_name_to_node_object[self._indices_to_nodes[next_node_idx]]
+                node_obj = H.node_name_to_node_object[next_node]
                 
-                current_node_idx = next_node_idx
+                current_node = next_node
                 #sample_path.append(current_node_idx)
 
                 #update node properties if its a first visit
@@ -183,7 +198,7 @@ class RandomWalker(object):
             #TODO: Implement JS divergence clustering
             raise NotImplementedError
 
-        return Community(clustered_nodes = clusters, source_node = self._indices_to_nodes[source_node])
+        return Community(clustered_nodes = clusters, source_node = source_node)
        
         
 
