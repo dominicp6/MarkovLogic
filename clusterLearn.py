@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     #Generate a hypergraph from a database file
     #cProfile.run('H.read_from_alchemy_db(db_file_name="ani.db")')
-    H.read_from_alchemy_db(db_file_name="interaction.db")
+    H.read_from_alchemy_db(db_file_name="smoking.db", info_file_name="smoking.info")
     end1 = time.time()
 
     #Convert the hypergraph to a graph
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     end2 = time.time()
 
     #Perform hierarchical clustering on the graph
-    clusterer = HierarchicalClusterer(stop_criterion='cluster_size', min_cluster_size=2, max_fractional_size=0.95)
+    clusterer = HierarchicalClusterer(stop_criterion='eigenvalue', min_cluster_size=3, max_fractional_size=0.95)
     #cProfile.run('clusterer.hierarchical_clustering(G)')
     graph_clusters = clusterer.hierarchical_clustering(G)
     end3 = time.time()
@@ -42,6 +42,7 @@ if __name__ == "__main__":
     #Save the communities to disk
     write_communities_files(H,community_hypergraphs,communities,'test_file')
     end5 = time.time()
+
 
     print('Read file:            {}'.format(str(end1-start)))
     print('Convert to Graph:     {}'.format(str(end2-end1)))

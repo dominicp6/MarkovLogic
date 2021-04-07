@@ -1,3 +1,4 @@
+import numpy as np
 import graph_utils as graph_util
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 from Community import Community
@@ -56,7 +57,18 @@ def _get_output_string(hyperedge_id, node_to_name_map, hypergraph):
 
     return output_string
 
-def write_communities_files(original_hypergraph, community_hypergraphs, communities, file_name : str):
+def _print_community_diagnostics(community_hypergraphs):
+    num_comms = len(community_hypergraphs)
+    num_nodes = [community_hypergraph.order() for community_hypergraph in community_hypergraphs]
+    min_nodes = min(num_nodes)
+    max_nodes = max(num_nodes)
+    num_edges = [community_hypergraph.size() for community_hypergraph in community_hypergraphs]
+    ave_num_nodes = np.mean(num_nodes)
+    ave_num_edges = np.mean(num_edges)
+    print('Created {} community hypergraphs with an average of {} nodes and {} edges.'.format(num_comms, int(ave_num_nodes), int(ave_num_edges)))
+    print('The largest community has {} nodes. The smallest has {} nodes.'.format(max_nodes, min_nodes))
+
+def write_communities_files(original_hypergraph, community_hypergraphs, communities, file_name : str, verbose = True):
     """
     Writes the communities .ldb, .uldb, and .srcnclust files to disk
 
@@ -65,6 +77,7 @@ def write_communities_files(original_hypergraph, community_hypergraphs, communit
                                   on the original hypergraph
     :param communities: a list of communities corresponding to each of the community_hypergraphs
     :param file_name: the name of the output file (before .ldb/.uldb/.srcnclust suffix)
+    :param verbose (bool): whether or not to include a diagnostic output of the size and shape of the communities
     """
     
     assert isinstance(original_hypergraph, EnhancedUndirectedHypergraph), "Arg Error: original_hypergraph must be of type EnhancedUndirectedHypergraph"
@@ -158,3 +171,6 @@ def write_communities_files(original_hypergraph, community_hypergraphs, communit
     uldb_out_file.close()
     srcnclust_out_file.write('#END_GRAPH\n')
     srcnclust_out_file.close()
+
+    if verbose == True:
+        _print_community_diagnostics(community_hypergraphs)

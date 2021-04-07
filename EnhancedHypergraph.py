@@ -35,13 +35,16 @@ str(self.num_predicates()))
 
         return output
 
-    def _create_nodes(self, nodes):
+    def _create_nodes(self, nodes,node_name_to_node_type=None):
         """
         Creates a new hypergraph node object for each node in nodes, providing the 
         node isn't already in the hypergraph's node set
         """
         for node in nodes:
-            node_type = self._node_name_to_node_type[node]
+            if node_name_to_node_type is not None:
+                node_type = node_name_to_node_type[node]
+            else:
+                node_type = self._node_name_to_node_type[node]
             #only create a new node if it isn't already in the node set
             if node not in self.get_node_set():
                 self.node_name_to_node_object[node] = Node(node_name = node, node_type = node_type)
@@ -129,20 +132,20 @@ str(self.num_predicates()))
             predicate = None
         return predicate
 
-    def add_hyperedge(self, nodes, attr_dict=None, **attr):
+    def add_hyperedge(self, nodes, attr_dict=None, node_name_to_node_type = None, **attr):
         """
         Extends the add_hyperedge method implementation in UndirectedHypergraph 
         to also update the predicate dict and node to hyperedge dict.
         """
         if attr_dict["predicate"] is not None:
             self._update_predicate_list(attr_dict["predicate"], operation='add')
-        self._create_nodes(nodes)
+        self._create_nodes(nodes,node_name_to_node_type)
         hyperedge_id = super().add_hyperedge(nodes, attr_dict, **attr)
         self._update_node_to_hyperedge_id_dict(nodes, hyperedge_id)
         
         return hyperedge_id
 
-    def add_hyperedges(self, hyperedges, attr_dict=None, **attr):
+    def add_hyperedges(self, hyperedges, attr_dict=None, node_name_to_node_type = None, **attr):
         """
         Extends the add_hyperedges method implementation in UndirectedHypergraph 
         to also update the predicate dict and node to hyperedge dict.
@@ -155,7 +158,7 @@ str(self.num_predicates()))
         #update node to hyperedge dict
         for nodes, hyperedge_id in zip(hyperedges, hyperedge_ids):
             self._update_node_to_hyperedge_id_dict(nodes, hyperedge_id)
-            self._create_nodes(nodes)
+            self._create_nodes(nodes, node_name_to_node_type)
         
         return hyperedge_ids
 
@@ -206,9 +209,15 @@ str(self.num_predicates()))
         """
         return dict(self._predicate_counts)
 
+    def get_hyperedge_ids_of_node(self, node):
+        """
+        Returns the the hyperedge ids incident on a particular node.
+        """
+        return self._node_to_hyperedge_ids[node]
+
     def get_node_to_hyperedge_id_dict(self):
         """
-        Returns the node to hyperedge id dictionary of the hypergraph.
+        Returns the the hyperedge ids dictionary of the hypergraph.
         """
         return dict(self._node_to_hyperedge_ids)
 
@@ -271,7 +280,7 @@ str(self.num_predicates()))
         """
         if info_file_name is not None:
             info_file = open(info_file_name, 'r')
-            for line_idx, line in info_file.readlines():
+            for line_idx, line in enumerate(info_file.readlines()):
                 #Skip empty lines
                 if not line:
                     continue
@@ -293,11 +302,15 @@ str(self.num_predicates()))
                 for idx, node in enumerate(node_list):
                     self._node_name_to_node_type[node] = self._pred_to_types[predicate][idx]
             nodes = set(node_list)
-    
+            #print('1')
+            #print(self._node_name_to_node_type)
             self.add_hyperedge(nodes, weight=1, attr_dict = {"predicate": str(predicate)})
+            #print(self._node_name_to_node_type)
+            #print('2')
 
         db_file.close()
         print("Successfully imported hypergraph from "+db_file_name)
+        
 
 
     def convert_to_graph(self, sum_weights_for_multi_edges = True, verbose = True):
@@ -367,7 +380,7 @@ str(self.num_predicates()))
             #template hypergraph which contain that node
             for hyperedge_id in self._node_to_hyperedge_ids[node]:
                 #add the corresponding hyperedges to the new hypergraph instance
-                H.add_hyperedge(self.get_hyperedge_nodes(hyperedge_id), weight=1, attr_dict = {"predicate": self.get_hyperedge_attribute(hyperedge_id, "predicate")})
+                H.add_hyperedge(self.get_hyperedge_nodes(hyperedge_id), weight=1, attr_dict = {"predicate": self.get_hyperedge_attribute(hyperedge_id, "predicate")}, node_name_to_node_type=self._node_name_to_node_type)
         
         return H
 

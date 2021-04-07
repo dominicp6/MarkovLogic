@@ -208,6 +208,7 @@ class HierarchicalClusterer(object):
             return G, None, split_again
 
         #k means cluster the ordered eigenvectors 
+        #it is this stage of the algorithm that makes it stochastic
         kmeans = KMeans(init="random", n_clusters=2, n_init=self.n_init, max_iter=self.max_iter).fit(U)
         labels = kmeans.labels_
         
