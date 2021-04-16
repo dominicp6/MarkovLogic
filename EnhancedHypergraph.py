@@ -79,7 +79,15 @@ str(self.num_predicates()))
             else:
                 raise ValueError('_update_node_to_hyperedge_id_dict operation parameter must be one of: "add", "remove"')
 
-    def _update_predicate_list(self, predicate: str, operation='add', increment=1):
+    def _add_predicate(self, predicate : str, increment = 1):
+        self._predicate_set.add(predicate)
+        self._predicate_counts[predicate] += increment
+
+    def _remove_predicate(self, predicate : str, increment = 1):
+        self._predicate_set.add(predicate)
+        self._predicate_counts[predicate] += increment
+
+    def _update_predicate_list(self, predicate: str, operation='add', increment = 1):
         """
         Updates the set of predicates and predicate counts of the hypergraph whenever
         hyperedges are added or removed from the hypergraph
@@ -89,18 +97,12 @@ str(self.num_predicates()))
         :param operation: 'add' if we are adding hyperedge(s), 'remove' if we are removing
         :param incrment: the number of hyperedges to add/remove
         """
+        assert operation in ['add','remove'], '_update_predicate_list operation parameter must be one of: "add", "remove"'
+        
         if operation == 'add':
-            self._predicate_set.add(predicate)
-            self._predicate_counts[predicate] += increment
-
+            self._add_predicate(predicate, increment)
         elif operation == 'remove':
-            self._predicate_counts[predicate] -= increment
-            if self._predicate_counts[predicate] <= 0:
-                self._predicate_set.remove(predicate)
-                self._predicate_counts[predicate] = 0
-
-        else:
-            raise ValueError('_update_predicate_list operation parameter must be one of: "add", "remove"')
+            self._remove_predicate(predicate, increment)
 
     def reset_nodes(self):
         """
@@ -269,6 +271,38 @@ str(self.num_predicates()))
         predicate_arguments = [predicate_argument.strip() for predicate_argument in predicate_argument_string.split(',')]
         return predicate, predicate_arguments
 
+    def _read_info_file(self, info_file_name):
+        info_file = open(info_file_name, 'r')
+        for line_idx, line in enumerate(info_file.readlines()):
+            #Skip empty lines
+            if not line:
+                continue
+            
+            predicate, types = self._parse_line(file_name=info_file_name, line = line, line_idx = line_idx)
+            self._pred_to_types[predicate] = types
+
+        info_file.close()
+
+    def _label_nodes_with_predicate(self, node_list, predicate):
+        if len(self._pred_to_types) > 0:
+            for idx, node in enumerate(node_list):
+                self._node_name_to_node_type[node] = self._pred_to_types[predicate][idx]
+
+    def _read_db_file(self, db_file_name):
+        db_file = open(db_file_name, 'r')
+
+        for line_idx, line in enumerate(db_file.readlines()):
+            #Skip empty lines
+            if not line:
+                continue
+
+            predicate, node_list = self._parse_line(file_name=db_file_name, line = line, line_idx = line_idx)
+            self._label_nodes_with_predicate(node_list, predicate)
+            node_set = set(node_list)
+
+            self.add_hyperedge(node_set, weight=1, attr_dict = {"predicate": str(predicate)})
+
+        db_file.close()
 
     def read_from_alchemy_db(self, db_file_name: str, info_file_name = None):
         """
@@ -279,40 +313,12 @@ str(self.num_predicates()))
         hypergraph to be annotated by their type.
         """
         if info_file_name is not None:
-            info_file = open(info_file_name, 'r')
-            for line_idx, line in enumerate(info_file.readlines()):
-                #Skip empty lines
-                if not line:
-                    continue
-                
-                predicate, types = self._parse_line(file_name=info_file_name, line = line, line_idx = line_idx)
-                self._pred_to_types[predicate] = types
+            self._read_info_file(info_file_name)
 
-            info_file.close()
+        self._read_db_file(db_file_name)
 
-        db_file = open(db_file_name, 'r')
-
-        for line_idx, line in enumerate(db_file.readlines()):
-            #Skip empty lines
-            if not line:
-                continue
-
-            predicate, node_list = self._parse_line(file_name=db_file_name, line = line, line_idx = line_idx)
-            if info_file_name is not None:
-                for idx, node in enumerate(node_list):
-                    self._node_name_to_node_type[node] = self._pred_to_types[predicate][idx]
-            nodes = set(node_list)
-            #print('1')
-            #print(self._node_name_to_node_type)
-            self.add_hyperedge(nodes, weight=1, attr_dict = {"predicate": str(predicate)})
-            #print(self._node_name_to_node_type)
-            #print('2')
-
-        db_file.close()
         print("Successfully imported hypergraph from "+db_file_name)
         
-
-
     def convert_to_graph(self, sum_weights_for_multi_edges = True, verbose = True):
         """
         Converts the undirected hypergraph to a graph by replacing all 

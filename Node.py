@@ -1,3 +1,31 @@
+from collections import defaultdict, Counter
+import numpy as np
+import operator
+
+
+def _kulback_lieber_div(p,q):
+    return sum(p * np.log(p / q) for p, q in zip(p, q) if p != 0)
+
+def _jenson_shannon_divergence(p, q):
+    m = 0.5 * (p + q)
+    return 0.5 * _kulback_lieber_div(p, m) + 0.5 * _kulback_lieber_div(q,m)
+
+def compute_jenson_shannon_divergence(path_probs_1, path_probs_2):
+    path_set_1 = [path_and_prob[0] for path_and_prob in path_probs_1]
+    path_set_2 = [path_and_prob[0] for path_and_prob in path_probs_2]
+    paths_of_2_not_in_1 = np.setdiff1d(path_set_2, path_set_1)
+
+    p = np.array([path_and_prob[1] for path_and_prob in path_probs_1] + [0]*len(paths_of_2_not_in_1))
+    q = np.array([path_and_prob[1] if path_and_prob[0] in path_set_2 else 0 for path_and_prob in path_probs_1] + [path_and_prob[1] for path_and_prob in path_probs_2 if path_and_prob[0] in paths_of_2_not_in_1])
+
+    assert len(p) == len(q)
+
+    return _jenson_shannon_divergence(p,q)
+
+def merge_node_paths(path_probs_1, path_probs_2):
+    path_sums = dict(Counter(path_probs_1) + Counter(path_probs_2))
+    return {path_string : path_sums[path_string] / 2 for path_string in path_sums.keys()}
+
 class Node(object):
     """
     Defines a node object, a constituent of a hypergraph.
@@ -13,11 +41,11 @@ class Node(object):
         self.type = node_type
         self.first_visit = True
         self.ave_hitting_time = float('inf')
-        self.sample_paths = dict()
+        self.sample_paths = defaultdict(int)
 
     def __str__(self):
         return self.name
-
+        
     def reset(self):
         """
         Resets node properties to their default value.
@@ -50,8 +78,19 @@ class Node(object):
         else:
             self.ave_hitting_time += 1/(walk_number) * (hitting_time - self.ave_hitting_time)
 
-    def update_sample_paths(self, path : list, walk_number : int):
+    def update_sample_paths(self, path : list):
         """
         Updates the sample paths of the node with the most recent path.
         """
-        self.sample_paths[walk_number] = path
+        path_string = ','.join(path)
+        self.sample_paths[path_string] += 1
+
+    def get_Ntop_paths(self, Ntop : int):
+        num_paths = sum(self.sample_paths.values())
+        sample_paths_probabilities = {key : value/num_paths for key, value in self.sample_paths.items()}
+        sorted_paths = sorted(sample_paths_probabilities.items(), key=operator.itemgetter(1), reverse=True)
+
+        if len(sorted_paths) >= Ntop:
+            return sorted_paths[0:Ntop]
+        else:
+            return sorted_paths

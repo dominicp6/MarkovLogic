@@ -1,22 +1,21 @@
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from RandomWalker import RandomWalker
-from print_utils import write_communities_files
+from CommunityPrinter import CommunityPrinter
 import itertools
 import cProfile
 import time
 
  #TODO: check how node typing should affect the RW routine
- #TODO: check the reading type setting when importing a .info file
 
 if __name__ == "__main__":
     start = time.time()
     H = EnhancedUndirectedHypergraph()
-    rw = RandomWalker(number_of_walks=10)
+    rw = RandomWalker(number_of_walks=10, use_sample_paths=True)
 
     #Generate a hypergraph from a database file
     #cProfile.run('H.read_from_alchemy_db(db_file_name="ani.db")')
-    H.read_from_alchemy_db(db_file_name="smoking.db", info_file_name="smoking.info")
+    H.read_from_alchemy_db(db_file_name="ani.db")
     end1 = time.time()
 
     #Convert the hypergraph to a graph
@@ -40,7 +39,8 @@ if __name__ == "__main__":
         communities.append(rw.run_random_walks(cluster_hypergraph))
     end4 = time.time()
     #Save the communities to disk
-    write_communities_files(H,community_hypergraphs,communities,'test_file')
+    com_printer = CommunityPrinter(original_hypergraph=H, communities=communities, community_hypergraphs=community_hypergraphs) 
+    com_printer.write_communities_files(file_name='test_file')
     end5 = time.time()
 
 
