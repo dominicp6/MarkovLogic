@@ -84,8 +84,10 @@ str(self.num_predicates()))
         self._predicate_counts[predicate] += increment
 
     def _remove_predicate(self, predicate : str, increment = 1):
-        self._predicate_set.add(predicate)
-        self._predicate_counts[predicate] += increment
+        self._predicate_counts[predicate] -= increment
+        if self._predicate_counts[predicate] <= 0:
+            self._predicate_set.remove(predicate)
+            self._predicate_counts[predicate] = 0
 
     def _update_predicate_list(self, predicate: str, operation='add', increment = 1):
         """
@@ -304,20 +306,21 @@ str(self.num_predicates()))
 
         db_file.close()
 
-    def read_from_alchemy_db(self, db_file_name: str, info_file_name = None):
+    def generate_from_database(self, path_to_db_file: str, path_to_info_file = None):
         """
-        Reads an undirected hypergraph from an Alchemy .db file
+        Generates an undirected hypergraph representation of a relational database 
+        that is defined in an Alchemy .db file
 
-        If info_file_name is provided, then also reads in a .info file which 
+        If path_to_info_file is provided, then also reads in a .info file which 
         specifies the types of each predicate_argument, allowing nodes of the 
         hypergraph to be annotated by their type.
         """
-        if info_file_name is not None:
-            self._read_info_file(info_file_name)
+        if path_to_info_file is not None:
+            self._read_info_file(path_to_info_file)
 
-        self._read_db_file(db_file_name)
+        self._read_db_file(path_to_db_file)
 
-        print("Successfully imported hypergraph from "+db_file_name)
+        print("Successfully imported hypergraph from "+path_to_db_file)
         
     def convert_to_graph(self, sum_weights_for_multi_edges = True, verbose = True):
         """

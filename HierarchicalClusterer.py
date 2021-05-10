@@ -66,6 +66,7 @@ class HierarchicalClusterer(object):
     def __init__(self, stop_criterion = 'eigenvalue', min_ssev = 0.01, tree_output_depth = 1,
                             min_cluster_size = 1, n_init = 10, max_iter = 300, threshold = 0.01, max_fractional_size = 0.9):
         
+        
         assert stop_criterion in ['eigenvalue', 'cluster_size', 'tree_depth'], "Arg Error: stop_criterion must be one of 'eigenvalue', 'cluster_size', 'tree_depth'"
         assert min_ssev > 0, "Arg Error: min_ssev must be a positive real number"
         assert isinstance(tree_output_depth, int) and tree_output_depth >= 1, "Arg Error: tree_output_depth must be a positive integer"
