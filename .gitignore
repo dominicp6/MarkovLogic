@@ -1,0 +1,9 @@
+MarkovLogic
+RoughWork
+build
+__pycache__
+*.db
+*.type
+*.info
+*.dat
+*.log
