@@ -1,0 +1,67 @@
+//predicate declarations
+gender(person,sex)
+workedUnder(person,person)
+movie(picture,person)
+director(person)
+genre(person,cat)
+actor(person)
+
+//function declarations
+
+// 6.255059403  !director(v0) v !actor(v1) v !movie(v2,v0) v !movie(v2,v1) v workedUnder(v1,v0)
+6.255059403  !director(a1) v !actor(a2) v !movie(a3,a1) v !movie(a3,a2) v workedUnder(a2,a1)
+
+// 3.031604201  !movie(v0,v1) v movie(v0,v2) v !workedUnder(v2,v1)
+3.031604201  movie(a1,a2) v !movie(a1,a3) v !workedUnder(a2,a3)
+
+// -0.1795487975  !movie(v0,v1) v !movie(v0,v2) v !workedUnder(v1,v3) v !workedUnder(v2,v3)
+-0.1795487975  !movie(a1,a2) v !movie(a1,a3) v !workedUnder(a2,a4) v !workedUnder(a3,a4)
+
+// -0.6327625227  !movie(v0,v1) v !movie(v0,v2) v !workedUnder(v2,v1)
+-0.6327625227  !movie(a1,a2) v !movie(a1,a3) v !workedUnder(a3,a2)
+
+// 3.429221501  director(v0) v !workedUnder(v1,v0)
+3.429221501  director(a1) v !workedUnder(a2,a1)
+
+// 0.2981462551  !director(v0) v !workedUnder(v1,v0)
+0.2981462551  !director(a1) v !workedUnder(a2,a1)
+
+// 3.536972169  actor(v0) v !gender(v0,v1)
+3.536972169  actor(a1) v !gender(a1,a2)
+
+// -1.937413973  !actor(v0) v !gender(v0,v1)
+-1.937413973  !actor(a1) v !gender(a1,a2)
+
+// -1.264056713  actor(v0) v gender(v0,v1)
+-1.264056713  actor(a1) v gender(a1,a2)
+
+// -0.335501483  !actor(v0) v gender(v0,v1)
+-0.335501483  !actor(a1) v gender(a1,a2)
+
+// 3.098659233  actor(v0) v !workedUnder(v0,v1)
+3.098659233  actor(a1) v !workedUnder(a1,a2)
+
+// 0.6287085231  !actor(v0) v !workedUnder(v0,v1)
+0.6287085231  !actor(a1) v !workedUnder(a1,a2)
+
+// -0.2934361292  workedUnder(p0,p0)
+-0.2934361292  workedUnder(a1,a1)
+
+// -1.599558196  gender(v0,v1)
+-1.599558196  gender(a1,a2)
+
+// -3.727367757  workedUnder(v0,v1)
+-3.727367757  workedUnder(a1,a2)
+
+// -1.875930518  movie(v0,v1)
+-1.875930518  movie(a1,a2)
+
+// -0.1188940936  director(v0)
+-0.1188940936  director(a1)
+
+// -3.482362028  genre(v0,v1)
+-3.482362028  genre(a1,a2)
+
+// 1.136457728  actor(v0)
+1.136457728  actor(a1)
+

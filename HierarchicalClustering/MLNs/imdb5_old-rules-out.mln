@@ -1,0 +1,55 @@
+//predicate declarations
+gender(person,sex)
+workedUnder(person,person)
+movie(picture,person)
+director(person)
+genre(person,cat)
+actor(person)
+
+//function declarations
+
+// 4.156894651  actor(v0) v !gender(v0,v1)
+4.156894651  actor(a1) v !gender(a1,a2)
+
+// -1.831966886  !actor(v0) v !gender(v0,v1)
+-1.831966886  !actor(a1) v !gender(a1,a2)
+
+// 4.71621417  director(v0) v !workedUnder(v1,v0)
+4.71621417  director(a1) v !workedUnder(a2,a1)
+
+// -1.688133361  !director(v0) v !workedUnder(v1,v0)
+-1.688133361  !director(a1) v !workedUnder(a2,a1)
+
+// -2.819924945  actor(v0) v gender(v0,v1)
+-2.819924945  actor(a1) v gender(a1,a2)
+
+// 0.4949971798  !actor(v0) v gender(v0,v1)
+0.4949971798  !actor(a1) v gender(a1,a2)
+
+// 3.694311906  actor(v0) v !workedUnder(v0,v1)
+3.694311906  actor(a1) v !workedUnder(a1,a2)
+
+// -0.6662310976  !actor(v0) v !workedUnder(v0,v1)
+-0.6662310976  !actor(a1) v !workedUnder(a1,a2)
+
+// -0.1048900419  workedUnder(p0,p0)
+-0.1048900419  workedUnder(a1,a1)
+
+// -2.324927765  gender(v0,v1)
+-2.324927765  gender(a1,a2)
+
+// -3.028080809  workedUnder(v0,v1)
+-3.028080809  workedUnder(a1,a2)
+
+// -1.009113347  movie(v0,v1)
+-1.009113347  movie(a1,a2)
+
+// -7.288135603  director(v0)
+-7.288135603  director(a1)
+
+// -3.078514692  genre(v0,v1)
+-3.078514692  genre(a1,a2)
+
+// 0.668484853  actor(v0)
+0.668484853  actor(a1)
+

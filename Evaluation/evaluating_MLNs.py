@@ -64,31 +64,48 @@ if __name__ == '__main__':
     #Learn MLNs from Database Files
     for database_name in database_file_names:
         #Using Hierarchical Clustering
-        generate_community_files(database_name, config)
-        save_name = database_name.rstrip('.db')
-        os.system(f'./learnMLNfromCommunities.sh {save_name} {database_name} {info_file} {type_file} {LSM_DIR} {DATA_DIR} {MLN_DIR}')
+        #generate_community_files(database_name, config)
+        #save_name = database_name.rstrip('.db')
+        #os.system(f'./learnMLNfromCommunities.sh {save_name} {database_name} {info_file} {type_file} {LSM_DIR} {DATA_DIR} {MLN_DIR}')
 
         #Using Original Approach
-        #save_name = database_name.rstrip('.db')+'_old'
-        #os.system(f'./learnMLN.sh {save_name} {database_file} {info_file} {type_file} {LSM_DIR} {DATA_DIR} {MLN_DIR}')
+        save_name = database_name.rstrip('.db')+'_old'
+        os.system(f'./learnMLN.sh {save_name} {database_name} {info_file} {type_file} {LSM_DIR} {DATA_DIR} {MLN_DIR}')
 
+    #Remove Temporary Files
+    cwd = os.getcwd()
+    files_in_directory = os.listdir(cwd)
+    temp_files = [file for file in files_in_directory if file.endswith("_tmpalchemy.mln")]
+    for temp_file in temp_files:
+        path_to_file = os.path.join(cwd, temp_file)
+        os.remove(path_to_file)
 
     #Evaluate the MLNs
     for test_database in database_file_names:
-        mln_to_evaluate = os.path.join(MLN_DIR, test_database.rstrip('.db')+'.mln')
+        mln_to_evaluate = os.path.join(MLN_DIR, test_database.rstrip('.db')+'-rules-out.mln')
         evidence_database_files = [os.path.join(DATA_DIR, database_file) for database_file in database_file_names if database_file != test_database]
         results_file = os.path.join(RESULTS_DIR, test_database.rstrip('.db')+'.results')
         os.system(f'{INFER_DIR}/infer -i {mln_to_evaluate} -r {results_file} -e {evidence_database_files} -q {query_predicates}')
-        #TODO: also using original approach
+        
+        mln_to_evaluate = os.path.join(MLN_DIR, test_database.rstrip('.db')+'_old-rules-out.mln')
+        results_file = os.path.join(RESULTS_DIR, test_database.rstrip('.db')+'_old.results')
+        os.system(f'{INFER_DIR}/infer -i {mln_to_evaluate} -r {results_file} -e {evidence_database_files} -q {query_predicates}')
 
 
     #Compute the Conditional Log-Likelihood
-    average_CLLs = []
+    average_CLLs_new = []
+    average_CLLs_old = []
     for database_file in database_file_names:
-        results_file = database_file.rstrip('.db')+'.results'
-        results_dataframe = pd.read_csv(os.path.join(RESULTS_DIR,results_file), delimiter='  ', names=['Ground_Atom', 'CLL'])
-        average_CLLs.append(results_dataframe['CLL'].mean())
-        #TODO: also using original approach
+        results_new_file = database_file.rstrip('.db')+'.results'
+        results_new_dataframe = pd.read_csv(os.path.join(RESULTS_DIR,results_new_file), delimiter='  ', names=['Ground_Atom', 'CLL'])
+        average_CLLs_new.append(results_new_dataframe['CLL'].mean())
 
-    print(average_CLLs)
+        results_old_file = database_file.rstrip('.db')+'_old.results'
+        results_old_dataframe = pd.read_csv(os.path.join(RESULTS_DIR,results_old_file), delimiter='  ', names=['Ground_Atom', 'CLL'])
+        average_CLLs_old.append(results_old_dataframe['CLL'].mean())
+    
+
+    print(average_CLLs_new)
+    print(average_CLLs_old)
+
 
