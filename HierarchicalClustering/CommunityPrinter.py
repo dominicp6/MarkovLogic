@@ -6,12 +6,12 @@ from Community import Community
 import itertools
 
 class CommunityPrinter(object):
-    def __init__(self, output_directory, original_hypergraph, communities, community_hypergraphs):
+    def __init__(self, output_directory, original_hypergraph, communities, community_hypergraphs, verbose=True):
 
         assert isinstance(original_hypergraph, EnhancedUndirectedHypergraph), "Arg Error: original_hypergraph must be of type EnhancedUndirectedHypergraph"
         assert isinstance(community_hypergraphs[0], EnhancedUndirectedHypergraph), "Arg Error: community_hypergraphs must be of type List<EnhancedUndirectedHypergraph>"
         assert isinstance(communities[0], Community), "Arg Error: communities must be of type List<Community>"
-
+        
         self.output_directory = output_directory
         self.num_of_communities = len(communities)
         self.communities = communities
@@ -169,7 +169,6 @@ class CommunityPrinter(object):
 
     def _write_footer_and_close_file(self, footer, file):
         file.write(footer)
-        print('SAVED FILE!!')
         file.close()
 
     def _write_body_of_files(self, ldb_file, uldb_file, srcnclust_file):

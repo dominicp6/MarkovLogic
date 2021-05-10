@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 import math
-import cynetworkx as nx
+import networkx as nx
 from scipy import sparse
 from sklearn.cluster import KMeans
 from collections import OrderedDict

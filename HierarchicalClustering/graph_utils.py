@@ -8,7 +8,7 @@
 """
 import numpy as np
 from scipy import sparse
-import cynetworkx as nx
+import networkx as nx
 from scipy.linalg import eigh
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 

@@ -15,9 +15,10 @@ def generate_community_files(database_file, config):
     rw_config = config['randomwalk_params']
     hc_config = config['clustering_params']
     dir_config = config['directory_params']
+    terminal_config = config['terminal_params']
 
     start = time.time()
-    H = EnhancedUndirectedHypergraph()
+    H = EnhancedUndirectedHypergraph(verbose=terminal_config['verbose'])
     rw = RandomWalker(number_of_walks = rw_config['number_of_walks'], max_length = rw_config['max_length'], use_sample_paths=rw_config['use_sample_paths'], HT_merge_threshold=rw_config['HT_merge_threshold'], JS_merge_threshold=rw_config['JS_merge_threshold'], N_top=rw_config['N_top'])
 
     #Generate a hypergraph from a database file
@@ -28,7 +29,7 @@ def generate_community_files(database_file, config):
 
     #Convert the hypergraph to a graph
     #cProfile.run('H.convert_to_graph(verbose=True)')
-    G = H.convert_to_graph(verbose=True)
+    G = H.convert_to_graph()
     end2 = time.time()
 
     #Perform hierarchical clustering on the graph
@@ -48,14 +49,14 @@ def generate_community_files(database_file, config):
     end4 = time.time()
     #Save the communities to disk
     com_printer = CommunityPrinter(output_directory=dir_config['data_dir'], original_hypergraph=H, communities=communities, community_hypergraphs=community_hypergraphs) 
-    com_printer.write_communities_files(file_name=output_file_name)
+    com_printer.write_communities_files(file_name=output_file_name, verbose=terminal_config['verbose'])
     end5 = time.time()
 
-
-    print('Read file:            {}'.format(str(end1-start)))
-    print('Convert to Graph:     {}'.format(str(end2-end1)))
-    print('Hierarchical Cluster: {}'.format(str(end3-end2)))
-    print('Random Walks:         {}'.format(str(end4-end3)))
-    print('Saving Files:         {}'.format(str(end5-end4)))
+    if terminal_config['verbose']:
+        print('Read file:            {}'.format(str(end1-start)))
+        print('Convert to Graph:     {}'.format(str(end2-end1)))
+        print('Hierarchical Cluster: {}'.format(str(end3-end2)))
+        print('Random Walks:         {}'.format(str(end4-end3)))
+        print('Saving Files:         {}'.format(str(end5-end4)))
     
     

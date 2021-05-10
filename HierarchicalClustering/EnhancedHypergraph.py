@@ -1,5 +1,5 @@
 import warnings
-import cynetworkx as nx
+import networkx as nx
 from itertools import combinations
 from collections import defaultdict
 from Hypergraph import UndirectedHypergraph
@@ -12,9 +12,10 @@ class EnhancedUndirectedHypergraph(UndirectedHypergraph):
     to have additional functionality relevant to facilitate working with 
     Alchemy-formatted database files (Alchemy software: http://alchemy.cs.washington.edu/).
     """
-    def __init__(self):
+    def __init__(self, verbose=True):
         super().__init__()
 
+        self._verbose = verbose
         self._predicate_set = set()
         self._predicate_counts = defaultdict(lambda: 0)
         self._node_to_hyperedge_ids = defaultdict(lambda: set())
@@ -320,9 +321,10 @@ str(self.num_predicates()))
 
         self._read_db_file(path_to_db_file)
 
-        print("Successfully imported hypergraph from "+path_to_db_file)
+        if self._verbose:
+            print("Successfully imported hypergraph from "+path_to_db_file)
         
-    def convert_to_graph(self, sum_weights_for_multi_edges = True, verbose = True):
+    def convert_to_graph(self, sum_weights_for_multi_edges = True):
         """
         Converts the undirected hypergraph to a graph by replacing all 
         k-hyperedges with k-cliques (a k-clique is a fully connected 
@@ -352,7 +354,7 @@ str(self.num_predicates()))
                 else:
                     G.add_edge(*e, weight=1)
         
-        if verbose == True:
+        if self._verbose:
             print("New graph object")
             print("--------------------------------")
             print("#nodes               : {}".format(G.order()))
