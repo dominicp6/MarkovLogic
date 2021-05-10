@@ -10,6 +10,8 @@ import time
 #TODO: check how node typing should affect the RW routine
 
 def generate_community_files(database_file, config):
+    output_file_name = database_file.rstrip('.db')
+
     rw_config = config['randomwalk_params']
     hc_config = config['clustering_params']
     dir_config = config['directory_params']
@@ -45,8 +47,8 @@ def generate_community_files(database_file, config):
         communities.append(rw.run_random_walks(cluster_hypergraph))
     end4 = time.time()
     #Save the communities to disk
-    com_printer = CommunityPrinter(original_hypergraph=H, communities=communities, community_hypergraphs=community_hypergraphs) 
-    com_printer.write_communities_files(file_name='test_file')
+    com_printer = CommunityPrinter(output_directory=dir_config['data_dir'], original_hypergraph=H, communities=communities, community_hypergraphs=community_hypergraphs) 
+    com_printer.write_communities_files(file_name=output_file_name)
     end5 = time.time()
 
 

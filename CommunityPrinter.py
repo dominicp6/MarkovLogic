@@ -1,16 +1,18 @@
 import numpy as np
+import os
 import graph_utils as graph_util
 from EnhancedHypergraph import EnhancedUndirectedHypergraph
 from Community import Community
 import itertools
 
 class CommunityPrinter(object):
-    def __init__(self, original_hypergraph, communities, community_hypergraphs):
+    def __init__(self, output_directory, original_hypergraph, communities, community_hypergraphs):
 
         assert isinstance(original_hypergraph, EnhancedUndirectedHypergraph), "Arg Error: original_hypergraph must be of type EnhancedUndirectedHypergraph"
         assert isinstance(community_hypergraphs[0], EnhancedUndirectedHypergraph), "Arg Error: community_hypergraphs must be of type List<EnhancedUndirectedHypergraph>"
         assert isinstance(communities[0], Community), "Arg Error: communities must be of type List<Community>"
 
+        self.output_directory = output_directory
         self.num_of_communities = len(communities)
         self.communities = communities
         self.community_hypergraphs = community_hypergraphs
@@ -99,7 +101,7 @@ class CommunityPrinter(object):
         return {'ldb': ldb_hyperedge_string, 'uldb': uldb_hyperedge_string}
 
     def _create_blank_community_files(self, file_name : str):
-        return open(file_name+'.ldb', 'w'), open(file_name+'.uldb', 'w'), open(file_name+'.srcnclust', 'w')
+        return open(os.path.join(self.output_directory,file_name+'.ldb'), 'w'), open(os.path.join(self.output_directory,file_name+'.uldb'), 'w'), open(os.path.join(self.output_directory,file_name+'.srcnclusts'), 'w')
 
     def _write_header_to_file(self, header : str, file):
         assert isinstance(header, str)
@@ -167,6 +169,7 @@ class CommunityPrinter(object):
 
     def _write_footer_and_close_file(self, footer, file):
         file.write(footer)
+        print('SAVED FILE!!')
         file.close()
 
     def _write_body_of_files(self, ldb_file, uldb_file, srcnclust_file):

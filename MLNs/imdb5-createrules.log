@@ -1,11 +1,11 @@
 --------------- PARAMS --------------
 candFile        = /home/domphillips/MarkovLogic/lsmcode/data/imdb5.rules
 minSup          = 0
-dbFiles         = imdb5.db
+dbFiles         = /home/domphillips/MarkovLogic/lsmcode/data/imdb5.db
 combLDBFile     = /home/domphillips/MarkovLogic/lsmcode/data/imdb5.comb.ldb
 unmergeLDBFiles = /home/domphillips/MarkovLogic/lsmcode/data/imdb5.uldb
-declFile        = imdb.info
-learnWtsExec    = /home/domphillips/MarkovLogic/lsmcode//alchemy30/bin/learnwts
+declFile        = /home/domphillips/MarkovLogic/lsmcode/data/imdb.info
+learnWtsExec    = /home/domphillips/MarkovLogic/lsmcode/alchemy30/bin/learnwts
 tmpDir          = /home/domphillips/MarkovLogic/lsmcode/data/tmpdir
 fractAtoms      = 0.5
 lenPenalty      = 0.1
@@ -24,4 +24,4 @@ cora            = false
 noQuickPrune    = false
 secLimit        = -1
 -------------------------------------
-ERROR: failed to open imdb.info
+ERROR: failed to open /home/domphillips/MarkovLogic/lsmcode/data/imdb5.rules

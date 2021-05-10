@@ -27,7 +27,7 @@ config = {
     }
 }
 
-database_file_names = ['imbd1.db', 'imdb2.db', 'imdb3.db', 'imdb4.db', 'imdb5.db']
+database_file_names = ['imdb1.db', 'imdb2.db', 'imdb3.db', 'imdb4.db', 'imdb5.db']
 info_file = 'imdb.info'
 type_file = 'imdb.type'
 number_of_folds = 5
