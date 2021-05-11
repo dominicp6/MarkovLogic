@@ -9,7 +9,7 @@ import time
 
 #TODO: check how node typing should affect the RW routine
 
-def generate_community_files(database_file, config):
+def run_hierarchical_clustering(database_file, config):
     output_file_name = database_file.rstrip('.db')
 
     rw_config = config['randomwalk_params']
