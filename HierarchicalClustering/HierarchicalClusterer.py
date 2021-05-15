@@ -63,28 +63,36 @@ class HierarchicalClusterer(object):
     have more than max_fractional_size number of nodes compared to the original input hypergraph
     """
 
-    def __init__(self, stop_criterion = 'eigenvalue', min_ssev = 0.01, tree_output_depth = 1,
-                            min_cluster_size = 1, n_init = 10, max_iter = 300, threshold = 0.01, max_fractional_size = 0.9):
-        
-        
-        assert stop_criterion in ['eigenvalue', 'cluster_size', 'tree_depth'], "Arg Error: stop_criterion must be one of 'eigenvalue', 'cluster_size', 'tree_depth'"
-        assert min_ssev > 0, "Arg Error: min_ssev must be a positive real number"
-        assert isinstance(tree_output_depth, int) and tree_output_depth >= 1, "Arg Error: tree_output_depth must be a positive integer"
-        assert isinstance(min_cluster_size, int) and min_cluster_size >= 1, "Arg Error: min_cluster size must be a positive integer"
-        assert isinstance(n_init, int) and n_init > 0, "Arg Error: n_init must be a positive integer"
-        assert isinstance(max_iter, int) and max_iter > 0, "Arg Error: max_iter must be a positive integer"
-        assert isinstance(threshold, (int, float)), "Arg Error: threshold must be a real number"
-        assert isinstance(max_fractional_size, float) and max_fractional_size < 1 and max_fractional_size > 0, "Arg Error: max_fractional_size must be a number between 0 and 1"
+    def __init__(self, config):
 
+        #Suggested default parameter values
+        #----------------------------------
+        # stop_criterion = 'eigenvalue', 
+        # min_ssev = 0.01, 
+        # tree_output_depth = 1,
+        # min_cluster_size = 1, 
+        # n_init = 10, 
+        # max_iter = 300, 
+        # threshold = 0.01, 
+        # max_fractional_size = 0.9
+
+        self.stop_criterion = config['stop_criterion']
+        self.min_ssev = config['min_ssev']
+        self.tree_output_depth = config['tree_output_depth']
+        self.min_cluster_size = config['min_cluster_size']
+        self.n_init = config['n_init']
+        self.max_iter = config['max_iter']
+        self.threshold = config['threshold']
+        self.max_fractional_size = config['max_fractional_size']
         
-        self.stop_criterion = stop_criterion
-        self.min_ssev = min_ssev
-        self.tree_output_depth = tree_output_depth
-        self.min_cluster_size = min_cluster_size
-        self.n_init = n_init
-        self.max_iter = max_iter
-        self.threshold = threshold
-        self.max_fractional_size = max_fractional_size
+        assert self.stop_criterion in ['eigenvalue', 'cluster_size', 'tree_depth'], "Arg Error: stop_criterion must be one of 'eigenvalue', 'cluster_size', 'tree_depth'"
+        assert self.min_ssev > 0, "Arg Error: min_ssev must be a positive real number"
+        assert isinstance(self.tree_output_depth, int) and self.tree_output_depth >= 1, "Arg Error: tree_output_depth must be a positive integer"
+        assert isinstance(self.min_cluster_size, int) and self.min_cluster_size >= 1, "Arg Error: min_cluster size must be a positive integer"
+        assert isinstance(self.n_init, int) and self.n_init > 0, "Arg Error: n_init must be a positive integer"
+        assert isinstance(self.max_iter, int) and self.max_iter > 0, "Arg Error: max_iter must be a positive integer"
+        assert isinstance(self.threshold, (int, float)), "Arg Error: threshold must be a real number"
+        assert isinstance(self.max_fractional_size, float) and self.max_fractional_size < 1 and self.max_fractional_size > 0, "Arg Error: max_fractional_size must be a number between 0 and 1"
 
         self._original_hypergraph = None
         self._hierarchical_clustering_tree = OrderedDict()

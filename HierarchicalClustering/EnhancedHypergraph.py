@@ -1,6 +1,5 @@
 import warnings
 import networkx as nx
-from itertools import combinations
 from collections import defaultdict
 from Hypergraph import UndirectedHypergraph
 from Node import Node
@@ -12,7 +11,7 @@ class EnhancedUndirectedHypergraph(UndirectedHypergraph):
     to have additional functionality relevant to facilitate working with 
     Alchemy-formatted database files (Alchemy software: http://alchemy.cs.washington.edu/).
     """
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=True, database_file=None, info_file=None):
         super().__init__()
 
         self._verbose = verbose
@@ -23,6 +22,9 @@ class EnhancedUndirectedHypergraph(UndirectedHypergraph):
         self._node_name_to_node_type = defaultdict(lambda: 'default_type')
         self.node_name_to_node_object = defaultdict(lambda: Node)
         self.community = None
+
+        if database_file != None:
+            self.generate_from_database(path_to_db_file=database_file, path_to_info_file=info_file)
 
     def __str__(self): 
         output = '''Undirected hypergraph object
@@ -324,76 +326,7 @@ str(self.num_predicates()))
         if self._verbose:
             print("Successfully imported hypergraph from "+path_to_db_file)
         
-    def convert_to_graph(self, sum_weights_for_multi_edges = True):
-        """
-        Converts the undirected hypergraph to a graph by replacing all 
-        k-hyperedges with k-cliques (a k-clique is a fully connected 
-        subgraph with k nodes). This is useful as a pre-processing 
-        step for applying graph-based clustering algorithms.
-
-        :param sum_weights_for_multi_edges: if True then replaces any
-            multi-edges generated in the hypergraph -> graph conversion
-            with a single edge of weight equal to the number of multi
-            -edges. If false, give all edges in the graph uniform weight
-            regardless of the number of multi-edges.
-        """
-        G = nx.Graph()
-
-        for hyperedge_id in self.get_hyperedge_id_set():
-            nodes = self.get_hyperedge_nodes(hyperedge_id)
-            
-            #from the hyperedge node set construct a complete subgraph (clique)
-            for e in combinations(nodes,2):
-                if sum_weights_for_multi_edges == True:
-                    #increment edge weight if edge already exists
-                    if G.has_edge(*e):
-                        G[e[0]][e[1]]['weight'] += 1
-                    #else add the new edge
-                    else:
-                        G.add_edge(*e, weight=1)
-                else:
-                    G.add_edge(*e, weight=1)
-        
-        if self._verbose:
-            print("New graph object")
-            print("--------------------------------")
-            print("#nodes               : {}".format(G.order()))
-            print("#edges               : {}".format(G.size()))
-            print("#connected components: {}".format(nx.number_connected_components(G)))
-            print("--------------------------------")
-
-        #Check that the graph is connected
-        assert nx.is_connected(G)
-
-        return G
-
-    def convert_to_hypergraph(self, G):
-        """
-        Converts an undirected graph, or simply a set of graph nodes,
-        into a undirected hypergraph using an instance of EnhancedUndirectedHypergraph 
-        as a template.
-
-        :param G: The graph (or node set) to be converted to a hypergraph
-
-        """
-        #initialise a new hypergraph
-        H = EnhancedUndirectedHypergraph()
-        
-        if isinstance(G, nx.Graph):
-            nodes = G.nodes()
-        elif isinstance(G, set):
-            nodes = G
-        else:
-            raise ValueError('Input must be either of type Graph or Set, but is of type {}'.format(type(G)))
-
-        for node in nodes:
-            #for each node in the graph, find the sets of hyperedge nodes from the
-            #template hypergraph which contain that node
-            for hyperedge_id in self._node_to_hyperedge_ids[node]:
-                #add the corresponding hyperedges to the new hypergraph instance
-                H.add_hyperedge(self.get_hyperedge_nodes(hyperedge_id), weight=1, attr_dict = {"predicate": self.get_hyperedge_attribute(hyperedge_id, "predicate")}, node_name_to_node_type=self._node_name_to_node_type)
-        
-        return H
+    
 
 
     

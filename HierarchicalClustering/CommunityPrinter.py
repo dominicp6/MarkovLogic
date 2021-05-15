@@ -5,14 +5,44 @@ from EnhancedHypergraph import EnhancedUndirectedHypergraph
 from Community import Community
 import itertools
 
+def write_communities_files(output_file, communities, hypergraph_clusters, original_hypergraph, verbose=True):
+    """
+    Writes the communities .ldb, .uldb, and .srcnclust files to disk
+
+    :param output_file: the name of the file_prefix (inc. path to the directory)
+    :param communities: a list of communities corresponding to each of the community_hypergraphs
+    :param community_hypergraphs: a list of hypergraphs obtained after performing hierarchical clustering 
+                                on the original hypergraph
+    :param original_hypergraph: the hypergraph representation of the relational database
+    :param verbose (bool): whether or not to include a diagnostic output of the size and shape of the communities
+    """
+
+    com_printer = CommunityPrinter(communities, hypergraph_clusters, original_hypergraph, verbose)
+
+    ldb_file, uldb_file, srcnclust_file = com_printer._create_blank_community_files(output_file)
+
+    header = '#START_GRAPH  #COMS {}\n\n'.format(com_printer.num_of_communities)
+    com_printer._write_header_to_file(header, ldb_file)
+    com_printer._write_header_to_file(header, uldb_file)
+    com_printer._write_header_to_file(header, srcnclust_file)
+
+    com_printer._write_body_of_files(ldb_file, uldb_file, srcnclust_file)
+
+    footer = '#END_GRAPH\n'
+    com_printer._write_footer_and_close_file(footer, ldb_file)
+    com_printer._write_footer_and_close_file(footer, uldb_file)
+    com_printer._write_footer_and_close_file(footer, srcnclust_file)
+
+    if verbose == True:
+        com_printer._print_community_diagnostics()
+
 class CommunityPrinter(object):
-    def __init__(self, output_directory, original_hypergraph, communities, community_hypergraphs, verbose=True):
+    def __init__(self, communities, community_hypergraphs, original_hypergraph, verbose=True):
 
         assert isinstance(original_hypergraph, EnhancedUndirectedHypergraph), "Arg Error: original_hypergraph must be of type EnhancedUndirectedHypergraph"
         assert isinstance(community_hypergraphs[0], EnhancedUndirectedHypergraph), "Arg Error: community_hypergraphs must be of type List<EnhancedUndirectedHypergraph>"
         assert isinstance(communities[0], Community), "Arg Error: communities must be of type List<Community>"
         
-        self.output_directory = output_directory
         self.num_of_communities = len(communities)
         self.communities = communities
         self.community_hypergraphs = community_hypergraphs
@@ -104,7 +134,7 @@ class CommunityPrinter(object):
         return {'ldb': ldb_hyperedge_string, 'uldb': uldb_hyperedge_string}
 
     def _create_blank_community_files(self, file_name : str):
-        return open(os.path.join(self.output_directory,file_name+'.ldb'), 'w'), open(os.path.join(self.output_directory,file_name+'.uldb'), 'w'), open(os.path.join(self.output_directory,file_name+'.srcnclusts'), 'w')
+        return open(os.path.join(file_name+'.ldb'), 'w'), open(os.path.join(file_name+'.uldb'), 'w'), open(os.path.join(file_name+'.srcnclusts'), 'w')
 
     def _write_header_to_file(self, header : str, file):
         assert isinstance(header, str)
@@ -124,13 +154,9 @@ class CommunityPrinter(object):
         single_node_ids = []
         
         node_to_hyperedge_ids = community_hypergraph.get_node_to_hyperedge_id_dict()
-        #print('New com')
         for single_node in community.single_nodes:
             single_node_ids.append(str(self.node_to_node_ids[single_node.name]))
             hyperedge_ids = node_to_hyperedge_ids[single_node.name]
-            #if community_number == 0:
-                #print(str(self.node_to_node_ids[single_node.name]), hyperedge_ids)
-                #print(self.ldb_node_to_name_map[community_number][single_node.name])
             self._update_atom_strings(community_number, hyperedge_ids, community_hypergraph)
 
         single_node_ids.sort(key=int)
@@ -201,31 +227,3 @@ class CommunityPrinter(object):
             uldb_file.write("#END_DB\n\n")
             srcnclust_file.write("#END_DB\n\n")
 
-    def write_communities_files(self, file_name : str, verbose = True):
-        """
-        Writes the communities .ldb, .uldb, and .srcnclust files to disk
-
-        :param original_hypergraph: the hypergraph representation of the relational database
-        :param community_hypergraphs: a list of hypergraphs obtained after performing hierarchical clustering 
-                                    on the original hypergraph
-        :param communities: a list of communities corresponding to each of the community_hypergraphs
-        :param file_name: the name of the output file (before .ldb/.uldb/.srcnclust suffix)
-        :param verbose (bool): whether or not to include a diagnostic output of the size and shape of the communities
-        """
-
-        ldb_file, uldb_file, srcnclust_file = self._create_blank_community_files(file_name)
-
-        header = '#START_GRAPH  #COMS {}\n\n'.format(self.num_of_communities)
-        self._write_header_to_file(header, ldb_file)
-        self._write_header_to_file(header, uldb_file)
-        self._write_header_to_file(header, srcnclust_file)
-
-        self._write_body_of_files(ldb_file, uldb_file, srcnclust_file)
-
-        footer = '#END_GRAPH\n'
-        self._write_footer_and_close_file(footer, ldb_file)
-        self._write_footer_and_close_file(footer, uldb_file)
-        self._write_footer_and_close_file(footer, srcnclust_file)
-
-        if verbose == True:
-            self._print_community_diagnostics()

@@ -23,19 +23,31 @@ class RandomWalker(object):
                             when starting from the source node
     """
 
-    def __init__(self, number_of_walks = 100, max_length = 100, use_sample_paths = False, source_node = None, HT_merge_threshold = 2, JS_merge_threshold = 2, N_top = 5):
-        assert isinstance(number_of_walks, int), "Arg Error: number_of_walks must be of type int"
-        assert isinstance(max_length, int), "Arg Error: max_length must be of type int"
-        assert isinstance(use_sample_paths, bool), "Arg Error: use_sample_paths must be of type bool"
-        assert isinstance(N_top, int), "Arg Error: N_top must be of type int"
-        assert isinstance(HT_merge_threshold, (int,float)) and HT_merge_threshold > 0, "Arg Error: HT_merge_threshold must be a positive real number"
+    def __init__(self, config):
         
-        self.number_of_walks = number_of_walks
-        self.max_length = max_length
-        self.use_sample_paths = use_sample_paths
-        self.N_top = N_top
-        self.HT_merge_threshold = HT_merge_threshold
-        self.JS_merge_threshold = JS_merge_threshold
+        #Suggested default parameter values
+        #----------------------------------
+        # number_of_walks = 100, 
+        # max_length = 100, 
+        # use_sample_paths = False, 
+        # source_node = None, 
+        # HT_merge_threshold = 2, 
+        # JS_merge_threshold = 2, 
+        # N_top = 5
+
+        self.number_of_walks = config['number_of_walks']
+        self.max_length = config['max_length']
+        self.use_sample_paths = config['use_sample_paths']
+        self.N_top = config['N_top']
+        self.HT_merge_threshold = config['HT_merge_threshold']
+        self.JS_merge_threshold = config['JS_merge_threshold']
+        
+        assert isinstance(self.number_of_walks, int), "Arg Error: number_of_walks must be of type int"
+        assert isinstance(self.max_length, int), "Arg Error: max_length must be of type int"
+        assert isinstance(self.use_sample_paths, bool), "Arg Error: use_sample_paths must be of type bool"
+        assert isinstance(self.N_top, int), "Arg Error: N_top must be of type int"
+        assert isinstance(self.HT_merge_threshold, (int,float)) and self.HT_merge_threshold > 0, "Arg Error: HT_merge_threshold must be a positive real number"
+        
         
     def _setup_params(self, H):
         self._indices_to_nodes, self._nodes_to_indices = graph_util.get_node_mapping(H)
