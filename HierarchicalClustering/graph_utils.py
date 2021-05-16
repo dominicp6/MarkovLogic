@@ -10,7 +10,7 @@ import numpy as np
 from scipy import sparse
 import networkx as nx
 from scipy.linalg import eigh
-from EnhancedHypergraph import EnhancedUndirectedHypergraph
+from EnhancedHypergraph import Hypergraph
 
 
 def create_subgraph(G, subgraph_nodes):
@@ -63,7 +63,7 @@ def get_hyperedge_id_mapping(H):
     :raises: TypeError -- Algorithm only applicable to undirected hypergraphs
 
     """
-    if not isinstance(H, EnhancedUndirectedHypergraph):
+    if not isinstance(H, Hypergraph):
         raise TypeError("Algorithm only applicable to undirected hypergraphs")
 
     indices_to_hyperedge_ids, hyperedge_ids_to_indices = {}, {}
@@ -88,7 +88,7 @@ def get_incidence_matrix(H, nodes_to_indices, hyperedge_ids_to_indices):
     :raises: TypeError -- Algorithm only applicable to undirected hypergraphs
 
     """
-    if not isinstance(H, EnhancedUndirectedHypergraph):
+    if not isinstance(H, Hypergraph):
         raise TypeError("Algorithm only applicable to undirected hypergraphs")
 
     rows, cols = [], []
@@ -215,7 +215,7 @@ def compute_normalized_laplacian(H,
     delta = I - theta
     return delta
 
-def _compute_transition_matrix(H):
+def compute_transition_matrix(H):
         """Computes the transition matrix for a random walk on the given
         hypergraph as described in the paper:
         Zhou, Dengyong, Jiayuan Huang, and Bernhard Scholkopf.

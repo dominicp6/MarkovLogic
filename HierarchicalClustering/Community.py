@@ -9,12 +9,10 @@ class Community(object):
         self.num_clusters = len(self.clusters)
         self.num_nodes = sum([len(cluster) for cluster in self.clusters])+self.num_single_nodes
         self.source_node = source_node
-
-    def __str__(self):
-        return """Community(single_nodes: {}, clusters: {}, source_node: {})""".format(self.single_nodes, self.clusters, self.source_node)
     
     def all_nodes(self):
-        return [self.single_nodes]
+        cluster_nodes = [cluster_node for cluster in self.clusters for cluster_node in cluster]
+        return self.single_nodes + cluster_nodes
     
     def get_single_nodes_and_clusters(self, clustered_nodes):
         """
@@ -34,6 +32,9 @@ class Community(object):
                 clusters.append(array)
         
         return single_nodes, clusters
+
+    def __str__(self):
+        return """Community(single_nodes: {}, clusters: {}, source_node: {})""".format(self.single_nodes, self.clusters, self.source_node)
 
 
 

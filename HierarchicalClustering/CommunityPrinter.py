@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import graph_utils as graph_util
-from EnhancedHypergraph import EnhancedUndirectedHypergraph
+from EnhancedHypergraph import Hypergraph
 from Community import Community
 import itertools
 
@@ -39,8 +39,8 @@ def write_communities_files(output_file, communities, hypergraph_clusters, origi
 class CommunityPrinter(object):
     def __init__(self, communities, community_hypergraphs, original_hypergraph, verbose=True):
 
-        assert isinstance(original_hypergraph, EnhancedUndirectedHypergraph), "Arg Error: original_hypergraph must be of type EnhancedUndirectedHypergraph"
-        assert isinstance(community_hypergraphs[0], EnhancedUndirectedHypergraph), "Arg Error: community_hypergraphs must be of type List<EnhancedUndirectedHypergraph>"
+        assert isinstance(original_hypergraph, Hypergraph), "Arg Error: original_hypergraph must be of type Hypergraph"
+        assert isinstance(community_hypergraphs[0], Hypergraph), "Arg Error: community_hypergraphs must be of type List<Hypergraph>"
         assert isinstance(communities[0], Community), "Arg Error: communities must be of type List<Community>"
         
         self.num_of_communities = len(communities)
@@ -85,10 +85,10 @@ class CommunityPrinter(object):
         return ldb_node_to_name_map, uldb_node_to_name_map
 
     def _print_community_diagnostics(self):
-        num_nodes = [community_hypergraph.order() for community_hypergraph in self.community_hypergraphs]
+        num_nodes = [community_hypergraph.number_of_nodes() for community_hypergraph in self.community_hypergraphs]
         min_nodes = min(num_nodes)
         max_nodes = max(num_nodes)
-        num_edges = [community_hypergraph.size() for community_hypergraph in self.community_hypergraphs]
+        num_edges = [community_hypergraph.number_of_edges() for community_hypergraph in self.community_hypergraphs]
         ave_num_nodes = np.mean(num_nodes)
         ave_num_edges = np.mean(num_edges)
         print('Created {} community hypergraphs with an average of {} nodes and {} edges.'.format(self.num_of_communities, int(ave_num_nodes), int(ave_num_edges)))
@@ -127,8 +127,6 @@ class CommunityPrinter(object):
         hyperedge_nodes = hypergraph.get_hyperedge_nodes(hyperedge_id)
         
         ldb_hyperedge_string = self._get_hyperedge_string_for_file_type('ldb', community_number, predicate, hyperedge_nodes, hyperedge_id)
-        #if community_number == 0:
-            #print(ldb_hyperedge_string)
         uldb_hyperedge_string = self._get_hyperedge_string_for_file_type('uldb', community_number, predicate, hyperedge_nodes, hyperedge_id)
         
         return {'ldb': ldb_hyperedge_string, 'uldb': uldb_hyperedge_string}
