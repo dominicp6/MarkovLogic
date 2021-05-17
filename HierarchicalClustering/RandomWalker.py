@@ -1,10 +1,30 @@
-from EnhancedHypergraph import EnhancedUndirectedHypergraph
+from Hypergraph import Hypergraph
 from Community import Community
 import Node as node_utils
+import halp.utilities.undirected_matrices as umat
 import graph_utils as graph_util
 import numpy as np
 from collections import defaultdict
 from scipy import sparse
+
+def get_single_nodes_and_node_clusters(clustered_nodes):
+    """
+    Separates a list of lists of node clusters into clusters
+    of single nodes and clusters of more the one node.
+
+    :param: clustered_nodes - a list of lists
+    :returns: single_nodes - the list of single node clusters
+                clusters - a list of list of multi-node clusters
+    """
+    single_nodes = []
+    node_clusters = []
+    for array in clustered_nodes:
+        if len(array) == 1:
+            single_nodes.append(array[0])
+        else:
+            node_clusters.append(array)
+    
+    return single_nodes, node_clusters
 
 class RandomWalker(object):
     """
@@ -50,7 +70,7 @@ class RandomWalker(object):
         
         
     def _setup_params(self, H):
-        self._indices_to_nodes, self._nodes_to_indices = graph_util.get_node_mapping(H)
+        self._indices_to_nodes, self._nodes_to_indices = umat.get_node_mapping(H)
         self.sample_paths = defaultdict(lambda: [])
         
         return 
@@ -84,9 +104,9 @@ class RandomWalker(object):
         #2) Select a hyperedge uniformly at random
         hyperedge_id = np.random.choice(tuple(node_hyperedge_ids))
         hyperedge = H.get_hyperedge_nodes(hyperedge_id)
-        hyperedge.remove(current_node)
+        #to guarantee transitioning to a different node we remove the current node from the possibilities
+        hyperedge.remove(current_node) 
         #3) Select a node at random from that hyperedge
-
         if len(hyperedge) == 0:
             #If the hyperedge is a singleton set of just the current node, then try again
             call += 1
@@ -191,9 +211,12 @@ class RandomWalker(object):
             for node_cluster in truncated_hitting_time_clusters:
                 final_clusters.extend(self._cluster_nodes_by_path_symmetry(node_cluster))
             
-            return final_clusters
         else:
-            return truncated_hitting_time_clusters
+            final_clusters = truncated_hitting_time_clusters
+        
+        single_nodes, node_clusters = get_single_nodes_and_node_clusters(final_clusters)
+
+        return single_nodes, node_clusters
 
     def _run_walk_from_source_node(self, H, walk, source_node):
         if self.use_sample_paths: sample_path = []
@@ -228,7 +251,7 @@ class RandomWalker(object):
         a merge criterion (either truncated_hitting_time (if use_sample_paths = False) 
         or truncated_hitting_time combined with path JS_divergence (if use_sample_paths = True)).
 
-        :param: H (EnhancedUndirectedHypergraph) - the hypergraph to run random walks on
+        :param: H (Hypergraph) - the hypergraph to run random walks on
         :returns: Community object of the hypergraph's node clusters
         """
         self._setup_params(H)
@@ -241,9 +264,9 @@ class RandomWalker(object):
             self._run_walk_from_source_node(H, walk, source_node)
 
         #cluster nodes based on their symmetry properties
-        node_clusters = self._cluster_nodes(H)
+        single_nodes, node_clusters = self._cluster_nodes(H)
 
-        return Community(clustered_nodes = node_clusters, source_node = source_node)
+        return Community(single_nodes=single_nodes, node_clusters=node_clusters, source_node=source_node, hypergraph=H)
        
         
 

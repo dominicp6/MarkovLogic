@@ -5,8 +5,10 @@ import networkx as nx
 from scipy import sparse
 from sklearn.cluster import KMeans
 from collections import OrderedDict
+import halp.utilities.undirected_matrices as umat
+from halp.algorithms.undirected_partitioning import _compute_normalized_laplacian as compute_normalized_laplacian
 import graph_utils as graph_util
-from EnhancedHypergraph import EnhancedUndirectedHypergraph
+from Hypergraph import Hypergraph
 
 
 class HierarchicalClusterer(object):
@@ -143,10 +145,10 @@ class HierarchicalClusterer(object):
         self._most_recent_graph_size = H.order()
 
         # Get index<->node mappings and index<->hyperedge_id mappings for matrices
-        _, nodes_to_indices = graph_util.get_node_mapping(H)
-        _, hyperedge_ids_to_indices = graph_util.get_hyperedge_id_mapping(H)
+        _, nodes_to_indices = umat.get_node_mapping(H)
+        _, hyperedge_ids_to_indices = umat.get_hyperedge_id_mapping(H)
 
-        delta = graph_util.compute_normalized_laplacian(H,
+        delta = compute_normalized_laplacian(H,
                                             nodes_to_indices,
                                             hyperedge_ids_to_indices)
 
@@ -256,7 +258,7 @@ class HierarchicalClusterer(object):
         
         if isinstance(G, nx.Graph):
             G1, G2, split_again = self.normalized_graph_cut(G)
-        elif isinstance(G, EnhancedUndirectedHypergraph):
+        elif isinstance(G, Hypergraph):
             G1, G2, split_again = self.normalized_hypergraph_cut(G)
         else:
             raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')
@@ -357,7 +359,7 @@ class HierarchicalClusterer(object):
         """
         if isinstance(G, nx.Graph):
             pass
-        elif isinstance(G, EnhancedUndirectedHypergraph):
+        elif isinstance(G, Hypergraph):
             self._original_hypergraph = G
         else:
             raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')

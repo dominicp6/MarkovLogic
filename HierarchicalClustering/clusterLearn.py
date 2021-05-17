@@ -1,14 +1,14 @@
-from EnhancedHypergraph import EnhancedUndirectedHypergraph
+from Hypergraph import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from RandomWalker import RandomWalker
 from CommunityPrinter import write_communities_files
-from hypergraph_utils import convert_hypergraph_to_graph, convert_graph_to_hypergraph
+from graph_utils import convert_hypergraph_to_graph, convert_graph_to_hypergraph
 import itertools
 import cProfile
 import os
 import time
 
-def run_hierarchical_clustering(database_file, config):
+def run_hierarchical_clustering(database_file, config, info_file=None):
     output_file_name = database_file.rstrip('.db')
     rw_config = config['randomwalk_params'] 
     hc_config = config['clustering_params']
@@ -16,10 +16,13 @@ def run_hierarchical_clustering(database_file, config):
     terminal_config = config['terminal_params']
 
     path_to_database_file = os.path.join(dir_config['data_dir'], database_file)
+    if info_file:
+        path_to_info_file = os.path.join(dir_config['data_dir'], info_file)
+    else:
+        path_to_info_file = None
 
     # Construct the original hypergraph and graph objects
-    original_hypergraph = EnhancedUndirectedHypergraph(database_file=path_to_database_file, 
-                                              verbose=terminal_config['verbose'],)
+    original_hypergraph = Hypergraph(database_file=path_to_database_file, info_file=path_to_info_file)
     original_graph = convert_hypergraph_to_graph(original_hypergraph)
 
     # Perform hierarchical clustering on the graph
