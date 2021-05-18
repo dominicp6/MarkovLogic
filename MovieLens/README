@@ -1,3 +1,9 @@
+TO LEARN AN MLN:
+
+./learnMLN.sh save_name database_file info_file type_file /home/domphillips/MarkovLogic/lsmcode /home/domphillips/MarkovLogic/MarkovLogicProject/MovieLens /home/domphillips/MarkovLogic/MarkovLogicProject/MovieLens/MLNs
+
+
+
 SUMMARY
 ================================================================================
 
