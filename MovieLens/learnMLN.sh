@@ -8,7 +8,7 @@
 #echo "data_dir: $6"
 #echo "MLN_dir: $7"
 
-#echo "Running random walks..."
+echo "$6/$3"
 $5/rwl/rwl $6/$3 $6/$2 $6/$4 10000 5 0.05 0.1 4.9 0.1 1 3 1 $6/$1.ldb $6/$1.uldb $6/$1.srcnclusts > $6/$1-rwl.log
 
 #echo "Extracting motifs..."
