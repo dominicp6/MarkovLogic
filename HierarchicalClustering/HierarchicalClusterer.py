@@ -142,7 +142,7 @@ class HierarchicalClusterer(object):
                   (always 'True' for this algorithm)
         """
         split_again = True
-        self._most_recent_graph_size = H.order()
+        self._most_recent_graph_size = H.number_of_nodes()
 
         # Get index<->node mappings and index<->hyperedge_id mappings for matrices
         _, nodes_to_indices = umat.get_node_mapping(H)
@@ -177,11 +177,11 @@ class HierarchicalClusterer(object):
         H1 = self._original_hypergraph.convert_to_hypergraph(S1)
         H2 = self._original_hypergraph.convert_to_hypergraph(S2)
 
-        self._most_recent_cluster_sizes = [H1.order(), H2.order()]
+        self._most_recent_cluster_sizes = [H1.number_of_nodes(), H2.number_of_nodes()]
         
         #Don't split again if either of the resulting hypergraphs have more than
         #self.max_fractional_size of the number of nodes of the original
-        if H1.order() >= self.max_fractional_size * H.order() or H2.order() >= self.max_fractional_size * H.order():
+        if H1.number_of_nodes() >= self.max_fractional_size * H.number_of_nodes() or H2.number_of_nodes() >= self.max_fractional_size * H.number_of_nodes():
             split_again = False
             self._clusters_too_big = True
 
@@ -203,7 +203,7 @@ class HierarchicalClusterer(object):
                   graph based on the second smallest eigenvalue criterion 
         """
         split_again = True
-        self._most_recent_graph_size = G.order()
+        self._most_recent_graph_size = G.number_of_nodes()
 
         #get the L_{RW} spectrum of G by solving the generalised eigenvalue problem
         #NB: number of graph nodes = number of eigenvectors
@@ -249,7 +249,7 @@ class HierarchicalClusterer(object):
                   split_again (bool) - whether or not to continue splitting again 
                   based on the cluster size of second smallest eigenvalue criterion.
         """
-        number_of_nodes = G.order()
+        number_of_nodes = G.number_of_nodes()
         #If stopping based on cluster size, don't split if the number of 
         #nodes in the graph/hypergraph is smaller than min_cluster_size
         if self.stop_criterion == 'cluster_size' and number_of_nodes < self.min_cluster_size:
@@ -297,8 +297,8 @@ class HierarchicalClusterer(object):
                             (binary) tree (encoded as a binary string).
         """
 
-        if G.order() == 0 or G.order() == 1:
-            #if the graph has no nodes / one node then no need to 
+        if G.number_of_nodes() == 0 or G.number_of_nodes() == 1:
+            #if the graph has no nodes / one node then no need to F
             #proceed further with hierarchical clustering
             pass
         else:
@@ -307,7 +307,7 @@ class HierarchicalClusterer(object):
             #if split again then recursively call the make_tree algorithm
             if split_again:
                 #only further split if the graphs are not already singleton node sets
-                if G1.order() > 1 and G2.order() > 1:
+                if G1.number_of_nodes() > 1 and G2.number_of_nodes() > 1:
                     #increment the depth of the hierarhcial clustering tree
                     depth += 1
                     #If stop criterion is 'tree_depth', then only continue splitting if we have not exceeded tree_output_depth
@@ -365,14 +365,14 @@ class HierarchicalClusterer(object):
             raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')
 
         #Get the number of nodes in the graph/hypergraph
-        num_nodes = G.order()
+        num_nodes = G.number_of_nodes()
         
         assert self.min_cluster_size < num_nodes, "Arg Error: min_cluster_size ({}) must be an integer smaller than the number of nodes in the graph/hypergraph ({})".format(self.min_cluster_size, num_nodes)
 
         if self.stop_criterion == 'tree_depth' and self.tree_output_depth > math.log(num_nodes, 2):
             warnings.warn("Arg Warning: tree_output_depth is likey larger than the maximum possible for this graph/hypergraph")
         
-        #Run hierarchical clustering on the graph/hypergraph
+        #Construct the hierarchical clustering tree
         self._make_tree(G)
 
         #Extarct the leaf nodes from the hierachical clustering tree
