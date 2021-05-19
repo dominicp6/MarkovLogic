@@ -104,7 +104,7 @@ class HierarchicalClusterer(object):
         self._most_recent_graph_size = 0
         self._clusters_too_big = False
 
-    def diagnose_no_partition_error(self):
+    def diagnose_early_stopping_error(self):
         """
         Determines plausible reasons why the hierarchical clustering 
         terminated prematurely and suggest how the user should change
@@ -123,69 +123,6 @@ class HierarchicalClusterer(object):
             raise NotImplementedError
 
         raise RuntimeError('Stop criterion automatically satisfied for the original hypergraph: no splitting occurred')
-    
-    def normalized_hypergraph_cut(self, H):
-        """Executes the min-cut algorithm described in the paper:
-        Zhou, Dengyong, Jiayuan Huang, and Bernhard Scholkopf.
-        "Learning with hypergraphs: Clustering, classification, and embedding."
-        Advances in neural information processing systems. 2006.
-        (http://machinelearning.wustl.edu/mlpapers/paper_files/NIPS2006_630.pdf)
-
-        This algorithm uses the normalized Laplacian to partition the hypergraph
-        into two disjoint components.
-
-        :param H: the hypergraph to perform the hypergraph-cut algorithm on.
-        :returns: H1 -- the hypergraph derived from the nodes of the first partition
-                  H2 -- the hypergraph derived from the nodes of the second partition
-                  split_again (bool) -- whether or not to continue splitting the 
-                  hypergraph based on the second smallest eigenvalue criterion 
-                  (always 'True' for this algorithm)
-        """
-        split_again = True
-        self._most_recent_graph_size = H.number_of_nodes()
-
-        # Get index<->node mappings and index<->hyperedge_id mappings for matrices
-        _, nodes_to_indices = umat.get_node_mapping(H)
-        _, hyperedge_ids_to_indices = umat.get_hyperedge_id_mapping(H)
-
-        delta = compute_normalized_laplacian(H,
-                                            nodes_to_indices,
-                                            hyperedge_ids_to_indices)
-
-        eigenvalues, eigenvectors = np.linalg.eig(delta.todense())
-
-        second_min_index = np.argsort(eigenvalues)[1]
-        self._most_recent_ssev = np.real(eigenvalues[second_min_index])
-        
-        #If stopping based on eigenvalue, don't split if the second smallest 
-        #eigenvalue is below the minimum threshold
-        if self.stop_criterion == 'eigenvalue' and self._most_recent_ssev < self.min_ssev:
-            split_again = False
-            return H, None, split_again
-
-        second_eigenvector = eigenvectors[:, second_min_index]
-        partition_index = [i for i in range(len(second_eigenvector))
-                        if second_eigenvector[i] >= self.threshold]
-
-        S1, S2 = set(), set()
-        for key, value in nodes_to_indices.items():
-            if value in partition_index:
-                S1.add(key)
-            else:
-                S2.add(key)
-
-        H1 = self._original_hypergraph.convert_to_hypergraph(S1)
-        H2 = self._original_hypergraph.convert_to_hypergraph(S2)
-
-        self._most_recent_cluster_sizes = [H1.number_of_nodes(), H2.number_of_nodes()]
-        
-        #Don't split again if either of the resulting hypergraphs have more than
-        #self.max_fractional_size of the number of nodes of the original
-        if H1.number_of_nodes() >= self.max_fractional_size * H.number_of_nodes() or H2.number_of_nodes() >= self.max_fractional_size * H.number_of_nodes():
-            split_again = False
-            self._clusters_too_big = True
-
-        return H1, H2, split_again
 
     def normalized_graph_cut(self, G):
         """
@@ -256,12 +193,8 @@ class HierarchicalClusterer(object):
             split_again = False
             return G, None, split_again
         
-        if isinstance(G, nx.Graph):
-            G1, G2, split_again = self.normalized_graph_cut(G)
-        elif isinstance(G, Hypergraph):
-            G1, G2, split_again = self.normalized_hypergraph_cut(G)
-        else:
-            raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')
+
+        G1, G2, split_again = self.normalized_graph_cut(G)
 
         return G1, G2, split_again        
 
@@ -357,12 +290,6 @@ class HierarchicalClusterer(object):
         :returns: list of leaf node graph/hypergraph objects obtained
                   after hierarchical clustering
         """
-        if isinstance(G, nx.Graph):
-            pass
-        elif isinstance(G, Hypergraph):
-            self._original_hypergraph = G
-        else:
-            raise ValueError('Input must be either of type Graph or EnhancedUndirectedGraph')
 
         #Get the number of nodes in the graph/hypergraph
         num_nodes = G.number_of_nodes()
@@ -383,4 +310,4 @@ class HierarchicalClusterer(object):
         self._banned_positions = set()
         self._original_hypergraph = None
 
-        return leaf_nodes.values()
+        return list(leaf_nodes.values())

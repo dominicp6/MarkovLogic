@@ -1,10 +1,31 @@
 import warnings
 import networkx as nx
 from collections import defaultdict
+import matplotlib.pyplot as plt
+from networkx import Graph
+
+import hypernetx as hnx
 from hypernetx import Hypergraph
 from hypernetx import Entity
 from hypernetx import EntitySet
+from itertools import combinations
 
+class EnhancedGraph(Graph):
+    def __init__(self):
+        super().__init__()
+
+    def convert_to_hypergraph_from_template(self, template_hypergraph):
+        hypergraph = EnhancedHypergraph()
+
+        for node in self.nodes():
+            # for each node in the graph, find the sets of hyperedge nodes from the
+            # template hypergraph which contain that node
+            hyperedges_of_node = template_hypergraph.nodes[node].memberships
+            for hyperedge_id, edge in hyperedges_of_node.items():
+                # add the corresponding hyperedges to the new hypergraph instance
+                hypergraph.add_edge(edge)
+
+        return hypergraph
 
 class EnhancedHypergraph(Hypergraph):
 
@@ -14,7 +35,7 @@ class EnhancedHypergraph(Hypergraph):
         # self._hyperedges_of_node = defaultdict(lambda: set())  # node_id: set(h_edge1, h_edge2,...)
 
         if database_file:
-            self.generate_from_database(path_to_db_file=database_file, path_to_info_file=info_file)
+            self.generate_from_database(path_to_db_file=database_file, path_to_info_file=None)
 
     #
     # def get_hyperedges_of_node(self, node):
@@ -77,6 +98,30 @@ class EnhancedHypergraph(Hypergraph):
     #     for hyperedge_id in hyperedge_ids:
     #         self.remove_hyperedge(hyperedge_id)
     #
+    def convert_to_graph(self, sum_weights_for_multi_edges):
+        # graph = nx.Graph()
+        graph = EnhancedGraph()
+
+        for hyperedge in self.edges():
+            nodes = hyperedge.elements
+
+            # from the hyperedge node set construct a complete subgraph (clique)
+            for edge in combinations(nodes, 2):
+                if sum_weights_for_multi_edges == True:
+                    # increment edge weight if edge already exists
+                    if graph.has_edge(*edge):
+                        graph[edge[0]][edge[1]]['weight'] += 1
+                    # else add the new edge
+                    else:
+                        graph.add_edge(*edge, weight=1)
+                else:
+                    graph.add_edge(*edge, weight=1)
+
+        # Check that the graph is connected
+        assert nx.is_connected(graph)
+
+        return graph
+
     def _correct_line_syntax(self, line_fragments):
         argument_string = line_fragments[1][0:1]
         # check that open and closed parentheses are correctly used
@@ -132,9 +177,9 @@ class EnhancedHypergraph(Hypergraph):
             if not line:
                 continue
 
-            predicate, node_list = self._parse_line(file_name=path_to_db_file, line=line, line_number=line_idx)
+            predicate, nodes_of_predicate = self._parse_line(file_name=path_to_db_file, line=line, line_number=line_idx)
 
-            node_set = set(node_list)
+            node_set = set(nodes_of_predicate)
             edge = Entity(uid=line_idx, elements=node_set)
             self.add_edge(edge)
 
