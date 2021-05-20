@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from hypernetx import Entity
 from networkx.drawing.nx_pylab import draw
 from GraphObjects import EnhancedHypergraph
-from HierarchicalClusterer import HierarchicalClusterer
+from NewHC import HierarchicalClusterer
 
-H = EnhancedHypergraph(database_file='smoking.db')
+H = EnhancedHypergraph(database_file='ani.db')
 hnx.draw(H)
 G = H.convert_to_graph(True)
 config = {
@@ -15,26 +15,15 @@ config = {
                           'HT_merge_threshold': 2,
                           'JS_merge_threshold': 2,
                           'N_top': 5, },
-    'clustering_params': {'stop_criterion': 'cluster_size',
-                          'min_ssev': 0.01,
-                          'tree_output_depth': 1,
-                          'min_cluster_size': 2,
-                          'n_init': 10,
-                          'max_iter': 300,
-                          'threshold': 0.01,
-                          'max_fractional_size': 0.9},
+    'clustering_params': {'min_cluster_size': 20,
+                          'max_lambda2': .7},
     'terminal_params': {
         'verbose': False,
     }
 }
-clusterer = HierarchicalClusterer(config=config['clustering_params'])
-graph_clusters = clusterer.hierarchical_clustering(G)
-print(graph_clusters)
-for g in graph_clusters:
-    print(g.nodes())
-hypergraph_clusters = [graph.convert_to_hypergraph_from_template(H) for graph in graph_clusters]
-#for i in graph_clusters:
-#    draw(i)
+clusterer = HierarchicalClusterer(H, config=config['clustering_params'])
+hypergraph_clusters = clusterer.hierarchical_clustering()
+
 for hg in hypergraph_clusters:
     plt.figure()
     hnx.draw(hg)

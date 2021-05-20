@@ -37,68 +37,7 @@ class EnhancedHypergraph(Hypergraph):
         if database_file:
             self.generate_from_database(path_to_db_file=database_file, path_to_info_file=None)
 
-    #
-    # def get_hyperedges_of_node(self, node):
-    #     return self._hyperedges_of_node[node]
-    #
-    # def get_node_to_hyperedges_dict(self):
-    #     return dict(self._hyperedges_of_node)
-    #
-    # def number_of_nodes(self):
-    #     return len(self.get_node_set())
-    #
-    # def number_of_edges(self):
-    #     return len(self.get_hyperedge_id_set())
-    #
-    # def _add_nodes_to_hyperedge(self, nodes, hyperedge_id):
-    #     for node in nodes:
-    #         self._hyperedges_of_node[node].add(hyperedge_id)
-    #
-    # def _remove_nodes_from_hyperedge(self, nodes, hyperedge_id):
-    #     for node in nodes:
-    #         self._hyperedges_of_node[node].remove(hyperedge_id)
-    #
-    # def add_hyperedge(self, nodes, predicate=None, node_name_to_node_type=None):
-    #     """
-    #     Adds a hyperedge to the hypergraph. If the hyperedge contains nodes not
-    #     already present in the hypergraph then these nodes are also added to the
-    #     hypergraph.
-    #
-    #     :param nodes: the node set of the hyperedge to add
-    #     :param predicate (str): the predicate name of the hyperedge [optional]
-    #     """
-    #     hyperedge_id = super().add_hyperedge(nodes, {'predicate': predicate})
-    #
-    #     self._add_nodes_to_hyperedge(nodes, hyperedge_id)
-    #
-    #     return hyperedge_id
-    #
-    # def add_hyperedges(self, hyperedges, predicate=None, node_name_to_node_type=None):
-    #     """
-    #     Adds a hyperedges to the hypergraph. If the hyperedges contain nodes not
-    #     already present in the hypergraph then these nodes are also added to the
-    #     hypergraph.
-    #
-    #     :param hyperedges: a list of node sets of the hyperedges to add
-    #     :param predicate (str): the predicate name of the hyperedges (same for each) [optional]
-    #     """
-    #     hyperedge_ids = []
-    #     for nodes in hyperedges:
-    #         hyperedge_id = self.add_hyperedge(nodes, predicate)
-    #         hyperedge_ids.append(hyperedge_id)
-    #
-    #     return hyperedge_ids
-    #
-    # def remove_hyperedge(self, hyperedge_id):
-    #     nodes = self.get_hyperedge_nodes(hyperedge_id)
-    #     self._remove_nodes_from_hyperedge(nodes, hyperedge_id)
-    #     super().remove_hyperedge(hyperedge_id)
-    #
-    # def remove_hyperedges(self, hyperedge_ids):
-    #     for hyperedge_id in hyperedge_ids:
-    #         self.remove_hyperedge(hyperedge_id)
-    #
-    def convert_to_graph(self, sum_weights_for_multi_edges):
+    def convert_to_graph(self, sum_weights_for_multi_edges=True):
         # graph = nx.Graph()
         graph = EnhancedGraph()
 
