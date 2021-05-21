@@ -4,6 +4,8 @@ import scipy.sparse
 import warnings
 import networkx as nx
 from graph_utils import get_second_eigenpair, create_subgraph
+import matplotlib.pyplot as plt
+from networkx.drawing.nx_pylab import draw
 from Hypergraph import Hypergraph
 
 
@@ -150,17 +152,23 @@ class HierarchicalClusterer(object):
 
     def get_clusters(self, graph):
         v_2, lambda2 = get_second_eigenpair(graph)
+        print(lambda2)
         if lambda2 > self.max_lambda2:
             self.graph_clusters.append(graph)
-            print('Nodes of first subgraph: {}'.format(set(graph.nodes())))
+            print('Met lambda stopping criterion!')
+            #print('Nodes of first subgraph: {}'.format(set(graph.nodes())))
             return None
         else:
             subgraph1, subgraph2 = self._cheeger_cut(graph, v_2)
+            print(subgraph1.number_of_nodes())
+            print(subgraph2.number_of_nodes())
             if (self.min_cluster_size and
                     (subgraph1.number_of_nodes() < self.min_cluster_size or
                      subgraph2.number_of_nodes() < self.min_cluster_size)):
                 self.graph_clusters.append(graph)
-                print('Nodes of first subgraph: {}'.format(set(graph.nodes())))
+                print('Nodes of first subgraph: {}'.format(set(subgraph1.nodes())))
+                print('Nodes of second subgraph: {}'.format(set(subgraph2.nodes())))
+
                 return None
             else:
                 return self.get_clusters(subgraph1), self.get_clusters(subgraph2)

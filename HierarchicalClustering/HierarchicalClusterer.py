@@ -43,7 +43,7 @@ class HierarchicalClusterer(object):
                                           height in the hierarchical clustering tree
                            'cluster_size' - stop partitioning a cluster when the number of nodes in
                                           the partitioned cluster would below a specified size
-    :param min_ssev (float): [Only if stop criteiron is 'eigenvalue'] The minimum value of the second 
+    :param min_ssev (float): [Only if stop criteiron is 'eigenvalue']    The minimum value of the second 
                         smallest eigenvalue of the Laplace matrix for when to stop partitioning
     :param tree_output_height (int): [Only if stop criterion is 'tree_height'] The height in the hierarchical
                                clustering tree from which to output the final node clusters, e.g. height of 0 
@@ -169,6 +169,7 @@ class HierarchicalClusterer(object):
         S1 = [nodes[i] for i in C1]
         S2 = [nodes[i] for i in C2]
         self._most_recent_cluster_sizes = [len(S1), len(S2)]
+
 
         #create subgraphs from the node sets
         G1 = graph_util.create_subgraph(G, S1)
