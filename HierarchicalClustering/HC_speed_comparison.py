@@ -12,14 +12,14 @@ config = {
                           'JS_merge_threshold': 2,
                           'N_top': 5, },
     'clustering_params': {'min_cluster_size': 3,
-                          'max_lambda2': 1},
+                          'max_lambda2': 0.7},
     'terminal_params': {
         'verbose': False,
     }
 }
 
 log_file = 'timings_test.log'
-databases = ['smoking.db', 'nations.db']#, 'MovieLensMini.db', 'kinship.db', 'imdb1.db', 'function.db', 'ani.db']
+databases = ['smoking.db', 'imdb1.db', 'function.db', 'ani.db'] # 'nations.db', 'MovieLensMini.db', 'kinship.db',
 
 file = open('testing', "w")
 for database in databases:

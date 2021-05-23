@@ -5,6 +5,7 @@ import warnings
 import networkx as nx
 from sklearn.cluster import KMeans
 
+from HierarchicalClustering.GraphObjects import GraphCluster
 from graph_utils import create_subgraph, laplace_RW_spectrum
 from Hypergraph import Hypergraph
 
@@ -67,8 +68,8 @@ class HierarchicalClusterer(object):
         self.min_cluster_size = config['min_cluster_size']
         self.max_lambda2 = config['max_lambda2']
         self.Hypergraph = Hypergraph
-        self.graph_clusters = []
-        self.hypergraph_clusters = []
+        self.graph_cluster = []
+        self.hypergraph_cluster = []
 
         assert self.min_cluster_size > 2, "Argument Error: min_cluster_size must be greater than 2"
         assert 0 < self.max_lambda2 < 2, "Argument Error: max_lambda2 needs to be greater than 0 and less than 2"
@@ -171,7 +172,7 @@ class HierarchicalClusterer(object):
         w, U = laplace_RW_spectrum(graph)
         lambda2 = w[1]
         if lambda2 > self.max_lambda2:
-            self.graph_clusters.append(graph)
+            self.graph_cluster.append(graph)
             print('Nodes of first subgraph: {}'.format(set(graph.nodes())))
             return None
         else:
@@ -179,7 +180,7 @@ class HierarchicalClusterer(object):
             if (self.min_cluster_size and
                     (subgraph1.number_of_nodes() < self.min_cluster_size or
                      subgraph2.number_of_nodes() < self.min_cluster_size)):
-                self.graph_clusters.append(graph)
+                self.graph_cluster.append(graph)
                 print('Nodes of first subgraph: {}'.format(set(graph.nodes())))
                 return None
             else:
@@ -196,6 +197,7 @@ class HierarchicalClusterer(object):
         """
         original_graph = self.Hypergraph.convert_to_graph()
         self.get_clusters(original_graph)
-        self.hypergraph_clusters = [graph.convert_to_hypergraph_from_template(self.Hypergraph) for graph in self.graph_clusters]
+        graph_cluster = GraphCluster(self.graph_cluster)
+        self.hypergraph_cluster = graph_cluster.convert_to_hypergraph_cluster_from_template(self.Hypergraph)
 
-        return self.hypergraph_clusters
+        return self.hypergraph_cluster

@@ -5,9 +5,8 @@ from networkx.drawing.nx_pylab import draw
 from GraphObjects import EnhancedHypergraph
 from NewHC import HierarchicalClusterer
 
-H = EnhancedHypergraph(database_file='smoking.db')
-# hnx.draw(H)
-G = H.convert_to_graph(True)
+H = EnhancedHypergraph(database_file='imdb1.db')
+hnx.draw(H)
 config = {
     'randomwalk_params': {'number_of_walks': 100,
                           'max_length': 100,
@@ -24,7 +23,7 @@ config = {
 clusterer = HierarchicalClusterer(H, config=config['clustering_params'])
 hypergraph_clusters = clusterer.hierarchical_clustering()
 
-# for hg in hypergraph_clusters:
-#     plt.figure()
-#     hnx.draw(hg)
-# plt.show()
+for hg in hypergraph_clusters:
+    plt.figure()
+    hnx.draw(hg)
+plt.show()

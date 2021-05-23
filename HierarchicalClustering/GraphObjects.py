@@ -9,6 +9,8 @@ from hypernetx import Hypergraph
 from hypernetx import Entity
 from hypernetx import EntitySet
 from itertools import combinations
+from math import floor
+
 
 class EnhancedGraph(Graph):
     def __init__(self):
@@ -27,6 +29,82 @@ class EnhancedGraph(Graph):
 
         return hypergraph
 
+
+class GraphCluster:
+    def __init__(self, list_of_graphs):
+        if not all([issubclass(graph.__class__, Graph) for graph in list_of_graphs]) and isinstance(list_of_graphs, list):
+            print(type(list_of_graphs))
+            raise ValueError("GraphCluster object must be initialised from a list of Graph or EnhancedGraph objects")
+        self.graphs = list_of_graphs
+
+    def __getitem__(self, index):
+        return self.graphs[index]
+
+    def _find_candidate_hypergraph_ids_to_add_hyperedge_to(self, hyperedge):
+        """
+        Find candidate hypergraph ids for adding a hyperedge to. Candidates correspond to those
+        graphs in the graph cluster that share the most nodes with the nodes of the hyperedge.
+        """
+
+        hyperedge_nodes = set(hyperedge.elements.keys())
+        number_of_hyperedge_nodes = len(hyperedge_nodes)
+        max_nodes_in_graph = 0
+        candidate_hypergraphs_to_add_hyperedge_to = []
+        for graph_id, graph in enumerate(self.graphs):
+            # stop searching if either
+            #   1) we find a graph for the first time containing more than half of the hyperedge nodes
+            #   2) the total number of matched nodes in our candidate graphs equals the number of hyperedge nodes
+            if max_nodes_in_graph <= floor(number_of_hyperedge_nodes / 2) \
+                    and len(candidate_hypergraphs_to_add_hyperedge_to) * max_nodes_in_graph < number_of_hyperedge_nodes:
+                num_edge_nodes_in_graph = len(hyperedge_nodes.intersection(set(graph.nodes())))
+                if num_edge_nodes_in_graph > max_nodes_in_graph:
+                    candidate_hypergraphs_to_add_hyperedge_to = [graph_id]
+                    max_nodes_in_graph = num_edge_nodes_in_graph
+                elif num_edge_nodes_in_graph == max_nodes_in_graph:
+                    candidate_hypergraphs_to_add_hyperedge_to.append(graph_id)
+                else:
+                    pass
+            else:
+                break
+
+        return candidate_hypergraphs_to_add_hyperedge_to
+
+    @staticmethod
+    def _find_optimal_id_from_candidates_using_clusters(candidate_hypergraph_ids, hypergraph_cluster):
+        if len(candidate_hypergraph_ids):
+            hypergraph_to_add_hyperedge_to = candidate_hypergraph_ids[0]
+        else:
+            lowest = float('inf')
+            hypergraph_to_add_hyperedge_to = 0
+            for candidate_id in candidate_hypergraph_ids:
+                num_nodes = hypergraph_cluster[candidate_id].number_of_nodes()
+                if num_nodes < lowest:
+                    lowest = num_nodes
+                    hypergraph_to_add_hyperedge_to = candidate_id
+
+        return hypergraph_to_add_hyperedge_to
+
+    def _find_hypergraph_id_to_add_hyperedge_to(self, hyperedge, hypergraph_cluster):
+
+        candidate_hypergraph_ids = self._find_candidate_hypergraph_ids_to_add_hyperedge_to(hyperedge)
+        hyperedge_id = self._find_optimal_id_from_candidates_using_clusters(candidate_hypergraph_ids,
+                                                                            hypergraph_cluster)
+
+        return hyperedge_id
+
+    def convert_to_hypergraph_cluster_from_template(self, template_hypergraph):
+        hypergraph_cluster = [EnhancedHypergraph() for idx in range(len(self.graphs))]
+
+        for hyperedge in template_hypergraph.edges():
+            hypergraph_id = self._find_hypergraph_id_to_add_hyperedge_to(hyperedge, hypergraph_cluster)
+            hypergraph_cluster[hypergraph_id].add_edge(hyperedge)
+
+        # remove empty hypergraphs
+        hypergraph_cluster = [hypergraph for hypergraph in hypergraph_cluster if hypergraph.number_of_nodes() > 0]
+
+        return hypergraph_cluster
+
+
 class EnhancedHypergraph(Hypergraph):
 
     def __init__(self, database_file=None):
@@ -38,7 +116,6 @@ class EnhancedHypergraph(Hypergraph):
             self.generate_from_database(path_to_db_file=database_file, path_to_info_file=None)
 
     def convert_to_graph(self, sum_weights_for_multi_edges=True):
-        # graph = nx.Graph()
         graph = EnhancedGraph()
 
         for hyperedge in self.edges():
@@ -123,4 +200,3 @@ class EnhancedHypergraph(Hypergraph):
             self.add_edge(edge)
 
         db_file.close()
-
