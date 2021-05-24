@@ -1,0 +1,1220 @@
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 100
+
+database size: 368
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+156,Documentary,M1189
+111,Romance,M1669
+23,Dislikes,"U57,M1977"
+6,Dislikes,"U5788,M2754"
+57,Dislikes,"U4266,M3016"
+115,Horror,M1321
+9,Dislikes,"U1744,M2340"
+27,Dislikes,"U904,M1327"
+54,Dislikes,"U5517,M1258"
+95,Likes,"U1121,M1669"
+-------------- MLN -------------
+-1.879294104  Romance(a1)
+-4.942329883  Likes(a1,a2)
+1.179114832  Horror(a1)
+-4.753579573  Dislikes(a1,a2)
+-1.194240707  Old(a1)
+1.194240707  Young(a1)
+-4.197109785  Animation(a1)
+-2.013212139  Documentary(a1)
+1.500505112  Male(a1)
+-1.500505112  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+number_of_ratings : 100
+
+database size: 495
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+228,Adventure,M836
+51,Likes,"U1606,M16"
+430,Old,U5250
+128,Crime,M1617
+473,Male,U3108
+269,Drama,M1834
+460,Old,U5058
+328,Young,U4277
+373,Male,U1981
+27,Likes,"U2232,M858"
+-------------- MLN -------------
+-1.33387277  Romance(a1)
+-3.832601811  Film-Noir(a1)
+-5.197768352  Likes(a1,a2)
+-0.5091117638  Comedy(a1)
+-3.459209427  Mystery(a1)
+-3.832601811  Fantasy(a1)
+-0.9864144289  Action(a1)
+-1.33387277  Thriller(a1)
+-2.538151683  Horror(a1)
+-1.68534138  Adventure(a1)
+-2.88915863  War(a1)
+-5.339413775  Dislikes(a1,a2)
+-2.88915863  Children's(a1)
+-1.633281507  Old(a1)
+-4.445243069  Musical(a1)
+1.633281507  Young(a1)
+-2.88915863  Animation(a1)
+-1.852414117  Sci-Fi(a1)
+-6.807144455  Documentary(a1)
+-2.69987125  Crime(a1)
+1.125280573  Male(a1)
+-3.832601811  Western(a1)
+-0.7372522023  Drama(a1)
+-1.125280573  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 3
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 100
+
+database size: 368
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Indifferent(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+87,Likes,"U5957,M152"
+43,Likes,"U1366,M366"
+352,Male,U3081
+239,Young,U4086
+13,Dislikes,"U2279,M3935"
+26,Dislikes,"U3265,M1985"
+175,Young,U5053
+211,Old,U4786
+234,Male,U3265
+96,Dislikes,"U4003,M3414"
+-------------- MLN -------------
+-1.878333092  Romance(a1)
+-5.011280005  Likes(a1,a2)
+-5.370811395  Indifferent(a1,a2)
+1.174470747  Horror(a1)
+-5.326029006  Dislikes(a1,a2)
+-1.197543519  Old(a1)
+1.197543519  Young(a1)
+-4.166041763  Animation(a1)
+-2.012924149  Documentary(a1)
+1.507387958  Male(a1)
+-1.507387958  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 3
+restrict_genres : False
+number_of_ratings : 100
+
+database size: 495
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Indifferent(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+242,Drama,M2028
+438,Young,U3271
+487,Male,U3984
+302,Young,U5053
+283,Sci-Fi,M1206
+156,Horror,M3081
+173,Romance,M440
+48,Indifferent,"U3679,M2858"
+355,Female,U1594
+227,Action,M836
+-------------- MLN -------------
+-1.325442917  Romance(a1)
+-3.852261396  Film-Noir(a1)
+-5.236600843  Likes(a1,a2)
+-0.5154145291  Comedy(a1)
+-3.448399782  Mystery(a1)
+-3.852261396  Fantasy(a1)
+-1.006442425  Action(a1)
+-5.699753885  Indifferent(a1,a2)
+-1.325442917  Thriller(a1)
+-2.539446758  Horror(a1)
+-1.681787414  Adventure(a1)
+-2.887329112  War(a1)
+-6.319444383  Dislikes(a1,a2)
+-2.887329112  Children's(a1)
+-1.629930029  Old(a1)
+-4.498911745  Musical(a1)
+1.629930029  Young(a1)
+-2.887329112  Animation(a1)
+-1.848145366  Sci-Fi(a1)
+-6.754860691  Documentary(a1)
+-2.701049819  Crime(a1)
+1.126775382  Male(a1)
+-3.852261396  Western(a1)
+-0.7495602153  Drama(a1)
+-1.126775382  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 3
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 100
+
+database size: 368
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+MiddleAged(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+51,Likes,"U2125,M720"
+149,Horror,M1997
+27,Dislikes,"U904,M1327"
+362,Male,U4539
+140,Horror,M2516
+290,Male,U57
+26,Dislikes,"U3265,M1985"
+22,Dislikes,"U3371,M1969"
+267,MiddleAged,U4447
+93,Dislikes,"U163,M328"
+-------------- MLN -------------
+-1.877940347  Romance(a1)
+-4.929803839  Likes(a1,a2)
+1.177831245  Horror(a1)
+-4.741847158  Dislikes(a1,a2)
+-2.914223937  Old(a1)
+0.4705335201  Young(a1)
+-4.178449511  Animation(a1)
+-0.6875963095  MiddleAged(a1)
+-2.012218986  Documentary(a1)
+1.501682475  Male(a1)
+-1.501682475  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 3
+num_rating_categories : 2
+restrict_genres : False
+number_of_ratings : 100
+
+database size: 495
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+MiddleAged(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+166,Horror,M1278
+379,Male,U1137
+141,Horror,M3273
+204,Comedy,M122
+247,Thriller,M3101
+7,Dislikes,"U1331,M2336"
+201,Romance,M3269
+57,Likes,"U1561,M3089"
+80,Dislikes,"U4662,M2888"
+386,Youthful,U2116
+-------------- MLN -------------
+-1.333271266  Romance(a1)
+-3.828974039  Film-Noir(a1)
+-5.119136064  Likes(a1,a2)
+-0.5189907102  Comedy(a1)
+-3.382207235  Mystery(a1)
+-3.828974039  Fantasy(a1)
+-0.9824815272  Action(a1)
+-1.333271266  Thriller(a1)
+-2.539643153  Horror(a1)
+-1.685485977  Adventure(a1)
+-2.888273575  War(a1)
+-5.267215728  Dislikes(a1,a2)
+-2.888273575  Children's(a1)
+-2.90801395  Old(a1)
+-4.425559975  Musical(a1)
+0.4687851799  Young(a1)
+-2.888273575  Animation(a1)
+-1.852587212  Sci-Fi(a1)
+-0.6659869515  MiddleAged(a1)
+-7.011032946  Documentary(a1)
+-2.704369848  Crime(a1)
+1.125964583  Male(a1)
+-3.828974039  Western(a1)
+-0.7424566117  Drama(a1)
+-1.125964583  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 3
+num_rating_categories : 3
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 100
+
+database size: 368
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+MiddleAged(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Indifferent(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+248,Male,U1980
+251,MiddleAged,U3998
+145,Horror,M2459
+300,Male,U5957
+119,Horror,M3838
+141,Horror,M188
+195,Youthful,U4484
+234,Male,U3265
+64,Dislikes,"U1470,M1123"
+168,Horror,M2644
+-------------- MLN -------------
+-1.87878772  Romance(a1)
+-5.007480537  Likes(a1,a2)
+-5.357162513  Indifferent(a1,a2)
+1.178435121  Horror(a1)
+-5.313821055  Dislikes(a1,a2)
+-2.929123893  Old(a1)
+0.4729962798  Young(a1)
+-4.16756236  Animation(a1)
+-0.6928044486  MiddleAged(a1)
+-2.013124623  Documentary(a1)
+1.502916524  Male(a1)
+-1.502916524  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 3
+num_rating_categories : 3
+restrict_genres : False
+number_of_ratings : 100
+
+database size: 495
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+MiddleAged(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Indifferent(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+283,Sci-Fi,M1206
+231,Thriller,M454
+341,Male,U5795
+417,Male,U5213
+349,Male,U4808
+169,Sci-Fi,M2528
+173,Romance,M440
+250,Action,M2167
+429,Male,U5250
+197,Comedy,M3481
+-------------- MLN -------------
+-1.333923461  Romance(a1)
+-3.806524911  Film-Noir(a1)
+-5.151723195  Likes(a1,a2)
+-0.533660175  Comedy(a1)
+-3.473301716  Mystery(a1)
+-3.806524911  Fantasy(a1)
+-1.021237464  Action(a1)
+-5.55641892  Indifferent(a1,a2)
+-1.333923461  Thriller(a1)
+-2.537840419  Horror(a1)
+-1.686696411  Adventure(a1)
+-2.901774872  War(a1)
+-6.077964781  Dislikes(a1,a2)
+-2.901774872  Children's(a1)
+-2.925089253  Old(a1)
+-4.454398751  Musical(a1)
+0.4496874824  Young(a1)
+-2.901774872  Animation(a1)
+-1.85342689  Sci-Fi(a1)
+-0.6764726415  MiddleAged(a1)
+-6.436547214  Documentary(a1)
+-2.701936508  Crime(a1)
+1.123529577  Male(a1)
+-3.806524911  Western(a1)
+-0.7531282202  Drama(a1)
+-1.123529577  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 1000
+
+database size: 2638
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+1569,Old,U3201
+1441,Young,U4577
+1497,Young,U3425
+1612,Male,U5811
+28,Likes,"U3771,M1321"
+46,Likes,"U3201,M2652"
+144,Likes,"U3974,M3499"
+1234,Female,U5329
+1834,Male,U2648
+243,Likes,"U19,M1321"
+-------------- MLN -------------
+-2.124458628  Romance(a1)
+-5.466031019  Likes(a1,a2)
+0.730628796  Horror(a1)
+-5.425792401  Dislikes(a1,a2)
+-1.548470322  Old(a1)
+1.548470322  Young(a1)
+-5.279485341  Animation(a1)
+-1.216788633  Documentary(a1)
+1.179410797  Male(a1)
+-1.179410797  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 3000
+
+database size: 6289
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+4497,Male,U4861
+4027,Male,U1764
+3489,Male,U5621
+4243,Male,U4009
+4531,Male,U1153
+2953,Dislikes,"U4946,M1345"
+5109,Male,U757
+5371,Male,U3191
+5230,Young,U1195
+5282,Young,U3249
+-------------- MLN -------------
+-2.109113494  Romance(a1)
+-5.434262756  Likes(a1,a2)
+0.5226303295  Horror(a1)
+-5.387060538  Dislikes(a1,a2)
+-1.574677571  Old(a1)
+1.574677571  Young(a1)
+-4.765180546  Animation(a1)
+-1.004181619  Documentary(a1)
+1.061445449  Male(a1)
+-1.061445449  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 10000
+
+database size: 15927
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+5060,Likes,"U173,M3680"
+13577,Male,U5625
+8589,Likes,"U1733,M565"
+10006,Horror,M3892
+4616,Dislikes,"U2622,M1835"
+1381,Likes,"U3978,M1345"
+888,Likes,"U1974,M1649"
+188,Dislikes,"U2124,M3918"
+2866,Likes,"U1980,M1997"
+12942,Old,U928
+-------------- MLN -------------
+-2.025222153  Romance(a1)
+-5.011297745  Likes(a1,a2)
+0.3454492189  Horror(a1)
+-4.988929368  Dislikes(a1,a2)
+-1.407807093  Old(a1)
+1.407807093  Young(a1)
+-4.938584236  Animation(a1)
+-0.841072254  Documentary(a1)
+0.9690971635  Male(a1)
+-0.9690971635  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 30000
+
+database size: 38399
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+58,Dislikes,"U4220,M720"
+19232,Dislikes,"U939,M1969"
+37912,Old,U1891
+35290,Young,U2692
+8052,Dislikes,"U390,M1321"
+19494,Dislikes,"U4312,M177"
+1290,Likes,"U1357,M1258"
+27495,Dislikes,"U4543,M1971"
+29034,Likes,"U1675,M2790"
+23913,Dislikes,"U4335,M2517"
+-------------- MLN -------------
+-1.979730705  Romance(a1)
+-4.437171306  Likes(a1,a2)
+0.265653808  Horror(a1)
+-4.382907143  Dislikes(a1,a2)
+-1.336433993  Old(a1)
+1.336433993  Young(a1)
+-4.980149248  Animation(a1)
+-0.770918243  Documentary(a1)
+0.9828655126  Male(a1)
+-0.9828655126  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+number_of_ratings : 3000
+
+database size: 5653
+remove_redundant_binary_predicate : True
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+121,Dislikes,"U4484,M1984"
+2444,Dislikes,"U5019,M28"
+3642,Young,U2737
+4727,Young,U3110
+748,Dislikes,"U4761,M2995"
+229,Likes,"U3433,M1333"
+3544,Male,U5250
+5109,Young,U855
+4449,Male,U5501
+4675,Young,U698
+-------------- MLN -------------
+-1.937937337  Romance(a1)
+-5.492396893  Likes(a1,a2)
+0.4439992646  Horror(a1)
+-5.376933702  Dislikes(a1,a2)
+-7.163023064  Old(a1)
+1.571489414  Young(a1)
+-4.816796156  Animation(a1)
+-0.9890891958  Documentary(a1)
+1.033136418  Male(a1)
+-7.163023064  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 500
+
+database size: 1327
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+1239,Young,U1617
+751,Young,U1255
+501,Romance,M2497
+1290,Male,U1077
+756,Male,U2279
+224,Dislikes,"U1146,M2451"
+1063,Male,U2737
+9,Likes,"U3626,M1970"
+136,Likes,"U6011,M3499"
+326,Dislikes,"U565,M3918"
+-------------- MLN -------------
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 500
+
+database size: 1323
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+271,Likes,"U5367,M246"
+359,Likes,"U4440,M2514"
+451,Likes,"U4374,M1983"
+947,Young,U5194
+690,Male,U5394
+405,Dislikes,"U4279,M1969"
+1290,Young,U1958
+716,Young,U4484
+496,Dislikes,"U1284,M1191"
+372,Likes,"U1034,M3414"
+-------------- MLN -------------
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 500
+
+database size: 1323
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+1,Likes,"U5996,M1258"
+991,Young,U714
+503,Documentary,M549
+420,Likes,"U4579,M1835"
+1126,Male,U678
+895,Young,U81
+388,Likes,"U5964,M1258"
+50,Dislikes,"U482,M2497"
+736,Young,U2859
+750,Male,U6000
+-------------- MLN -------------
+-2.141161863  Romance(a1)
+-5.381867864  Likes(a1,a2)
+0.5816166505  Horror(a1)
+-5.378837704  Dislikes(a1,a2)
+1.55944472  Young(a1)
+-5.135598615  Animation(a1)
+-1.054667016  Documentary(a1)
+1.138852987  Male(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 500
+
+database size: 1323
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+988,Male,U4318
+1143,Young,U877
+115,Likes,"U3198,M1258"
+639,Horror,M2515
+246,Dislikes,"U2907,M1342"
+646,Horror,M1340
+577,Documentary,M3188
+1009,Male,U4457
+23,Dislikes,"U2811,M2323"
+174,Dislikes,"U3821,M3016"
+-------------- MLN -------------
+-2.141161863  Romance(a1)
+-5.381867864  Likes(a1,a2)
+0.5816166505  Horror(a1)
+-5.378837704  Dislikes(a1,a2)
+1.55944472  Young(a1)
+-5.135598615  Animation(a1)
+-1.054667016  Documentary(a1)
+1.138852987  Male(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+remove_redundant_binary_predicate : True
+number_of_ratings : 500
+
+database size: 2068
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+1592,Young,U4354
+1392,Male,U1796
+1345,Animation,M2081
+600,Romance,M1307
+625,Crime,M3783
+830,Action,M2662
+176,Likes,"U4354,M1374"
+1539,Young,U3519
+421,Dislikes,"U4387,M168"
+1621,Male,U4981
+-------------- MLN -------------
+-1.846987504  Romance(a1)
+-4.01655286  Film-Noir(a1)
+-6.103938505  Likes(a1,a2)
+-0.6090008687  Comedy(a1)
+-3.36839555  Mystery(a1)
+-3.662108969  Fantasy(a1)
+-1.198835356  Action(a1)
+-1.606133195  Thriller(a1)
+-2.487098253  Horror(a1)
+-2.139626184  Adventure(a1)
+-2.713850844  War(a1)
+-6.235711366  Dislikes(a1,a2)
+-2.521410833  Children's(a1)
+-2.757484509  Musical(a1)
+1.438763796  Young(a1)
+-2.952814806  Animation(a1)
+-1.694031864  Sci-Fi(a1)
+-4.422637366  Documentary(a1)
+-2.139626184  Crime(a1)
+1.0281077   Male(a1)
+-4.422637366  Western(a1)
+-0.5006522806  Drama(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 3000
+
+database size: 5635
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+4867,Male,U3705
+2522,Dislikes,"U3762,M1978"
+1228,Likes,"U187,M2693"
+2831,Dislikes,"U2896,M1258"
+2853,Dislikes,"U5686,M1997"
+3070,Horror,M3941
+2350,Likes,"U2016,M2677"
+744,Dislikes,"U3821,M3499"
+510,Likes,"U3491,M1346"
+1781,Dislikes,"U2748,M3917"
+-------------- MLN -------------
+-1.999760404  Romance(a1)
+-5.412218183  Likes(a1,a2)
+0.4663956373  Horror(a1)
+-5.405289015  Dislikes(a1,a2)
+1.440988423  Young(a1)
+-5.398635618  Animation(a1)
+-0.9790054094  Documentary(a1)
+1.036731029  Male(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+remove_redundant_binary_predicate : True
+number_of_ratings : 3000
+
+database size: 8744
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+4036,Drama,M2926
+8019,Male,U329
+6623,Male,U4124
+5017,Thriller,M1631
+1324,Likes,"U5667,M1265"
+4326,Romance,M930
+3580,Thriller,M3708
+5402,Drama,M3556
+2334,Dislikes,"U952,M3948"
+8606,Young,U3250
+-------------- MLN -------------
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 10000
+
+database size: 14584
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+9293,Dislikes,"U4972,M2650"
+6913,Dislikes,"U3121,M879"
+7895,Dislikes,"U2129,M1971"
+3154,Dislikes,"U154,M2653"
+7493,Likes,"U2075,M2710"
+6080,Dislikes,"U1958,M1971"
+8598,Likes,"U868,M2787"
+7131,Likes,"U1903,M2859"
+7608,Likes,"U1369,M2649"
+13750,Male,U4948
+-------------- MLN -------------
+-1.992042458  Romance(a1)
+-4.996868539  Likes(a1,a2)
+0.3295681658  Horror(a1)
+-4.982285773  Dislikes(a1,a2)
+1.403169645  Young(a1)
+-4.933101324  Animation(a1)
+-0.8429517998  Documentary(a1)
+1.050516794  Male(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+remove_redundant_binary_predicate : True
+number_of_ratings : 10000
+
+database size: 19809
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Action(movie)
+Adventure(movie)
+Animation(movie)
+Children's(movie)
+Comedy(movie)
+Crime(movie)
+Documentary(movie)
+Drama(movie)
+Fantasy(movie)
+Film-Noir(movie)
+Horror(movie)
+Musical(movie)
+Mystery(movie)
+Romance(movie)
+Sci-Fi(movie)
+Thriller(movie)
+War(movie)
+Western(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+168,Likes,"U5019,M1222"
+14011,Drama,M390
+4888,Dislikes,"U1279,M1217"
+1444,Likes,"U2947,M562"
+4099,Dislikes,"U5129,M1356"
+5777,Dislikes,"U5720,M2815"
+6968,Dislikes,"U3017,M804"
+19078,Young,U5791
+19555,Young,U4466
+16864,Male,U2094
+-------------- MLN -------------
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+remove_redundant_binary_predicate : True
+number_of_ratings : 30000
+
+database size: 36469
+------------ TYPES -------------
+movie
+user
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Male(user)
+Likes(user, movie)
+Dislikes(user, movie)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+29488,Likes,"U1538,M1333"
+25491,Likes,"U666,M1657"
+920,Dislikes,"U4510,M1771"
+20570,Dislikes,"U4422,M3017"
+3402,Likes,"U4607,M1345"
+11519,Likes,"U2928,M3007"
+15954,Dislikes,"U1146,M1980"
+18647,Likes,"U5250,M1339"
+23114,Dislikes,"U123,M1976"
+31029,Young,U1099
+-------------- MLN -------------
+-1.980036764  Romance(a1)
+-4.413310682  Likes(a1,a2)
+0.2652278331  Horror(a1)
+-4.357330651  Dislikes(a1,a2)
+1.330367319  Young(a1)
+-4.990251557  Animation(a1)
+-0.7744870511  Documentary(a1)
+0.99296361  Male(a1)

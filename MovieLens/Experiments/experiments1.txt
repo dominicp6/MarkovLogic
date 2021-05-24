@@ -1,0 +1,693 @@
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 100
+
+database size: 366
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+252,Gender,"U5546,Male"
+173,Age,"U3762,Old"
+273,Age,"U5650,Young"
+102,Genre,"M2513,Horror"
+151,Genre,"M1983,Horror"
+324,Gender,"U904,Male"
+85,Rating,"U1128,M2460,Negative"
+180,Gender,"U3683,Male"
+169,Genre,"M1189,Documentary"
+165,Genre,"M3838,Horror"
+327,Age,"U710,Young"
+82,Rating,"U1496,M1342,Negative"
+154,Genre,"M1835,Romance"
+318,Gender,"U482,Male"
+215,Age,"U4342,Young"
+138,Genre,"M128,Documentary"
+12,Rating,"U3163,M1982,Negative"
+13,Rating,"U2979,M246,Positive"
+172,Gender,"U3762,Male"
+73,Rating,"U869,M3840,Negative"
+-------------- MLN -------------
+-1.059289288  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-4.820499137  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 1000
+
+database size: 2658
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+2594,Gender,"U5729,Male"
+2211,Age,"U806,Young"
+357,Rating,"U3722,M1982,Positive"
+2233,Age,"U1051,Young"
+2484,Gender,"U1491,Male"
+698,Rating,"U4932,M1258,Positive"
+2405,Age,"U2106,Young"
+2492,Gender,"U5555,Male"
+703,Rating,"U4611,M720,Positive"
+956,Rating,"U698,M2459,Positive"
+2320,Gender,"U953,Male"
+2358,Gender,"U482,Male"
+753,Rating,"U1698,M1997,Positive"
+1658,Gender,"U4433,Male"
+2247,Age,"U5753,Young"
+2162,Gender,"U5945,Female"
+581,Rating,"U1051,M2689,Positive"
+2304,Gender,"U2038,Female"
+2378,Gender,"U710,Male"
+1790,Gender,"U2063,Male"
+-------------- MLN -------------
+-1.078112552  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-5.522035852  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 3000
+
+database size: 6312
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+5759,Age,"U4334,Young"
+4693,Age,"U5269,Young"
+4887,Age,"U1284,Old"
+3231,Genre,"M1666,Romance"
+5858,Gender,"U204,Male"
+1717,Rating,"U3998,M2460,Negative"
+5694,Gender,"U904,Male"
+732,Rating,"U1140,M3081,Positive"
+4793,Age,"U4945,Old"
+1304,Rating,"U2258,M1997,Positive"
+5096,Gender,"U4220,Male"
+3520,Gender,"U4519,Male"
+5345,Age,"U2527,Young"
+3325,Age,"U1969,Young"
+906,Rating,"U161,M549,Positive"
+1571,Rating,"U1746,M3182,Positive"
+3047,Genre,"M1258,Horror"
+4152,Gender,"U5323,Male"
+4937,Age,"U5699,Young"
+179,Rating,"U4950,M1147,Positive"
+-------------- MLN -------------
+-1.082548248  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-5.434090388  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 10000
+
+database size: 15831
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+11889,Gender,"U2074,Male"
+3436,Rating,"U3976,M2721,Negative"
+12698,Age,"U2503,Young"
+562,Rating,"U1628,M1345,Positive"
+6100,Rating,"U1722,M1347,Positive"
+3097,Rating,"U4610,M720,Positive"
+6139,Rating,"U1470,M1321,Negative"
+13415,Gender,"U5067,Male"
+4933,Rating,"U4425,M2644,Positive"
+10786,Age,"U500,Young"
+6652,Rating,"U2852,M3917,Positive"
+7737,Rating,"U5113,M1974,Negative"
+3897,Rating,"U4458,M2693,Negative"
+2056,Rating,"U3491,M1974,Positive"
+5797,Rating,"U5287,M1346,Positive"
+6389,Rating,"U5549,M3081,Negative"
+14285,Gender,"U1142,Male"
+13105,Gender,"U5982,Male"
+12285,Gender,"U5532,Male"
+1429,Rating,"U1285,M2323,Positive"
+-------------- MLN -------------
+-1.084334549  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-5.003505387  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 30000
+
+database size: 38423
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+35752,Age,"U3306,Old"
+18668,Rating,"U5040,M2710,Positive"
+28591,Rating,"U5536,M1974,Negative"
+8408,Rating,"U1335,M581,Positive"
+32733,Gender,"U1306,Male"
+13410,Rating,"U5795,M2340,Negative"
+9754,Rating,"U4064,M1258,Negative"
+34201,Gender,"U2033,Female"
+36790,Age,"U2856,Young"
+25454,Rating,"U3118,M759,Positive"
+6073,Rating,"U4901,M1982,Negative"
+22840,Rating,"U1579,M3007,Positive"
+29843,Rating,"U4305,M1333,Positive"
+19904,Rating,"U1765,M3918,Positive"
+23941,Rating,"U2544,M2693,Positive"
+17574,Rating,"U2351,M1345,Negative"
+14167,Rating,"U1300,M1337,Positive"
+14729,Rating,"U1999,M1327,Positive"
+24754,Rating,"U3806,M2648,Positive"
+35051,Gender,"U2258,Female"
+-------------- MLN -------------
+-1.084420771  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-4.376222564  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : False
+number_of_ratings : 100
+
+database size: 366
+------------ TYPES -------------
+movie
+user
+rating
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+275,Young,U235
+56,Rating,"U667,M1999,Negative"
+232,Male,U1422
+322,Male,U764
+194,Male,U1584
+228,Female,U548
+18,Rating,"U4009,M606,Negative"
+252,Male,U5546
+125,Horror,M1342
+9,Rating,"U482,M1191,Negative"
+205,Old,U3304
+298,Female,U4750
+358,Male,U1101
+312,Male,U5854
+286,Male,U3727
+112,Documentary,M581
+175,Old,U1717
+180,Male,U3683
+304,Male,U5753
+120,Horror,M1985
+-------------- MLN -------------
+-2.16235835  Romance(a1)
+0.6704270208  Horror(a1)
+-1.709212043  Old(a1)
+1.709212043  Young(a1)
+-4.182327289  Animation(a1)
+-1.09752467  Documentary(a1)
+1.561519613  Male(a1)
+-4.830906478  Rating(a1,a2,a3)
+-1.561519613  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : False
+number_of_ratings : 1000
+
+database size: 2658
+------------ TYPES -------------
+movie
+user
+rating
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+165,Rating,"U2242,M246,Positive"
+1939,Young,U1966
+369,Rating,"U1206,M246,Positive"
+2103,Young,U3539
+1825,Young,U1928
+853,Rating,"U520,M1347,Positive"
+843,Rating,"U5329,M3016,Positive"
+2058,Male,U877
+2402,Male,U3998
+1698,Male,U1791
+2013,Young,U4031
+1854,Female,U5561
+196,Rating,"U915,M1986,Negative"
+1125,Horror,M1973
+1387,Young,U1467
+2601,Old,U1654
+522,Rating,"U211,M3917,Positive"
+2637,Old,U2778
+1345,Young,U3280
+2230,Female,U4816
+-------------- MLN -------------
+-2.145227431  Romance(a1)
+0.6240532973  Horror(a1)
+-1.494561613  Old(a1)
+1.494561613  Young(a1)
+-4.580519936  Animation(a1)
+-1.106510391  Documentary(a1)
+1.164697174  Male(a1)
+-5.537155609  Rating(a1,a2,a3)
+-1.164697174  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : False
+number_of_ratings : 3000
+
+database size: 6312
+------------ TYPES -------------
+movie
+user
+rating
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+3143,Romance,M2708
+868,Rating,"U2223,M1340,Positive"
+5870,Female,U1587
+3797,Young,U1273
+4717,Young,U5546
+3870,Female,U3065
+4551,Young,U3341
+3965,Young,U3780
+6306,Male,U4666
+5769,Young,U1194
+5516,Female,U663
+1645,Rating,"U3844,M1258,Positive"
+5459,Young,U3272
+352,Rating,"U5433,M1971,Negative"
+4331,Young,U5858
+5031,Old,U1607
+800,Rating,"U2466,M1986,Negative"
+5923,Old,U5752
+4152,Male,U5323
+305,Rating,"U6036,M1657,Positive"
+-------------- MLN -------------
+-2.03001863  Romance(a1)
+0.444986254  Horror(a1)
+-1.434663627  Old(a1)
+1.434663627  Young(a1)
+-4.931390817  Animation(a1)
+-0.9558644099  Documentary(a1)
+1.134529239  Male(a1)
+-5.290196851  Rating(a1,a2,a3)
+-1.134529239  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : False
+number_of_ratings : 10000
+
+database size: 15831
+------------ TYPES -------------
+movie
+user
+rating
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+4667,Rating,"U5096,M3206,Negative"
+10118,Horror,M2633
+323,Rating,"U669,M246,Positive"
+3972,Rating,"U3575,M3081,Positive"
+2803,Rating,"U1306,M1147,Positive"
+5139,Rating,"U4972,M1970,Negative"
+3851,Rating,"U712,M3718,Positive"
+9122,Rating,"U4169,M879,Negative"
+7562,Rating,"U1722,M2995,Negative"
+12267,Male,U85
+8967,Rating,"U1600,M1865,Negative"
+13773,Male,U5771
+11948,Young,U4897
+5740,Rating,"U915,M3917,Negative"
+14963,Male,U438
+14058,Young,U5046
+13441,Female,U5856
+5505,Rating,"U5722,M3182,Positive"
+12803,Female,U2309
+1021,Rating,"U4354,M2859,Negative"
+-------------- MLN -------------
+1.611829981  !Horror(a1) v !Romance(a1)
+-1.140818235  !Horror(a1) v Romance(a1)
+-0.3360443286  Horror(a1) v !Romance(a1)
+-1.275785652  Romance(a1)
+-0.4710117455  Horror(a1)
+-1.416302845  Old(a1)
+1.416302845  Young(a1)
+-4.916786013  Animation(a1)
+-0.8959284628  Documentary(a1)
+1.051276994  Male(a1)
+-4.971916258  Rating(a1,a2,a3)
+-1.051276994  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : True
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : False
+number_of_ratings : 30000
+
+database size: 38423
+------------ TYPES -------------
+movie
+user
+rating
+
+------------  INFO -------------
+Animation(movie)
+Documentary(movie)
+Horror(movie)
+Romance(movie)
+Young(user)
+Old(user)
+Male(user)
+Female(user)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+15664,Rating,"U5463,M246,Positive"
+14779,Rating,"U869,M2548,Negative"
+719,Rating,"U4114,M1321,Positive"
+3239,Rating,"U1448,M1835,Positive"
+20128,Rating,"U6005,M1983,Negative"
+32846,Young,U1609
+15979,Rating,"U1943,M1973,Negative"
+1826,Rating,"U2240,M3499,Positive"
+33237,Male,U48
+25933,Rating,"U1912,M2513,Negative"
+17559,Rating,"U678,M1979,Negative"
+24369,Rating,"U3824,M2710,Positive"
+10487,Rating,"U1912,M1975,Negative"
+37487,Male,U2946
+15018,Rating,"U1753,M3327,Positive"
+8593,Rating,"U548,M3499,Positive"
+6069,Rating,"U3654,M3081,Positive"
+34657,Male,U4995
+10830,Rating,"U3356,M1321,Positive"
+19954,Rating,"U2041,M2644,Negative"
+-------------- MLN -------------
+-1.973042623  Romance(a1)
+0.2676836545  Horror(a1)
+-1.347579313  Old(a1)
+1.347579313  Young(a1)
+-4.890269144  Animation(a1)
+-0.7795572174  Documentary(a1)
+0.9971054295  Male(a1)
+-4.485081306  Rating(a1,a2,a3)
+-0.9971054295  Female(a1)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 100
+
+database size: 482
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+24,Rating,"U4798,M2699,Negative"
+465,Age,"U3301,Young"
+361,Age,"U3799,Young"
+145,Genre,"M2795,Comedy"
+13,Rating,"U3391,M201,Negative"
+118,Genre,"M3061,Musical"
+226,Genre,"M2291,Romance"
+64,Rating,"U1866,M1665,Positive"
+326,Gender,"U3610,Male"
+220,Genre,"M1196,Sci-Fi"
+39,Rating,"U639,M74,Positive"
+101,Genre,"M7,Romance"
+48,Rating,"U1958,M2169,Negative"
+219,Genre,"M1196,Drama"
+435,Age,"U2168,Young"
+311,Age,"U4089,Young"
+6,Rating,"U3715,M1405,Negative"
+163,Genre,"M2490,Thriller"
+117,Genre,"M3061,Comedy"
+1,Rating,"U5397,M1923,Negative"
+-------------- MLN -------------
+-1.97685538  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-5.065474925  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 1000
+
+database size: 4146
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+960,Rating,"U1892,M1214,Positive"
+3040,Gender,"U1744,Male"
+3254,Gender,"U3886,Male"
+1101,Genre,"M1608,Thriller"
+32,Rating,"U3778,M6,Positive"
+3904,Gender,"U3603,Female"
+3836,Gender,"U1012,Female"
+2149,Genre,"M380,Action"
+2314,Genre,"M1562,Action"
+1976,Genre,"M3528,Romance"
+2201,Genre,"M969,War"
+2529,Age,"U1440,Young"
+2834,Gender,"U339,Male"
+2118,Genre,"M2000,Crime"
+4096,Gender,"U173,Male"
+1333,Genre,"M276,Comedy"
+251,Rating,"U1583,M2881,Negative"
+205,Rating,"U3906,M2001,Positive"
+677,Rating,"U5434,M1270,Positive"
+836,Rating,"U3467,M1103,Negative"
+-------------- MLN -------------
+-2.068693061  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-6.510385017  Rating(a1,a2,a3)
+============================================================================================
+------------ CONFIG ------------
+num_age_categories : 2
+num_rating_categories : 2
+restrict_genres : False
+restricted_genres : ['Romance', 'Horror', 'Animation', 'Documentary']
+alternative_predicate_types : True
+number_of_ratings : 3000
+
+database size: 9589
+------------ TYPES -------------
+movie
+user
+age
+gender
+genre
+rating
+------------  INFO -------------
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+------- DATABASE SNIPPIT ------
+,predicate,arguments
+5753,Genre,"M3638,Romance"
+7242,Age,"U3239,Young"
+7714,Age,"U4480,Young"
+1405,Rating,"U2443,M3500,Negative"
+4563,Genre,"M1285,Comedy"
+1709,Rating,"U2498,M2311,Negative"
+1492,Rating,"U1053,M1212,Positive"
+2537,Rating,"U5468,M516,Negative"
+1870,Rating,"U3660,M589,Positive"
+2312,Rating,"U1202,M1027,Negative"
+7646,Age,"U3886,Young"
+6262,Age,"U694,Young"
+2596,Rating,"U4850,M419,Positive"
+2717,Rating,"U1151,M2736,Positive"
+8643,Gender,"U10,Female"
+9321,Gender,"U3418,Female"
+1737,Rating,"U714,M597,Positive"
+588,Rating,"U3946,M2405,Negative"
+1668,Rating,"U5085,M3368,Positive"
+5794,Age,"U1066,Old"
+-------------- MLN -------------
+-2.121832581  Genre(a1,a2)
+0           Gender(a1,a2)
+0           Age(a1,a2)
+-6.700490798  Rating(a1,a2,a3)
