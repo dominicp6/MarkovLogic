@@ -1,7 +1,7 @@
 RoughWork
 build
 __pycache__
-*.db
+#*.db
 *.type
 *.info
 *.dat
