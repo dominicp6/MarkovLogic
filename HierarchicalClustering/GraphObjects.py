@@ -6,39 +6,55 @@ from networkx import Graph
 
 import hypernetx as hnx
 from hypernetx import Hypergraph
-from hypernetx import Entity
+from Edge import Edge
+from Node import Node, run_random_walks
 from hypernetx import EntitySet
 from itertools import combinations
+
 
 class EnhancedGraph(Graph):
     def __init__(self):
         super().__init__()
 
     def convert_to_hypergraph_from_template(self, template_hypergraph):
+        # TODO: include the copying of node-type information from the template
         hypergraph = EnhancedHypergraph()
 
         for node in self.nodes():
-            # for each node in the graph, find the sets of hyperedge nodes from the
+            # for each node in the graph, find the sets of hyperedges from the
             # template hypergraph which contain that node
             hyperedges_of_node = template_hypergraph.nodes[node].memberships
             for hyperedge_id, edge in hyperedges_of_node.items():
-                # add the corresponding hyperedges to the new hypergraph instance
+                # add the corresponding hyperedge to the new hypergraph instance
                 hypergraph.add_edge(edge)
 
         return hypergraph
 
+
 class EnhancedHypergraph(Hypergraph):
 
-    def __init__(self, database_file=None):
+    def __init__(self, database_file=None, info_file=None):
         super().__init__()
+        self.type_to_nodes_map = defaultdict(list)
+        self.node_types = set()
 
-        # self._hyperedges_of_node = defaultdict(lambda: set())  # node_id: set(h_edge1, h_edge2,...)
+        if database_file and not info_file:
+            raise ValueError("Cannot generate hypergraph. Database file provided but no info file provided.")
+        elif info_file and not database_file:
+            raise ValueError("Cannot generate hypergraph. Info file provided but no database file provided.")
+        elif info_file and database_file:
+            self.generate_from_database(path_to_db_file=database_file, path_to_info_file=info_file)
+        else:
+            pass
 
-        if database_file:
-            self.generate_from_database(path_to_db_file=database_file, path_to_info_file=None)
+    def generate_communities(self, config):
+        generate_communities(hypergraph=self, config=config)
+
+    def reset_nodes(self):
+        # resets the sample path and truncated hitting time data for every node in the hypergraph
+        pass
 
     def convert_to_graph(self, sum_weights_for_multi_edges=True):
-        # graph = nx.Graph()
         graph = EnhancedGraph()
 
         for hyperedge in self.edges():
@@ -46,7 +62,7 @@ class EnhancedHypergraph(Hypergraph):
 
             # from the hyperedge node set construct a complete subgraph (clique)
             for edge in combinations(nodes, 2):
-                if sum_weights_for_multi_edges == True:
+                if sum_weights_for_multi_edges:
                     # increment edge weight if edge already exists
                     if graph.has_edge(*edge):
                         graph[edge[0]][edge[1]]['weight'] += 1
@@ -61,7 +77,8 @@ class EnhancedHypergraph(Hypergraph):
 
         return graph
 
-    def _correct_line_syntax(self, line_fragments):
+    @staticmethod
+    def _good_line_syntax(line_fragments):
         argument_string = line_fragments[1][0:1]
         # check that open and closed parentheses are correctly used
         # check that the argument string does not contain duplicate closing braces
@@ -69,6 +86,20 @@ class EnhancedHypergraph(Hypergraph):
             return True
         else:
             return False
+
+    def _get_predicate_argument_types_from_info_file(self, path_to_info_file: str):
+        predicate_argument_types = {}
+        with open(path_to_info_file, 'r') as info_file:
+            for line_idx, line in enumerate(info_file.readlines()):
+                # Skip empty lines
+                if not line:
+                    continue
+
+                predicate, types = self._parse_line(file_name=path_to_info_file, line=line, line_number=line_idx)
+                predicate_argument_types[predicate] = types
+                self.node_types.update(types)
+
+        return predicate_argument_types
 
     def _parse_line(self, file_name: str, line: str, line_number: int):
         """
@@ -87,7 +118,7 @@ class EnhancedHypergraph(Hypergraph):
         line = line.strip()
 
         line_fragments = line.split('(')
-        if not self._correct_line_syntax(line_fragments):
+        if not self._good_line_syntax(line_fragments):
             raise IOError("Line {} [{}]".format(line_number, line)
                           + "of {} has incorrect syntax \n".format(file_name) +
                           "Make sure that each predicate is correctly" +
@@ -100,7 +131,7 @@ class EnhancedHypergraph(Hypergraph):
                                predicate_argument_string.split(',')]
         return predicate, predicate_arguments
 
-    def generate_from_database(self, path_to_db_file: str, path_to_info_file=None):
+    def generate_from_database(self, path_to_db_file: str, path_to_info_file: str):
         """
         Generates an undirected hypergraph representation of a relational database
         that is defined in an Alchemy .db file
@@ -110,17 +141,21 @@ class EnhancedHypergraph(Hypergraph):
         hypergraph to be annotated by their type.
         """
 
-        db_file = open(path_to_db_file, 'r')
-        for line_idx, line in enumerate(db_file.readlines()):
-            # Skip empty lines
-            if not line:
-                continue
+        predicate_argument_types = self._get_predicate_argument_types_from_info_file(path_to_info_file)
 
-            predicate, nodes_of_predicate = self._parse_line(file_name=path_to_db_file, line=line, line_number=line_idx)
+        with open(path_to_db_file, 'r') as database_file:
+            for line_idx, line in enumerate(database_file.readlines()):
+                # Skip empty lines
+                if not line:
+                    continue
 
-            node_set = set(nodes_of_predicate)
-            edge = Entity(uid=line_idx, elements=node_set)
-            self.add_edge(edge)
+                predicate, node_names = self._parse_line(file_name=path_to_db_file, line=line,
+                                                         line_number=line_idx)
+                node_types = predicate_argument_types[predicate]
+                for i in range(len(node_names)):
+                    self.type_to_nodes_map[node_types[i]].append(node_names[i])
 
-        db_file.close()
+                nodes = [Node(name=nodes[i], node_type=node_types[i]) for i in range(len(node_names))]
+                edge = Edge(edge_id=line_idx, nodes=nodes, predicate=predicate)
 
+                self.add_edge(edge)

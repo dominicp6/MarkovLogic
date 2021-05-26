@@ -5,16 +5,18 @@ from networkx.drawing.nx_pylab import draw
 from GraphObjects import EnhancedHypergraph
 from NewHC import HierarchicalClusterer
 
-H = EnhancedHypergraph(database_file='Databases/imdb1.db')
-# hnx.draw(H)
+H = EnhancedHypergraph(database_file='Databases/smoking.db', info_file='Databases/smoking.info')
+hnx.draw(H)
+plt.show()
 G = H.convert_to_graph(True)
 config = {
-    'randomwalk_params': {'number_of_walks': 100,
-                          'max_length': 100,
-                          'use_sample_paths': False,
-                          'HT_merge_threshold': 2,
-                          'JS_merge_threshold': 2,
-                          'N_top': 5, },
+    'randomwalk_params': {'number_of_walks': 1000,
+                          'max_length': 7,
+                          'walk_scaling_param': 5,
+                          'theta_hit': 4.9,
+                          'theta_sym': 0.1,
+                          'theta_js': 1,
+                          'num_top': 3},
     'clustering_params': {'min_cluster_size': 3,
                           'max_lambda2': .7},
     'terminal_params': {
