@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from scipy.linalg import eigh
 import scipy as sp
-from Hypergraph import Hypergraph
+from MarkovLogicProject.HierarchicalClustering.Depricated.Hypergraph import Hypergraph
 from itertools import combinations
 
 def get_second_eigenpair(graph):

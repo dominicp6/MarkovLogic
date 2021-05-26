@@ -1,12 +1,9 @@
 import numpy as np
 import scipy as sp
 import scipy.sparse
-import warnings
-import networkx as nx
 from sklearn.cluster import KMeans
 
 from graph_utils import create_subgraph, laplace_RW_spectrum
-from Hypergraph import Hypergraph
 
 
 class HierarchicalClusterer(object):

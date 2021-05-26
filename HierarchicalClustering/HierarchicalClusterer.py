@@ -1,14 +1,9 @@
 import numpy as np
 import warnings
 import math
-import networkx as nx
-from scipy import sparse
 from sklearn.cluster import KMeans
 from collections import OrderedDict
-import halp.utilities.undirected_matrices as umat
-from halp.algorithms.undirected_partitioning import _compute_normalized_laplacian as compute_normalized_laplacian
 import graph_utils as graph_util
-from Hypergraph import Hypergraph
 
 
 class HierarchicalClusterer(object):

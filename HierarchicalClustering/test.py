@@ -5,7 +5,7 @@ from networkx.drawing.nx_pylab import draw
 from GraphObjects import EnhancedHypergraph
 from NewHC import HierarchicalClusterer
 
-H = EnhancedHypergraph(database_file='smoking.db')
+H = EnhancedHypergraph(database_file='Databases/imdb1.db')
 # hnx.draw(H)
 G = H.convert_to_graph(True)
 config = {

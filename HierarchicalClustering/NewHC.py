@@ -1,12 +1,8 @@
 import numpy as np
 import scipy as sp
 import scipy.sparse
-import warnings
 import networkx as nx
 from graph_utils import get_second_eigenpair, create_subgraph
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_pylab import draw
-from Hypergraph import Hypergraph
 
 
 class HierarchicalClusterer(object):
