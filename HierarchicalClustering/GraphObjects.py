@@ -10,6 +10,7 @@ from numpy import random
 
 from Edge import Edge
 from Node import Node
+from NodeCluster import NodeCluster
 from hypernetx import EntitySet
 from itertools import combinations
 
@@ -212,7 +213,7 @@ class EnhancedHypergraph(Hypergraph):
         """
 
         # sort the nodes in the hypergraph in increasing order of average hitting time
-        # sorted_node_list = sorted(node_list, key = lambda n: n.ave_hitting_time)
+        nodes = sorted(nodes, key = lambda n: n.ave_hitting_time)
         current_hitting_time = nodes[0].average_hitting_time
         distance_symmetric_clusters = []
         distance_symmetric_cluster = []
@@ -229,31 +230,29 @@ class EnhancedHypergraph(Hypergraph):
 
     def _cluster_nodes_by_JS_divergence(self, nodes, threshold_JS_divergence, max_frequent_paths):
 
-        JS_clusters = [[node] for node in nodes]
+        JS_clusters = [NodeCluster([node]) for node in nodes]
 
         #node_paths = [node.get_Ntop_paths(self.N_top) for node in node_list]
-        mergeOccurred = True
+        merge_occurred = True
         max_div = float('inf')
 
-        while mergeOccurred:
-            mergeOccurred = False
+        while merge_occurred:
+            merge_occurred = False
             best_pair = [-1, -1]
-            smallestDiv = max_div
-            for i in range(len(node_paths)):
-                for j in range(i + 1, len(node_paths)):
-                    JSdiv = node_utils.compute_jenson_shannon_divergence(node_paths[i], node_paths[j])
-                    if JSdiv < smallestDiv and JSdiv < self.JS_merge_threshold:
-                        smallestDiv = JSdiv
+            smallest_div = max_div
+            for i in range(len(JS_clusters)):
+                for j in range(i + 1, len(nodes)):
+                    JS_div = compute_jenson_shannon_divergence(JS_clusters[i], JS_clusters[j])
+                    if JS_div < smallest_div and JS_div < threshold_JS_divergence:
+                        smallest_div = JS_div
                         best_pair[0] = i
                         best_pair[1] = j
 
-            if smallestDiv < max_div:
-                mergeOccurred = True
+            if smallest_div < max_div:
+                merge_occurred = True
                 i = best_pair[0]
                 j = best_pair[1]
-                node_clusters[i].extend(node_clusters[j])
-                del node_clusters[j]
-                node_paths[i] = node_utils.merge_node_paths(node_paths[i], node_paths[j])
-                del node_paths[j]
+                JS_clusters[i].merge(JS_clusters[j])
+                del JS_clusters[j]
 
-        return node_clusters
+        return JS_clusters
