@@ -6,8 +6,10 @@ from networkx import Graph
 
 import hypernetx as hnx
 from hypernetx import Hypergraph
+from numpy import random
+
 from Edge import Edge
-from Node import Node, run_random_walks
+from Node import Node
 from hypernetx import EntitySet
 from itertools import combinations
 
@@ -159,3 +161,99 @@ class EnhancedHypergraph(Hypergraph):
                 edge = Edge(edge_id=line_idx, nodes=nodes, predicate=predicate)
 
                 self.add_edge(edge)
+
+    def _get_random_neighbor_and_edge_of_node(self, node):
+        edges = self.nodes[node].memberships.items()
+        edges = [edge for edge_id, edge in edges if self.size(edge) >= 2]
+        edge = random.choice(edges)
+        neighbors = [neighbor for neighbor in edge.elements if neighbor.name != node.name]
+        neighbor = random.choice(neighbors)
+
+        return neighbor, edge
+
+    def _run_random_walk(self, source_node, max_path_length):
+        current_node = source_node
+        encountered_nodes = set()
+        path = []
+        for step in range(max_path_length):
+            next_node, next_edge = self._get_random_neighbor_and_edge_of_node(current_node)
+            path.append(str(next_node.name))
+            path.append(next_edge.id)
+
+            if next_node not in encountered_nodes:
+                next_node.number_of_hits += 1
+                next_node.add_path(path.copy())
+                hitting_time = step + 1
+                next_node.update_accumulated_hitting_time(hitting_time)
+                encountered_nodes.add(next_node)
+
+            current_node = next_node
+
+    def run_random_walks(self, source_node, number_of_walks, max_path_length):
+        for walk in range(number_of_walks):
+            self._run_random_walk(source_node, max_path_length)
+
+        for node in self.nodes():
+            node.update_average_hitting_time(number_of_walks, max_path_length)
+
+    def _get_close_nodes(self, threshold_hitting_time):
+        return [node for node in self.nodes if node.average_hitting_time < threshold_hitting_time]
+
+    def _cluster_nodes_by_truncated_hitting_times(self, nodes, threshold_hitting_time):
+        """
+        Clusters a list of nodes into groups based on the truncated hitting
+        criterion as follows:
+
+        Let h_{j} be the average truncated hitting time of node v_{j}.
+        Nodes v_{j} are grouped into disjoint sets A_{k} such that:
+        for all v_{j} in A_{k} there exists a node v_{j'} in A_{k}
+        such that |h_{j} - h_{j'}| <= merge_threshold.
+        Ref: https://alchemy.cs.washington.edu/papers/kok10/kok10.pdf
+        """
+
+        # sort the nodes in the hypergraph in increasing order of average hitting time
+        # sorted_node_list = sorted(node_list, key = lambda n: n.ave_hitting_time)
+        current_hitting_time = nodes[0].average_hitting_time
+        distance_symmetric_clusters = []
+        distance_symmetric_cluster = []
+        for node in nodes:
+            if (node.average_hitting_time - current_hitting_time) < threshold_hitting_time:
+                distance_symmetric_cluster.append(node)
+            else:
+                distance_symmetric_clusters.append(distance_symmetric_cluster)
+                distance_symmetric_cluster.clear()
+                distance_symmetric_cluster.append(node)
+            current_hitting_time = node.average_hitting_time
+
+        return distance_symmetric_clusters
+
+    def _cluster_nodes_by_JS_divergence(self, nodes, threshold_JS_divergence, max_frequent_paths):
+
+        JS_clusters = [[node] for node in nodes]
+
+        #node_paths = [node.get_Ntop_paths(self.N_top) for node in node_list]
+        mergeOccurred = True
+        max_div = float('inf')
+
+        while mergeOccurred:
+            mergeOccurred = False
+            best_pair = [-1, -1]
+            smallestDiv = max_div
+            for i in range(len(node_paths)):
+                for j in range(i + 1, len(node_paths)):
+                    JSdiv = node_utils.compute_jenson_shannon_divergence(node_paths[i], node_paths[j])
+                    if JSdiv < smallestDiv and JSdiv < self.JS_merge_threshold:
+                        smallestDiv = JSdiv
+                        best_pair[0] = i
+                        best_pair[1] = j
+
+            if smallestDiv < max_div:
+                mergeOccurred = True
+                i = best_pair[0]
+                j = best_pair[1]
+                node_clusters[i].extend(node_clusters[j])
+                del node_clusters[j]
+                node_paths[i] = node_utils.merge_node_paths(node_paths[i], node_paths[j])
+                del node_paths[j]
+
+        return node_clusters

@@ -4,16 +4,24 @@ class Community(object):
     (Output object from the run_random_walks method of RandomWalker)
     """
 
-    def __init__(self, single_nodes, node_clusters, source_node):
-        self.single_nodes = single_nodes
-        self.node_clusters = node_clusters
-        self.source_node = source_node
-
-        self.num_single_nodes = len(self.single_nodes)
-        self.num_clusters = len(self.node_clusters)
-        self.num_nodes = sum([len(cluster) for cluster in self.node_clusters]) + self.num_single_nodes
+    def __init__(self, single_nodes=None, node_clusters=None):
+        if single_nodes is not None:
+            self.single_nodes = single_nodes
+        else:
+            self.single_nodes = []
+        if node_clusters is not None:
+            self.node_clusters = node_clusters
+        else:
+            self.node_clusters = []
 
     def __str__(self):
-        return """Community(single_nodes: {}, node_clusters: {}, source_node: {})""".format(self.single_nodes,
-                                                                                            self.node_clusters,
-                                                                                            self.source_node)
+        return """Community(single_nodes: {}, node_clusters: {})""".format(self.single_nodes, self.node_clusters)
+
+    def get_number_of_single_nodes(self):
+        return len(self.single_nodes)
+
+    def get_number_of_clusters(self):
+        return len(self.node_clusters)
+
+    def get_number_of_nodes(self):
+        return sum([len(cluster) for cluster in self.node_clusters]) + self.get_number_of_clusters()

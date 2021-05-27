@@ -95,22 +95,22 @@ def run_random_walks(num_samples, config, hypergraph, source_node):
     for walk_id in range(num_samples):
         run_random_walk(config, hypergraph, source_node)
 
-def run_random_walk(config, hypergraph, source_node):
-    current_node = source_node
-    sample_path = []
-    for step in range(config['max_length']):
-        next_node, next_hyperedge_id = get_random_neighbour_of_node(hypergraph, current_node)  # or method?
-
-        sample_path.append(str(step))
-        sample_path.append(next_hyperedge_id)
-
-        hitting_time = step + 1
-
-        #TODO: make sure this only happens if it wasn't already hit
-        next_node.increment_number_of_hits()
-        next_node.add_to_accumulated_hitting_time(hitting_time)
-        next_node.add_sample_path(sample_path)
-
-        current_node = next_node
+# def run_random_walk(config, hypergraph, source_node):
+#     current_node = source_node
+#     sample_path = []
+#     for step in range(config['max_length']):
+#         next_node, next_hyperedge_id = get_random_neighbour_of_node(hypergraph, current_node)  # or method?
+#
+#         sample_path.append(str(step))
+#         sample_path.append(next_hyperedge_id)
+#
+#         hitting_time = step + 1
+#
+#         #TODO: make sure this only happens if it wasn't already hit
+#         next_node.increment_number_of_hits()
+#         next_node.add_to_accumulated_hitting_time(hitting_time)
+#         next_node.add_sample_path(sample_path)
+#
+#         current_node = next_node
 
 
