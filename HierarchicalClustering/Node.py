@@ -1,5 +1,5 @@
 from hypernetx.classes import Entity
-import Community
+from HierarchicalClustering.Community import Community
 from collections import defaultdict
 
 
@@ -7,23 +7,28 @@ class Node(Entity):
 
     def __init__(self, name, node_type):
         super().__init__(uid=name)
-        self.type = node_type
+        self.name = name
+        self.node_type = node_type
         self.path_counts = defaultdict(lambda: 0)
         self.accumulated_hitting_time = 0
         self.number_of_hits = 0
         self.average_hitting_time = 0
         self.community = Community()
 
-    def reset_node(self):
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def reset(self):
         self.path_counts = defaultdict(lambda: 0)
         self.accumulated_hitting_time = 0
         self.number_of_hits = 0
+        self.average_hitting_time = 0
 
     def add_path(self, path):
         self.path_counts[path] += 1
-
-    def get_N_most_frequent_paths(self, N):
-        pass
 
     def update_accumulated_hitting_time(self, hitting_time):
         self.accumulated_hitting_time += hitting_time

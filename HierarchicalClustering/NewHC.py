@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import scipy.sparse
 import networkx as nx
-from graph_utils import get_second_eigenpair, create_subgraph
+from HierarchicalClustering.graph_utils import get_second_eigenpair, create_subgraph
 
 
 class HierarchicalClusterer(object):

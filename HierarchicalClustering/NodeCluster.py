@@ -18,16 +18,18 @@ class NodeCluster(object):
         return path_counts, total_count
 
     def merge(self, node_cluster):
-        self.nodes = self.nodes.extend(node_cluster.nodes)
-        self.path_counts = self.path_counts.update(node_cluster.path_counts)
+        self.nodes.extend(node_cluster.nodes)
+        self.path_counts.update(node_cluster.path_counts)
 
     def number_of_nodes(self):
         return len(self.nodes)
 
     def get_top_n_path_probabilities(self, n):
+        print(f'Number of nodes {len(self.nodes)}')
         path_probabilities = {key: value / self.total_count for key, value in self.path_counts.items()}
         sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
 
-        top_n_paths_probabilities = sorted_probabilities[0:n]
+        top_n_paths_probabilities = dict(sorted_probabilities[0:n])
 
         return top_n_paths_probabilities
+

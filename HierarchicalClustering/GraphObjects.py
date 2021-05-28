@@ -1,18 +1,15 @@
-import warnings
 import networkx as nx
 from collections import defaultdict
-import matplotlib.pyplot as plt
 from networkx import Graph
-
-import hypernetx as hnx
 from hypernetx import Hypergraph
-from numpy import random
+import random
 
-from Edge import Edge
-from Node import Node
-from NodeCluster import NodeCluster
-from hypernetx import EntitySet
+from HierarchicalClustering.Community import Community
+from HierarchicalClustering.Edge import Edge
+from HierarchicalClustering.Node import Node
+from HierarchicalClustering.NodeCluster import NodeCluster
 from itertools import combinations
+from HierarchicalClustering.merge_utilities import compute_js_divergence
 
 
 class EnhancedGraph(Graph):
@@ -20,7 +17,6 @@ class EnhancedGraph(Graph):
         super().__init__()
 
     def convert_to_hypergraph_from_template(self, template_hypergraph):
-        # TODO: include the copying of node-type information from the template
         hypergraph = EnhancedHypergraph()
 
         for node in self.nodes():
@@ -31,6 +27,10 @@ class EnhancedGraph(Graph):
                 # add the corresponding hyperedge to the new hypergraph instance
                 hypergraph.add_edge(edge)
 
+        for edge in hypergraph.edges():
+            hypergraph.node_objects.update([node for node in template_hypergraph.node_objects if node.name
+                                            in [node.name for node in edge.elements.values()]])
+
         return hypergraph
 
 
@@ -38,8 +38,8 @@ class EnhancedHypergraph(Hypergraph):
 
     def __init__(self, database_file=None, info_file=None):
         super().__init__()
-        self.type_to_nodes_map = defaultdict(list)
         self.node_types = set()
+        self.node_objects = set()
 
         if database_file and not info_file:
             raise ValueError("Cannot generate hypergraph. Database file provided but no info file provided.")
@@ -50,12 +50,11 @@ class EnhancedHypergraph(Hypergraph):
         else:
             pass
 
-    def generate_communities(self, config):
-        generate_communities(hypergraph=self, config=config)
 
-    def reset_nodes(self):
+    def _reset_nodes(self):
         # resets the sample path and truncated hitting time data for every node in the hypergraph
-        pass
+        for node in self.node_objects:
+            node.reset()
 
     def convert_to_graph(self, sum_weights_for_multi_edges=True):
         graph = EnhancedGraph()
@@ -155,11 +154,12 @@ class EnhancedHypergraph(Hypergraph):
                 predicate, node_names = self._parse_line(file_name=path_to_db_file, line=line,
                                                          line_number=line_idx)
                 node_types = predicate_argument_types[predicate]
-                for i in range(len(node_names)):
-                    self.type_to_nodes_map[node_types[i]].append(node_names[i])
+                # for i in range(len(node_names)):
+                #     self.type_to_nodes_map[node_types[i]].append(node_names[i])
 
-                nodes = [Node(name=nodes[i], node_type=node_types[i]) for i in range(len(node_names))]
-                edge = Edge(edge_id=line_idx, nodes=nodes, predicate=predicate)
+                nodes = [Node(name=node_names[i], node_type=node_types[i]) for i in range(len(node_names))]
+                self.node_objects.update(nodes)
+                edge = Edge(id=line_idx, nodes=nodes, predicate=predicate)
 
                 self.add_edge(edge)
 
@@ -167,7 +167,7 @@ class EnhancedHypergraph(Hypergraph):
         edges = self.nodes[node].memberships.items()
         edges = [edge for edge_id, edge in edges if self.size(edge) >= 2]
         edge = random.choice(edges)
-        neighbors = [neighbor for neighbor in edge.elements if neighbor.name != node.name]
+        neighbors = [neighbor for neighbor in edge.nodes if neighbor.name != node.name]
         neighbor = random.choice(neighbors)
 
         return neighbor, edge
@@ -175,32 +175,34 @@ class EnhancedHypergraph(Hypergraph):
     def _run_random_walk(self, source_node, max_path_length):
         current_node = source_node
         encountered_nodes = set()
-        path = []
+        path = str(source_node.name)
         for step in range(max_path_length):
-            next_node, next_edge = self._get_random_neighbor_and_edge_of_node(current_node)
-            path.append(str(next_node.name))
-            path.append(next_edge.id)
 
-            if next_node not in encountered_nodes:
+            next_node, next_edge = self._get_random_neighbor_and_edge_of_node(current_node)
+            path += str(next_edge.id)
+            path += str(next_node.name)
+
+            if next_node.name not in encountered_nodes:
                 next_node.number_of_hits += 1
-                next_node.add_path(path.copy())
+                next_node.add_path(path)
                 hitting_time = step + 1
                 next_node.update_accumulated_hitting_time(hitting_time)
-                encountered_nodes.add(next_node)
+                encountered_nodes.add(next_node.name)
 
             current_node = next_node
 
-    def run_random_walks(self, source_node, number_of_walks, max_path_length):
+    def _run_random_walks(self, source_node, number_of_walks, max_path_length):
         for walk in range(number_of_walks):
             self._run_random_walk(source_node, max_path_length)
 
-        for node in self.nodes():
+        for node in self.node_objects:
             node.update_average_hitting_time(number_of_walks, max_path_length)
 
     def _get_close_nodes(self, threshold_hitting_time):
-        return [node for node in self.nodes if node.average_hitting_time < threshold_hitting_time]
+        return [node for node in self.node_objects if node.average_hitting_time < threshold_hitting_time]
 
-    def _cluster_nodes_by_truncated_hitting_times(self, nodes, threshold_hitting_time):
+    @staticmethod
+    def _cluster_nodes_by_truncated_hitting_times(nodes, threshold_hitting_time_difference):
         """
         Clusters a list of nodes into groups based on the truncated hitting
         criterion as follows:
@@ -213,12 +215,12 @@ class EnhancedHypergraph(Hypergraph):
         """
 
         # sort the nodes in the hypergraph in increasing order of average hitting time
-        nodes = sorted(nodes, key = lambda n: n.ave_hitting_time)
+        nodes = sorted(nodes, key=lambda n: n.average_hitting_time)
         current_hitting_time = nodes[0].average_hitting_time
         distance_symmetric_clusters = []
         distance_symmetric_cluster = []
         for node in nodes:
-            if (node.average_hitting_time - current_hitting_time) < threshold_hitting_time:
+            if (node.average_hitting_time - current_hitting_time) < threshold_hitting_time_difference:
                 distance_symmetric_cluster.append(node)
             else:
                 distance_symmetric_clusters.append(distance_symmetric_cluster)
@@ -228,31 +230,107 @@ class EnhancedHypergraph(Hypergraph):
 
         return distance_symmetric_clusters
 
-    def _cluster_nodes_by_JS_divergence(self, nodes, threshold_JS_divergence, max_frequent_paths):
+    @staticmethod
+    def _get_single_nodes_and_node_clusters_from_js_clusters(js_clusters):
+        single_nodes = []
+        node_clusters = []
+        for js_cluster in js_clusters:
+            if js_cluster.number_of_nodes() == 1:
+                single_nodes.append(js_cluster.nodes[0])
+            else:
+                node_clusters.append(js_cluster.nodes)
 
-        JS_clusters = [NodeCluster([node]) for node in nodes]
+        return single_nodes, node_clusters
 
-        #node_paths = [node.get_Ntop_paths(self.N_top) for node in node_list]
-        merge_occurred = True
-        max_div = float('inf')
+    @staticmethod
+    def _cluster_nodes_by_js_divergence(nodes, threshold_js_divergence, max_frequent_paths):
 
-        while merge_occurred:
-            merge_occurred = False
-            best_pair = [-1, -1]
-            smallest_div = max_div
-            for i in range(len(JS_clusters)):
-                for j in range(i + 1, len(nodes)):
-                    JS_div = compute_jenson_shannon_divergence(JS_clusters[i], JS_clusters[j])
-                    if JS_div < smallest_div and JS_div < threshold_JS_divergence:
-                        smallest_div = JS_div
-                        best_pair[0] = i
-                        best_pair[1] = j
+        js_clusters = [NodeCluster([node]) for node in nodes]
 
-            if smallest_div < max_div:
-                merge_occurred = True
-                i = best_pair[0]
-                j = best_pair[1]
-                JS_clusters[i].merge(JS_clusters[j])
-                del JS_clusters[j]
+        max_divergence = float('inf')
+        cluster_to_merge1 = None
+        cluster_to_merge2 = None
 
-        return JS_clusters
+        while True:
+            smallest_divergence = max_divergence
+            for i in range(len(js_clusters)):
+                for j in range(i + 1, len(js_clusters)):
+                    js_divergence = compute_js_divergence(js_clusters[i], js_clusters[j], max_frequent_paths)
+
+                    if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
+                        smallest_divergence = js_divergence
+                        cluster_to_merge1 = i
+                        cluster_to_merge2 = j
+
+            # if we've found a pair of clusters to merge, merge the two clusters and continue
+            if smallest_divergence < max_divergence:
+                js_clusters[cluster_to_merge1].merge(js_clusters[cluster_to_merge2])
+                del js_clusters[cluster_to_merge2]
+            # otherwise, stop merging
+            else:
+                break
+
+        return js_clusters
+
+    def _cluster_nodes(self, nodes, config):
+        single_nodes = []
+        node_clusters = []
+
+        for node_type in self.node_types:
+            nodes_of_type = [node for node in nodes if node.node_type == node_type]
+            distance_symmetric_clusters = self._cluster_nodes_by_truncated_hitting_times(
+                nodes_of_type, threshold_hitting_time_difference=config['theta_sym'])
+
+            for distance_symmetric_cluster in distance_symmetric_clusters:
+                if len(distance_symmetric_cluster) == 1:
+                    single_nodes.append(distance_symmetric_cluster[0])
+                else:
+                    js_clusters = self._cluster_nodes_by_js_divergence(distance_symmetric_cluster,
+                                                                       threshold_js_divergence=config['theta_js'],
+                                                                       max_frequent_paths=config['num_top'])
+                    js_single_nodes, js_node_clusters = self._get_single_nodes_and_node_clusters_from_js_clusters(
+                        js_clusters)
+                    single_nodes.extend(js_single_nodes)
+                    node_clusters.extend(js_node_clusters)
+
+        return single_nodes, node_clusters
+
+    def generate_communities(self, config):
+        """
+        Config parameters:
+        num_walks : the maximum number of random walks to run per node
+        max_length: the maximum length of a random walk
+        walk_scaling_param: the number of random walks to run is min(num_walks, walk_scaling_param|V||E|) where
+                            |V| and |E| are the number of nodes and hyperedges in the hypergraph respectively
+        theta_hit : after running walks, nodes whose truncated hitting times are larger theta_hit are discarded
+        theta_sym : of the remaining nodes, those whose truncated hitting times are less than theta_sym apart are considered
+                    as potentially symmetric
+        theta_js  : agglomerative clustering of symmetric nodes stops when no pairs of clusters have a path-distribution
+                    Jenson-Shannon divergence less than theta_js
+        num_top   : the number of most frequent paths to consider when computing the Jenson-Shannon divergence between
+                        two path sets
+        """
+
+        # TODO: check that the config parameters are valid
+
+        source_nodes = []
+        communities = []
+        for node in self.nodes():
+            print(f'Running random walks on node {node}')
+            # Get number of samples from criterion (explain)
+            num_samples = min(config['num_walks'],
+                              config[
+                                  'walk_scaling_param'] * self.number_of_nodes() * self.number_of_edges())
+
+            self._run_random_walks(source_node=node, number_of_walks=num_samples, max_path_length=config['max_length'])
+            close_nodes = self._get_close_nodes(threshold_hitting_time=config['theta_hit'])
+            print(len(close_nodes))
+            single_nodes, node_clusters = self._cluster_nodes(close_nodes, config)
+
+            self._reset_nodes()
+
+            communities.append(Community(single_nodes=single_nodes, node_clusters=node_clusters))
+            # unmerged_community = Community() - TODO: figure out how this would work
+
+        # return communities, unmerged communities, source nodes
+        return communities
