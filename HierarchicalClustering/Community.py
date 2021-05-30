@@ -4,7 +4,9 @@ class Community(object):
     (Output object from the run_random_walks method of RandomWalker)
     """
 
-    def __init__(self, single_nodes=None, node_clusters=None):
+    def __init__(self, single_nodes=None, node_clusters=None, source_node=None):
+        self.source_node = source_node
+
         if single_nodes is not None:
             self.single_nodes = single_nodes
         else:

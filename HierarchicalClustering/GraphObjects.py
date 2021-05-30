@@ -175,12 +175,11 @@ class EnhancedHypergraph(Hypergraph):
     def _run_random_walk(self, source_node, max_path_length):
         current_node = source_node
         encountered_nodes = set()
-        path = str(source_node.name)
+        path = ''
         for step in range(max_path_length):
 
             next_node, next_edge = self._get_random_neighbor_and_edge_of_node(current_node)
-            path += str(next_edge.id)
-            path += str(next_node.name)
+            path += str(next_edge.predicate)+','
 
             if next_node.name not in encountered_nodes:
                 next_node.number_of_hits += 1
@@ -223,10 +222,14 @@ class EnhancedHypergraph(Hypergraph):
             if (node.average_hitting_time - current_hitting_time) < threshold_hitting_time_difference:
                 distance_symmetric_cluster.append(node)
             else:
-                distance_symmetric_clusters.append(distance_symmetric_cluster)
+                distance_symmetric_clusters.append(distance_symmetric_cluster.copy())
                 distance_symmetric_cluster.clear()
                 distance_symmetric_cluster.append(node)
             current_hitting_time = node.average_hitting_time
+
+        # append the last cluster to the list if it is not empty
+        if distance_symmetric_cluster is not None:
+            distance_symmetric_clusters.append(distance_symmetric_cluster)
 
         return distance_symmetric_clusters
 
@@ -316,7 +319,6 @@ class EnhancedHypergraph(Hypergraph):
         source_nodes = []
         communities = []
         for node in self.nodes():
-            print(f'Running random walks on node {node}')
             # Get number of samples from criterion (explain)
             num_samples = min(config['num_walks'],
                               config[
@@ -324,12 +326,11 @@ class EnhancedHypergraph(Hypergraph):
 
             self._run_random_walks(source_node=node, number_of_walks=num_samples, max_path_length=config['max_length'])
             close_nodes = self._get_close_nodes(threshold_hitting_time=config['theta_hit'])
-            print(len(close_nodes))
             single_nodes, node_clusters = self._cluster_nodes(close_nodes, config)
 
             self._reset_nodes()
 
-            communities.append(Community(single_nodes=single_nodes, node_clusters=node_clusters))
+            communities.append(Community(single_nodes=single_nodes, node_clusters=node_clusters, source_node=node))
             # unmerged_community = Community() - TODO: figure out how this would work
 
         # return communities, unmerged communities, source nodes

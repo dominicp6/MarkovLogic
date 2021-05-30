@@ -3,7 +3,7 @@ import random
 import math
 
 from HierarchicalClustering.GraphObjects import EnhancedHypergraph
-from HierarchicalClustering.merge_utilities import _kl_divergence
+from HierarchicalClustering.merge_utilities import _kl_divergence, _js_divergence
 
 H = EnhancedHypergraph(database_file='../Databases/smoking.db', info_file='../Databases/smoking.info')
 config = {'num_walks': 1000,
@@ -45,14 +45,21 @@ def test_correct_computation_of_kl_divergence():
     q2 = {'a': 0.7, 'b': 0.2, 'd': 0.0, 'c': 0.1}
     q3 = {'d': 0.1, 'a': 0.7, 'b': 0.1, 'c': 0.1}
 
+    p2 = {'d': 0.1, 'a': 0.7, 'b': 0.1, 'c': 0.1}
+    q4 = {'a': 0.6, 'b': 0.2, 'c': 0.15, 'd': 0.05}
+
     assert math.isclose(_kl_divergence(p1, q1), 0.09203285023)
     assert math.isclose(_kl_divergence(p1, q2), 0.09203285023)
     assert math.isclose(_kl_divergence(q2, q3), 0.13862943611)
     assert math.isclose(_kl_divergence(q1, q3), 0.13862943611)
+    assert math.isclose(_kl_divergence(p2, q4), 0.06735896506)
 
 
 def test_correct_computation_of_js_divergence():
-    pass
+    p1 = {'a': 0.5, 'b': 0.3, 'c': 0.2}
+    q1 = {'d': 0.1, 'a': 0.7, 'b': 0.1, 'c': 0.1}
+
+    assert math.isclose(_js_divergence(p1, q1), 0.0776870668)
 
 
 def test_always_some_nearby_nodes():
@@ -61,10 +68,6 @@ def test_always_some_nearby_nodes():
         close_nodes = H._get_close_nodes(threshold_hitting_time=4.9)
         H._reset_nodes()
         assert len(close_nodes) > 0
-
-
-def test_no_unit_sized_clusters_input_to_js_clustering():
-    pass
 
 
 def test_check_correct_average_hitting_time_calculation():

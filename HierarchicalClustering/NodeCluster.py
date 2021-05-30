@@ -25,11 +25,13 @@ class NodeCluster(object):
         return len(self.nodes)
 
     def get_top_n_path_probabilities(self, n):
-        print(f'Number of nodes {len(self.nodes)}')
-        path_probabilities = {key: value / self.total_count for key, value in self.path_counts.items()}
-        sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
+        if self.total_count > 0:
+            path_probabilities = {key: value / self.total_count for key, value in self.path_counts.items()}
+            sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
 
-        top_n_paths_probabilities = dict(sorted_probabilities[0:n])
+            top_n_paths_probabilities = dict(sorted_probabilities[0:n])
+        else:
+            # if no paths found in cluster then return an empty path probability dictionary
+            top_n_paths_probabilities = {'': 0}
 
         return top_n_paths_probabilities
-
