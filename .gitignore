@@ -4,5 +4,4 @@ __pycache__
 *.db
 *.type
 *.info
-*.dat
 *.log
