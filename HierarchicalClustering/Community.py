@@ -17,7 +17,16 @@ class Community(object):
             self.node_clusters = []
 
     def __str__(self):
-        return """Community(single_nodes: {}, node_clusters: {})""".format(self.single_nodes, self.node_clusters)
+        source_str = f"SOURCE: {self.source_node.name}\n ---------------------------- \n"
+        single_nodes_str = "".join([f"SINGLE: {node.name}\n" for node in self.single_nodes])
+        clusters_str = ""
+        for cluster in self.node_clusters:
+            clusters_str += "CLUST: \n"
+            clusters_str += "".join([f"        {node.name}\n" for node in cluster])
+
+        output_str = source_str + single_nodes_str + clusters_str
+
+        return output_str
 
     def get_number_of_single_nodes(self):
         return len(self.single_nodes)

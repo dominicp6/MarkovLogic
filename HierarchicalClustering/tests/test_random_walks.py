@@ -1,5 +1,6 @@
 import pytest
 import random
+import numpy as np
 import math
 
 from HierarchicalClustering.GraphObjects import EnhancedHypergraph
@@ -15,6 +16,15 @@ config = {'num_walks': 1000,
           'num_top': 3}
 
 communities = H.generate_communities(config)
+
+H2 = EnhancedHypergraph(database_file='../Databases/imdb1.db', info_file='../Databases/imdb.info')
+config2 = {'num_walks': 10000,
+           'max_length': 5,
+           'walk_scaling_param': 5,
+           'theta_hit': 4.9,
+           'theta_sym': 0.1,
+           'theta_js': 1,
+           'num_top': 3}
 
 
 def test_non_empty_communities():
@@ -87,3 +97,31 @@ def test_path_dictionaries_not_empty_if_hit():
                 assert sum(node.path_counts.values()) > 0
         H._reset_nodes()
         break
+
+
+def test_number_close_nodes_same_as_SOTA():
+    len_of_close_nodes = []
+    for node in H2.nodes():
+        H2._run_random_walks(source_node=node, number_of_walks=config2['num_walks'], max_path_length=config2['max_length'])
+        close_nodes = H2._get_close_nodes(threshold_hitting_time=config2['theta_hit'])
+        len_of_close_nodes.append(len(close_nodes))
+        H2._reset_nodes()
+
+    assert np.abs(np.mean(len_of_close_nodes) - 21.56338028) < 0.615929519
+
+def test_number_distance_symmetric_clusters_same_as_SOTA():
+    num_dist_sym_clusters = []
+    for node in H2.nodes():
+        H2._run_random_walks(source_node=node, number_of_walks=config2['num_walks'],
+                             max_path_length=config2['max_length'])
+        close_nodes = H2._get_close_nodes(threshold_hitting_time=config2['theta_hit'])
+        for node_type in H2.node_types:
+            nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
+            if nodes_of_type:
+                distance_symmetric_clusters = H2._cluster_nodes_by_truncated_hitting_times(
+                    nodes_of_type, threshold_hitting_time_difference=config['theta_sym'])
+
+                num_dist_sym_clusters.append(len(distance_symmetric_clusters))
+        H2._reset_nodes()
+
+    assert np.abs(np.mean(num_dist_sym_clusters) - 1.699) < 0.033

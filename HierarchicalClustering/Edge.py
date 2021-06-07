@@ -6,4 +6,3 @@ class Edge(Entity):
         super().__init__(uid=id, elements=nodes)
         self.id = id
         self.predicate = predicate
-        self.nodes = nodes

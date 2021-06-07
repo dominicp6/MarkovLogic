@@ -7,7 +7,7 @@ from HierarchicalClustering.dev.RandomWalkAnalyser import RandomWalkAnalyser
 from NewHC import HierarchicalClusterer
 
 
-H = EnhancedHypergraph(database_file='Databases/smoking.db', info_file='Databases/smoking.info')
+H = EnhancedHypergraph(database_file='Databases/imdb1.db', info_file='Databases/imdb.info')
 #G = H.convert_to_graph(True)
 config = {
     'randomwalk_params': {'num_walks': 10000,
@@ -31,7 +31,8 @@ config = {
 
 #H.generate_communities(config['randomwalk_params'])
 
-RandomWalkAnalyser(H)
+for i in range(15):
+    RandomWalkAnalyser(H)
 
 # for hg in hypergraph_clusters:
 #     plt.figure()
