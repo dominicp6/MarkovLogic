@@ -2,7 +2,7 @@ import pytest
 import os
 
 from HierarchicalClustering.GraphObjects import EnhancedHypergraph
-from HierarchicalClustering.NewHC import HierarchicalClusterer
+from HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
 from HierarchicalClustering.graph_utils import get_second_eigenpair
 
 imdb_db = '../Databases/imdb1.db'

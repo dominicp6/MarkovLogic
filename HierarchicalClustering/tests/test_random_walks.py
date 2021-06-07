@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 from HierarchicalClustering.GraphObjects import EnhancedHypergraph
-from HierarchicalClustering.merge_utilities import _kl_divergence, _js_divergence
+from HierarchicalClustering.js_divergence_utils import _kl_divergence, _js_divergence
 
 H = EnhancedHypergraph(database_file='../Databases/smoking.db', info_file='../Databases/smoking.info')
 config = {'num_walks': 1000,
@@ -17,7 +17,7 @@ config = {'num_walks': 1000,
 
 communities = H.generate_communities(config)
 
-H2 = EnhancedHypergraph(database_file='../Databases/imdb1.db', info_file='../Databases/imdb.info')
+H2 = EnhancedHypergraph(database_file='../imdb1.db', info_file='../imdb.info')
 config2 = {'num_walks': 10000,
            'max_length': 5,
            'walk_scaling_param': 5,
