@@ -35,7 +35,10 @@ class Communities(object):
             close_nodes_random_walk_data = self._get_close_nodes(nodes_random_walk_data,
                                                                  threshold_hitting_time=config['theta_hit'])
 
+            print(f'Number of close nodes {len(close_nodes_random_walk_data)}')
+
             for node_type in hypergraph.node_types:
+                print(f'RW for Node type {node_type}')
                 nodes_of_type = [node for node in close_nodes_random_walk_data if node.node_type == node_type]
                 if nodes_of_type:
                     distance_symmetric_single_nodes, distance_symmetric_clusters = self._cluster_nodes_by_truncated_hitting_times(

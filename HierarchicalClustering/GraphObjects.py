@@ -25,6 +25,8 @@ class EnhancedGraph(Graph):
             for hyperedge_id, edge in hyperedges_of_node.items():
                 hypergraph.add_edge(edge)
 
+        hypergraph.node_types = template_hypergraph.node_types
+
         return hypergraph
 
 

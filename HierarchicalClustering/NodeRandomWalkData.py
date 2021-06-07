@@ -42,7 +42,7 @@ class NodeClusterRandomWalkData(object):
         return path_counts, total_count
 
     def merge(self, node_cluster):
-        self.nodes_random_walk_data.extend(node_cluster.nodes)
+        self.nodes_random_walk_data.extend(node_cluster.nodes_random_walk_data)
         self.path_counts.update(node_cluster.path_counts)
 
     def number_of_nodes(self):

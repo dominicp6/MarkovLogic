@@ -39,7 +39,7 @@ for hg_number, communities in enumerate(hgs_communities):
         for cluster_number, cluster in enumerate(cluster_dict['clusters']):
             print(f'CLUSTER {cluster_number}:')
             for node in cluster:
-                print('     '+node.name)
+                print('     '+node)
 
 
 
