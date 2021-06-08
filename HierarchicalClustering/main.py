@@ -9,7 +9,7 @@ config = {
         'max_lambda2' : 0.8,
     },
     'random_walk_params' : {
-        'num_walks': 100,
+        'num_walks': 1000,
         'max_length': 5,
         'walk_scaling_param': 5,
         'theta_hit': 4.9,
@@ -19,27 +19,29 @@ config = {
     }
 }
 
-hypergraph = EnhancedHypergraph(database_file='imdb1.db', info_file='imdb.info')
+hypergraph = EnhancedHypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
-HC = HierarchicalClusterer(hypergraph, config['clustering_params'])
-hypergraph_clusters = HC.hierarchical_clustering()
+# HC = HierarchicalClusterer(hypergraph, config['clustering_params'])
+# hypergraph_clusters = HC.hierarchical_clustering()
 
-hgs_communities = []
-for hypergraph in hypergraph_clusters:
-    hgs_communities.append(Communities(hypergraph, config['random_walk_params']))
+# hgs_communities = []
+# for hypergraph in hypergraph_clusters:
+#    hgs_communities.append(Communities(hypergraph, config['random_walk_params']))
 
-for hg_number, communities in enumerate(hgs_communities):
-    print(f'Hypergraph {hg_number}')
-    for node, cluster_dict in communities.communities.items():
-        print(f'Source Node {node}')
-        print(cluster_dict)
-        for single_node in cluster_dict['single_nodes']:
-            print(f'SINGLE NODE: {single_node.name}')
+# for hg_number, communities in enumerate(hgs_communities):
+#    print(f'Hypergraph {hg_number}')
 
-        for cluster_number, cluster in enumerate(cluster_dict['clusters']):
-            print(f'CLUSTER {cluster_number}:')
-            for node in cluster:
-                print('     '+node)
+communities = Communities(hypergraph, config['random_walk_params'])
+for node, cluster_dict in communities.communities.items():
+    print(f'Source Node {node}')
+    print(cluster_dict)
+    for single_node in cluster_dict['single_nodes']:
+        print(f'SINGLE NODE: {single_node}')
+
+    for cluster_number, cluster in enumerate(cluster_dict['clusters']):
+        print(f'CLUSTER {cluster_number}:')
+        for cluster_node in cluster:
+            print('     '+cluster_node)
 
 
 

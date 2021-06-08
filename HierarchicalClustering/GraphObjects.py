@@ -2,6 +2,7 @@ import networkx as nx
 from networkx import Graph
 from hypernetx import Hypergraph
 import random
+import re
 
 from Edge import Edge
 from Node import Node
@@ -69,14 +70,17 @@ class EnhancedHypergraph(Hypergraph):
         return graph
 
     @staticmethod
-    def _is_good_line_syntax(line_fragments):
-        argument_string = line_fragments[1][0:1]
-        # check that open and closed parentheses are correctly used
-        # check that the argument string does not contain duplicate closing braces
-        if (len(line_fragments) == 2) and (line_fragments[1][-1] == ")") and (")" not in argument_string):
-            return True
-        else:
-            return False
+    def _is_good_line_syntax(line):
+        """
+        The correct syntax is an arbitrary number of alpha numeric characters followed by an open parenthesis
+        followed by a sequence of arbitrary alpha numeric characters separated by commas terminating in a
+        closed parenthesis e.g. Friends(Alice, Bob), Family(Jane, Edward, Steve), or Smokes(John)
+        """
+        matched = re.match("\w+\((\w+|(\w+,\s*)+\w+)\)$", line)
+        is_match = bool(matched)
+
+        return is_match
+
 
     def _get_predicate_argument_types_from_info_file(self, path_to_info_file: str):
         predicate_argument_types = {}
@@ -87,6 +91,10 @@ class EnhancedHypergraph(Hypergraph):
                     continue
 
                 predicate, types = self._parse_line(line=line)
+                if predicate is None or types is None:
+                    raise IOError(f'Line {line_idx} "{line}" of {path_to_info_file} has incorrect syntax. Make sure '
+                                  f'that each predicate is correctly formatted with braces and commas e.g. Friends('
+                                  f'person, person)')
                 predicate_argument_types[predicate] = types
                 self.node_types.update(types)
 
@@ -95,10 +103,10 @@ class EnhancedHypergraph(Hypergraph):
     def _parse_line(self, line: str):
         line = line.strip()
 
-        line_fragments = line.split('(')
-        if not self._is_good_line_syntax(line_fragments):
+        if not self._is_good_line_syntax(line):
             return None, None
 
+        line_fragments = line.split('(')
         predicate = line_fragments[0]
         predicate_argument_string = line_fragments[1].split(')')[0]
         predicate_arguments = [predicate_argument.strip() for predicate_argument in
@@ -125,11 +133,9 @@ class EnhancedHypergraph(Hypergraph):
 
                 predicate, node_names = self._parse_line(line=line)
                 if predicate is None or node_names is None:
-                    raise IOError("Line {} [{}]".format(line_idx, line)
-                                  + "of {} has incorrect syntax \n".format(path_to_db_file) +
-                                  "Make sure that each predicate is correctly" +
-                                  " formatted with braces and commas e.g. " +
-                                  " Friends(Anna, Bob)")
+                    raise IOError(f'Line {line_idx} "{line}" of {path_to_db_file} has incorrect syntax. Make sure '
+                                  f'that each predicate is correctly formatted with braces and commas e.g. Friends('
+                                  f'Anna, Bob)')
                 node_types = predicate_argument_types[predicate]
 
                 nodes = [Node(name=node_names[i], node_type=node_types[i]) for i in range(len(node_names))]
