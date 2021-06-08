@@ -5,32 +5,34 @@ import random
 import numpy as np
 import math
 
-from GraphObjects import EnhancedHypergraph
+from GraphObjects import Hypergraph
 from js_divergence_utils import kl_divergence, js_divergence
 from Communities import Communities, run_random_walks, get_close_nodes, cluster_nodes_by_truncated_hitting_times
 
-H = EnhancedHypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
+H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
 config = {'num_walks': 1000,
           'max_length': 7,
           'walk_scaling_param': 5,
           'theta_hit': 6.9,
           'theta_sym': 0.1,
-          'theta_js': 1,
+          'theta_js': 1.0,
           'num_top': 3}
 
 communities = Communities(H, config).communities
 
-H2 = EnhancedHypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
+H2 = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 config2 = {'num_walks': 10000,
            'max_length': 5,
            'walk_scaling_param': 5,
            'theta_hit': 4.9,
            'theta_sym': 0.1,
-           'theta_js': 1,
+           'theta_js': 1.0,
            'num_top': 3}
 
 
 class TestRandomWalks(unittest.TestCase):
+
+    #TODO: add test for checking correct merger of node clusters
 
     def test_no_empty_communities(self):
         for node_name, node_cluster_dict in communities.items():

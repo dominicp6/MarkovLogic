@@ -1,4 +1,4 @@
-from GraphObjects import EnhancedHypergraph
+from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from Communities import Communities
 
@@ -14,15 +14,14 @@ config = {
         'walk_scaling_param': 5,
         'theta_hit': 4.9,
         'theta_sym': 0.1,
-        'theta_js': 1,
+        'theta_js': 1.0,
         'num_top': 3
     }
 }
 
-hypergraph = EnhancedHypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
+hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
-# HC = HierarchicalClusterer(hypergraph, config['clustering_params'])
-# hypergraph_clusters = HC.hierarchical_clustering()
+# hypergraph_clusters = HierarchicalClusterer(hypergraph, config['clustering_params'])
 
 # hgs_communities = []
 # for hypergraph in hypergraph_clusters:
@@ -32,16 +31,7 @@ hypergraph = EnhancedHypergraph(database_file='./Databases/imdb1.db', info_file=
 #    print(f'Hypergraph {hg_number}')
 
 communities = Communities(hypergraph, config['random_walk_params'])
-for node, cluster_dict in communities.communities.items():
-    print(f'Source Node {node}')
-    print(cluster_dict)
-    for single_node in cluster_dict['single_nodes']:
-        print(f'SINGLE NODE: {single_node}')
-
-    for cluster_number, cluster in enumerate(cluster_dict['clusters']):
-        print(f'CLUSTER {cluster_number}:')
-        for cluster_node in cluster:
-            print('     '+cluster_node)
+print(communities)
 
 
 

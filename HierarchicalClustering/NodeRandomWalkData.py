@@ -1,12 +1,17 @@
 from collections import defaultdict
 import operator
+import warnings
 
 
-class NodeRandomWalkData():
+class NodeRandomWalkData(object):
+    """
+    Data structure to store hitting time and path count information for each node during random walks.
+    """
+
     def __init__(self, name, node_type):
         self.name = name
         self.node_type = node_type
-        self.path_counts = defaultdict(lambda: 0)
+        self.path_counts = defaultdict(int)
         self.accumulated_hitting_time = 0
         self.number_of_hits = 0
         self.average_hitting_time = 0
@@ -18,44 +23,48 @@ class NodeRandomWalkData():
         self.accumulated_hitting_time += hitting_time
 
     def calculate_average_hitting_time(self, number_of_walks, max_length):
-        # asset self.average_hitting_time == 0, else this method was called more than once before
-        # resetting node properties, which is unintended behaviour
-        assert self.average_hitting_time == 0
+        if self.average_hitting_time != 0:
+            warnings.warn('Method "calculate_average_hitting_time" called more than once when running random walks')
+
         self.average_hitting_time = (self.accumulated_hitting_time + (number_of_walks - self.number_of_hits)
                                      * max_length) / number_of_walks
 
 
 class NodeClusterRandomWalkData(object):
+    """
+    Data structure to store path count information for a collection of nodes.
+    """
 
     def __init__(self, nodes_random_walk_data):
         super().__init__()
-        self.nodes_random_walk_data = nodes_random_walk_data
-        self.path_counts, self.total_count = self._initialise_path_counts()
+        self.node_names = set(node.name for node in nodes_random_walk_data)
 
-    def _initialise_path_counts(self):
-        path_counts = {}
-        for node in self.nodes_random_walk_data:
-            path_counts.update(node.path_counts)
+        path_counts = defaultdict(int)
+        total_count = 0
+        for node in nodes_random_walk_data:
+            for key, value in node.path_counts.items():
+                path_counts[key] += value
+                total_count += value
 
-        total_count = sum(path_counts.values())
-
-        return path_counts, total_count
+        self.path_counts = path_counts  # dict<str,int>
+        self.total_count = total_count  # int
 
     def merge(self, node_cluster):
-        self.nodes_random_walk_data.extend(node_cluster.nodes_random_walk_data)
-        self.path_counts.update(node_cluster.path_counts)
+        self.node_names.update(node_cluster.node_names)
+        self.total_count += node_cluster.total_count
+        for key, value in node_cluster.path_counts.items():
+            self.path_counts[key] += value
 
     def number_of_nodes(self):
-        return len(self.nodes_random_walk_data)
+        return len(self.node_names)
 
     def get_top_n_path_probabilities(self, n):
-        if self.total_count > 0:
-            path_probabilities = {key: value / self.total_count for key, value in self.path_counts.items()}
-            sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
+        path_probabilities = {key: value / self.total_count for key, value in self.path_counts.items()}
+        sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
 
+        if n < len(sorted_probabilities):
             top_n_paths_probabilities = dict(sorted_probabilities[0:n])
         else:
-            # if no paths found in cluster then return an empty path probability dictionary
-            top_n_paths_probabilities = {'': 0}
+            top_n_paths_probabilities = dict(sorted_probabilities)
 
         return top_n_paths_probabilities

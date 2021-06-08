@@ -1,30 +1,40 @@
 import networkx as nx
-import scipy as sp
+from scipy.sparse.linalg import eigsh
+
 
 def get_second_eigenpair(graph):
+    """
+    Returns the second smallest eigenvalue and eigenvector of the laplacian matrix of a graph.
+    """
+    assert isinstance(graph, nx.Graph)
 
     laplacian_matrix = nx.normalized_laplacian_matrix(graph)
+
     # Compute the second smallest eigenvalue of the laplacian matrix
-    eig_vals, eig_vecs = sp.sparse.linalg.eigsh(laplacian_matrix, which="SM", k=2)
-    v_2 = eig_vecs[:, 1]
-    lambda2 = eig_vals[1]
-    return v_2, lambda2
+    eigen_values, eigen_vectors = eigsh(laplacian_matrix, which="SM", k=2)
 
-def create_subgraph(G, subgraph_nodes):
+    vector2 = eigen_vectors[:, 1]
+    lambda2 = eigen_values[1]
+
+    return vector2, lambda2
+
+
+def create_subgraph(graph, subgraph_nodes):
     """
-    Constructs a subgraph (SG) from a graph (G), where the nodes
-    of the subgraph are subgraph_nodes (a subset of the nodes 
-    of G)
+    Constructs a subgraph from a graph, where the nodes of the subgraph are subgraph_nodes (a subset of the nodes
+    of the graph)
     """
-    SG = G.__class__()
+    assert isinstance(graph, nx.Graph)
+
+    subgraph = graph.__class__()
     if len(subgraph_nodes) > 1:
-        SG.add_edges_from((n, nbr, d)
-            for n, nbrs in G.adj.items() if n in subgraph_nodes
-            for nbr, d in nbrs.items() if nbr in subgraph_nodes)
+        subgraph.add_edges_from((node, neighbor, degree)
+                                for node, neighbors in graph.adj.items() if node in subgraph_nodes
+                                for neighbor, degree in neighbors.items() if neighbor in subgraph_nodes)
     else:
-        #subgraph_nodes is a singleton set(), next line retrieves the element
+        # subgraph_nodes is a singleton set(), next line retrieves the element
         (subgraph_node,) = subgraph_nodes
-        SG.add_node(subgraph_node)
-    SG.graph.update(G.graph)
-    return SG
+        subgraph.add_node(subgraph_node)
+    subgraph.graph.update(graph.graph)
 
+    return subgraph

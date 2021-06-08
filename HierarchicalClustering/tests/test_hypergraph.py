@@ -1,15 +1,15 @@
 import unittest
 import os
 
-from GraphObjects import EnhancedHypergraph
+from GraphObjects import Hypergraph
 
 smoking_db = './Databases/smoking.db'
 predicate_db = './Databases/predicate_testing.db'
 smoking_info = './Databases/smoking.info'
 predicate_info = './Databases/predicate_testing.info'
 
-H1 = EnhancedHypergraph(database_file=smoking_db, info_file=smoking_info)
-H2 = EnhancedHypergraph(database_file=predicate_db, info_file=predicate_info)
+H1 = Hypergraph(database_file=smoking_db, info_file=smoking_info)
+H2 = Hypergraph(database_file=predicate_db, info_file=predicate_info)
 
 
 class TestHypergraph(unittest.TestCase):
