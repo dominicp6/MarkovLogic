@@ -1,13 +1,15 @@
 import unittest
 
-import pytest
-import random
 import numpy as np
 import math
 
 from GraphObjects import Hypergraph
-from js_divergence_utils import kl_divergence, js_divergence
-from Communities import Communities, run_random_walks, get_close_nodes, cluster_nodes_by_truncated_hitting_times
+from NodeRandomWalkData import NodeClusterRandomWalkData
+from js_divergence_utils import kl_divergence, js_divergence, compute_js_divergence_of_top_n_paths
+from Communities import Communities
+from random_walks import generate_node_random_walk_data
+from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_truncated_hitting_times, \
+    cluster_nodes_by_js_divergence
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
 config = {'num_walks': 1000,
@@ -32,7 +34,59 @@ config2 = {'num_walks': 10000,
 
 class TestRandomWalks(unittest.TestCase):
 
-    #TODO: add test for checking correct merger of node clusters
+    def test_correct_node_cluster_merging(self):
+        for node in H.nodes():
+            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, number_of_walks=100,
+                                                           max_path_length=5)
+            close_nodes = get_close_nodes(nodes_rw_data, threshold_hitting_time=5)
+
+            # MERGE SOME CLUSTERS ------------------------------------------------------------------------------
+            js_clusters = [NodeClusterRandomWalkData([node]) for node in close_nodes]
+
+            max_divergence = float('inf')
+            cluster_to_merge1 = None
+            cluster_to_merge2 = None
+
+            while True:
+                smallest_divergence = max_divergence
+                for i in range(len(js_clusters)):
+                    for j in range(i + 1, len(js_clusters)):
+                        js_div = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j],
+                                                                             3)
+
+                        if js_div < smallest_divergence and js_div < 0.25:
+                            smallest_divergence = js_div
+                            cluster_to_merge1 = i
+                            cluster_to_merge2 = j
+
+                # if we've found a pair of clusters to merge, merge the two clusters and continue
+                if smallest_divergence < max_divergence:
+                    js_clusters[cluster_to_merge1].merge(js_clusters[cluster_to_merge2])
+                    del js_clusters[cluster_to_merge2]
+                # otherwise, stop merging
+                else:
+                    break
+            # --------------------------------------------------------------------------------------------------
+
+            for node_cluster in js_clusters:
+                # verify that path counts have been correctly added
+                assert sum(node_cluster.path_counts.values()) == node_cluster.total_count
+
+                # verify that the probability distribution of path counts is correctly normalised
+                assert math.isclose(
+                    sum(node_cluster.get_top_n_path_probabilities(len(node_cluster.path_counts)).values()), 1)
+
+    def test_valid_average_hitting_time(self):
+        max_path_length = 5
+        for node in H.nodes():
+            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, number_of_walks=10,
+                                                           max_path_length=max_path_length)
+            for node_data in nodes_rw_data.values():
+                if node_data.number_of_hits == 0:
+                    assert node_data.average_hitting_time == max_path_length
+                else:
+                    assert node_data.average_hitting_time <= max_path_length
+                    assert node_data.average_hitting_time > 0
 
     def test_no_empty_communities(self):
         for node_name, node_cluster_dict in communities.items():
@@ -77,11 +131,11 @@ class TestRandomWalks(unittest.TestCase):
 
         assert math.isclose(js_divergence(p1, q1), 0.0776870668)
 
-    def test_number_close_nodes_same_as_SOTA(self):
+    def test_number_of_close_nodes_same_as_SOTA(self):
         len_of_close_nodes = []
         for node in H2.nodes():
-            nodes_rw_data = run_random_walks(H2, source_node=node, number_of_walks=config2['num_walks'],
-                                             max_path_length=config2['max_length'])
+            nodes_rw_data = generate_node_random_walk_data(H2, source_node=node, number_of_walks=config2['num_walks'],
+                                                           max_path_length=config2['max_length'])
             close_nodes_rw_data = get_close_nodes(nodes_rw_data, threshold_hitting_time=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
 
@@ -89,26 +143,6 @@ class TestRandomWalks(unittest.TestCase):
         print("---------------------")
         print(f"This implementation {np.mean(len_of_close_nodes)}, SOTA {21.56338028}")
         assert np.abs(np.mean(len_of_close_nodes) - 21.56338028) < 0.615929519
-
-    # def test_number_distance_symmetric_clusters_same_as_SOTA(self):
-    #     num_dist_sym_clusters = []
-    #     for node in H2.nodes():
-    #         nodes_rw_data = run_random_walks(H2, source_node=node, number_of_walks=config2['num_walks'],
-    #                                          max_path_length=config2['max_length'])
-    #         close_nodes = get_close_nodes(nodes_rw_data, threshold_hitting_time=config2['theta_hit'])
-    #         for node_type in H2.node_types:
-    #             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
-    #             if nodes_of_type:
-    #                 distance_symmetric_single_nodes, distance_symmetric_clusters = cluster_nodes_by_truncated_hitting_times(
-    #                     nodes_of_type, threshold_hitting_time_difference=config['theta_sym'])
-    #
-    #                 num_dist_sym_clusters.append(
-    #                     len(distance_symmetric_single_nodes) + len(distance_symmetric_clusters))
-    #
-    #     print("Average # distance symmetric clusters")
-    #     print("-------------------------------------")
-    #     print(f"This implementation {np.mean(num_dist_sym_clusters)}, SOTA {1.699}")
-    #     assert np.abs(np.mean(num_dist_sym_clusters) - 1.699) < 0.033
 
     def test_average_number_of_clusters_and_single_nodes_same_as_SOTA(self):
         clusters_and_single_nodes = []

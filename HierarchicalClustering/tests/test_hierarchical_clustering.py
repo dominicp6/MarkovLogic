@@ -1,8 +1,5 @@
 import unittest
 
-import pytest
-import os
-
 from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from graph_utils import get_second_eigenpair
