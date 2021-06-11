@@ -3,10 +3,12 @@ from GraphObjects import Hypergraph
 from Node import Node
 
 
-def run_random_walks(hypergraph: Hypergraph, source_node: Node, number_of_walks: int, max_path_length: int):
+def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, number_of_walks: int, max_path_length: int):
     """
     Runs a total of 'number_of_walks' random walks on 'hypergraph', each originating from the 'source_node' with a
-    maximum length of 'max_path_length'.
+    maximum length of 'max_path_length'. Returns a data structure which holds information about the number of times
+    each node was hit, the average hitting time, and the frequency distribution of unique random walks paths that
+    led to hitting the node.
     """
 
     # initialise empty random walk data
@@ -15,16 +17,17 @@ def run_random_walks(hypergraph: Hypergraph, source_node: Node, number_of_walks:
         nodes_random_walk_data[node.name] = NodeRandomWalkData(node.name, node.node_type)
 
     for walk in range(number_of_walks):
-        nodes_random_walk_data = run_random_walk(hypergraph, source_node, max_path_length, nodes_random_walk_data)
+        nodes_random_walk_data = update_node_data_with_random_walk(hypergraph, source_node, max_path_length,
+                                                                   nodes_random_walk_data)
 
     for node in hypergraph.nodes():
         nodes_random_walk_data[node.name].calculate_average_hitting_time(number_of_walks, max_path_length)
 
-    return nodes_random_walk_data
+    return nodes_random_walk_data  # dict[str, NodeRandomWalkData]
 
 
-def run_random_walk(hypergraph: Hypergraph, source_node: Node, max_path_length: int,
-                    nodes_random_walk_data: dict[str, NodeRandomWalkData]):
+def update_node_data_with_random_walk(hypergraph: Hypergraph, source_node: Node, max_path_length: int,
+                                      nodes_random_walk_data: dict[str, NodeRandomWalkData]):
     """
     Runs a single random walk on a hypergraph, then returns the updated random walk data.
     """

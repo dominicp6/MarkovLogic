@@ -16,7 +16,11 @@ class NodeRandomWalkData(object):
         self.number_of_hits = 0
         self.average_hitting_time = 0
 
-    def add_path(self, path):
+    def add_path(self, path: str):
+        """
+        A path is an ordered sequence of predicate strings separated by commas (e.g. 'Friends,Smokes,Cancer,Friends,')
+        which represents the order in which hyperedges were traversed during a random walk before hitting a node.
+        """
         self.path_counts[path] += 1
 
     def update_accumulated_hitting_time(self, hitting_time: float):

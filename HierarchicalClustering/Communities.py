@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from random_walks import run_random_walks
+from random_walks import generate_node_random_walk_data
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
 from Node import Node
@@ -47,9 +47,9 @@ class Communities(object):
 
     def get_community(self, source_node: Node, config: dict):
 
-        random_walk_data = run_random_walks(self.hypergraph, source_node=source_node,
-                                            number_of_walks=config['num_walks'],
-                                            max_path_length=config['max_length'])
+        random_walk_data = generate_node_random_walk_data(self.hypergraph, source_node=source_node,
+                                                          number_of_walks=config['num_walks'],
+                                                          max_path_length=config['max_length'])
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node.name]
