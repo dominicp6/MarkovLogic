@@ -44,6 +44,20 @@ class Communities(object):
         for node in self.hypergraph.nodes():
             community = self.get_community(source_node=node, config=config)
             self.communities[node.name] = community
+            
+     def __str__(self):
+        output_str = ""
+        for source_node, cluster_dict in self.communities.items():
+            source_str = f"SOURCE: {source_node}\n ---------------------------- \n"
+            single_nodes_str = "".join([f"SINGLE: {node}\n" for node in cluster_dict['single_nodes']])
+            clusters_str = ""
+            for cluster_number, cluster in enumerate(cluster_dict['clusters']):
+                clusters_str += f"CLUSTER {cluster_number}: \n"
+                clusters_str += "".join([f"        {node}\n" for node in cluster])
+
+            output_str += source_str + single_nodes_str + clusters_str + "\n"
+
+        return output_str
 
     def get_community(self, source_node: Node, config: dict):
 
@@ -70,16 +84,4 @@ class Communities(object):
 
         return community
 
-    def __str__(self):
-        output_str = ""
-        for source_node, cluster_dict in self.communities.items():
-            source_str = f"SOURCE: {source_node}\n ---------------------------- \n"
-            single_nodes_str = "".join([f"SINGLE: {node}\n" for node in cluster_dict['single_nodes']])
-            clusters_str = ""
-            for cluster_number, cluster in enumerate(cluster_dict['clusters']):
-                clusters_str += f"CLUSTER {cluster_number}: \n"
-                clusters_str += "".join([f"        {node}\n" for node in cluster])
 
-            output_str += source_str + single_nodes_str + clusters_str + "\n"
-
-        return output_str
