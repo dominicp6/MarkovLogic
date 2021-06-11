@@ -37,7 +37,7 @@ class HierarchicalClusterer(object):
         assert self.hypergraph.number_of_nodes() > self.min_cluster_size, \
             "Argument Error: min_cluster_size needs to be smaller than the number of nodes in the hypergraph"
 
-    def hierarchical_clustering(self):
+    def run_hierarchical_clustering(self):
 
         # 1. Convert hypergraph to graph
         original_graph = self.hypergraph.convert_to_graph()

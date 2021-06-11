@@ -196,3 +196,9 @@ class Hypergraph(hnx.Hypergraph):
                 self.node_types.update(types)
 
         return predicate_argument_types
+
+
+
+
+
+
