@@ -8,7 +8,7 @@ class NodeRandomWalkData(object):
     Data structure to store hitting time and path count information for each node during random walks.
     """
 
-    def __init__(self, name, node_type):
+    def __init__(self, name: str, node_type: str):
         self.name = name
         self.node_type = node_type
         self.path_counts = defaultdict(int)
@@ -19,10 +19,10 @@ class NodeRandomWalkData(object):
     def add_path(self, path):
         self.path_counts[path] += 1
 
-    def update_accumulated_hitting_time(self, hitting_time):
+    def update_accumulated_hitting_time(self, hitting_time: float):
         self.accumulated_hitting_time += hitting_time
 
-    def calculate_average_hitting_time(self, number_of_walks, max_length):
+    def calculate_average_hitting_time(self, number_of_walks: int, max_length: int):
         if self.average_hitting_time != 0:
             warnings.warn('Method "calculate_average_hitting_time" called more than once when running random walks')
 
@@ -35,7 +35,7 @@ class NodeClusterRandomWalkData(object):
     Data structure to store path count information for a collection of nodes.
     """
 
-    def __init__(self, nodes_random_walk_data):
+    def __init__(self, nodes_random_walk_data: list[NodeRandomWalkData]):
         super().__init__()
         self.node_names = set(node.name for node in nodes_random_walk_data)
 
@@ -49,10 +49,10 @@ class NodeClusterRandomWalkData(object):
         self.path_counts = path_counts  # dict<str,int>
         self.total_count = total_count  # int
 
-    def merge(self, node_cluster):
-        self.node_names.update(node_cluster.node_names)
-        self.total_count += node_cluster.total_count
-        for key, value in node_cluster.path_counts.items():
+    def merge(self, other):
+        self.node_names.update(other.node_names)
+        self.total_count += other.total_count
+        for key, value in other.path_counts.items():
             self.path_counts[key] += value
 
     def number_of_nodes(self):

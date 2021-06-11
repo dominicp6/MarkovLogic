@@ -21,15 +21,6 @@ config = {
 
 hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
-# hypergraph_clusters = HierarchicalClusterer(hypergraph, config['clustering_params'])
-
-# hgs_communities = []
-# for hypergraph in hypergraph_clusters:
-#    hgs_communities.append(Communities(hypergraph, config['random_walk_params']))
-
-# for hg_number, communities in enumerate(hgs_communities):
-#    print(f'Hypergraph {hg_number}')
-
 communities = Communities(hypergraph, config['random_walk_params'])
 print(communities)
 

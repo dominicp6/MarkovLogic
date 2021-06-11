@@ -1,5 +1,4 @@
 import unittest
-import os
 
 from GraphObjects import Hypergraph
 

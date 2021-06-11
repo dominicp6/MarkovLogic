@@ -1,8 +1,9 @@
 import networkx as nx
 from scipy.sparse.linalg import eigsh
+from GraphObjects import Graph
 
 
-def get_second_eigenpair(graph):
+def get_second_eigenpair(graph: Graph):
     """
     Returns the second smallest eigenvalue and eigenvector of the laplacian matrix of a graph.
     """
@@ -19,7 +20,7 @@ def get_second_eigenpair(graph):
     return vector2, lambda2
 
 
-def create_subgraph(graph, subgraph_nodes):
+def create_subgraph(graph: Graph, subgraph_nodes: set):
     """
     Constructs a subgraph from a graph, where the nodes of the subgraph are subgraph_nodes (a subset of the nodes
     of the graph)
@@ -35,6 +36,7 @@ def create_subgraph(graph, subgraph_nodes):
         # subgraph_nodes is a singleton set(), next line retrieves the element
         (subgraph_node,) = subgraph_nodes
         subgraph.add_node(subgraph_node)
+
     subgraph.graph.update(graph.graph)
 
     return subgraph

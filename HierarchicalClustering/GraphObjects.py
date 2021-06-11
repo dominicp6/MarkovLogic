@@ -67,11 +67,13 @@ class Hypergraph(hnx.Hypergraph):
         elif info_file and not database_file:
             raise ValueError("Cannot generate hypergraph. Info file provided but no database file provided.")
         elif info_file and database_file:
-            self._generate_from_database(path_to_db_file=database_file, path_to_info_file=info_file)
+            self.construct_from_database(path_to_db_file=database_file, path_to_info_file=info_file)
+
+        # if no .db and .info files provided, create an empty hypergraph object
         else:
             pass
 
-    def _generate_from_database(self, path_to_db_file: str, path_to_info_file: str):
+    def construct_from_database(self, path_to_db_file: str, path_to_info_file: str):
 
         predicate_argument_types = self._get_predicate_argument_types_from_info_file(path_to_info_file)
 
@@ -122,10 +124,10 @@ class Hypergraph(hnx.Hypergraph):
 
         return graph
 
-    def get_random_neighbor_and_edge_of_node(self, node):
+    def get_random_edge_and_neighbor_of_node(self, node: str):
         """
-        Gets a random neighbouring node of a given node in the hypergraph.
-        Returns the neighbouring node and the hyperedge that it belongs to.
+        Given a node, gets a random non-single-vertex hyperedge that the node belongs to. Then gets a random node
+        from the other nodes in that hyperedge (neighbor). Returns the hyperedge and the neighbor.
         """
         edges = self.nodes[node].memberships.items()
         edges = [edge for edge_id, edge in edges if self.size(edge) >= 2]
@@ -134,7 +136,7 @@ class Hypergraph(hnx.Hypergraph):
         neighbors = [neighbor for neighbor in nodes_of_edge if neighbor.name != node.name]
         neighbor = random.choice(neighbors)
 
-        return neighbor, edge
+        return edge, neighbor
 
     def _parse_line(self, line: str):
         """
@@ -147,15 +149,18 @@ class Hypergraph(hnx.Hypergraph):
             return None, None
 
         line_fragments = line.split('(')
+        # the predicate name e.g. 'Friends'
         predicate = line_fragments[0]
+        # a string of predicate arguments separated by commas e.g. 'Alice, Bob'
         predicate_argument_string = line_fragments[1].split(')')[0]
+        # a list of predicate arguments e.g. ['Alice', 'Bob']
         predicate_arguments = [predicate_argument.strip() for predicate_argument in
                                predicate_argument_string.split(',')]
 
         return predicate, predicate_arguments
 
     @staticmethod
-    def _is_good_line_syntax(line):
+    def _is_good_line_syntax(line: str):
         """
         Checks for correct line syntax, returning either True or False.
 
@@ -191,9 +196,3 @@ class Hypergraph(hnx.Hypergraph):
                 self.node_types.update(types)
 
         return predicate_argument_types
-
-
-
-
-
-
