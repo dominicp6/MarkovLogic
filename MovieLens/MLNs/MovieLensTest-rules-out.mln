@@ -1,0 +1,96 @@
+//predicate declarations
+Romance(movie)
+Film-Noir(movie)
+Comedy(movie)
+Mystery(movie)
+Fantasy(movie)
+Action(movie)
+Thriller(movie)
+Horror(movie)
+Adventure(movie)
+War(movie)
+Children's(movie)
+Old(user)
+Musical(movie)
+Young(user)
+Animation(movie)
+Sci-Fi(movie)
+Documentary(movie)
+Crime(movie)
+Male(user)
+Western(movie)
+Drama(movie)
+Rating(user,movie,rating)
+Female(user)
+
+//function declarations
+
+// -1.5964205  Romance(v0)
+-1.5964205  Romance(a1)
+
+// -5.407205888  Film-Noir(v0)
+-5.407205888  Film-Noir(a1)
+
+// -0.8866644323  Comedy(v0)
+-0.8866644323  Comedy(a1)
+
+// -3.641207541  Mystery(v0)
+-3.641207541  Mystery(a1)
+
+// -3.824642877  Fantasy(v0)
+-3.824642877  Fantasy(a1)
+
+// -1.830152992  Action(v0)
+-1.830152992  Action(a1)
+
+// -1.633294122  Thriller(v0)
+-1.633294122  Thriller(a1)
+
+// -3.478931934  Horror(v0)
+-3.478931934  Horror(a1)
+
+// -2.171319367  Adventure(v0)
+-2.171319367  Adventure(a1)
+
+// -3.478931934  War(v0)
+-3.478931934  War(a1)
+
+// -2.416698091  Children's(v0)
+-2.416698091  Children's(a1)
+
+// -1.253658937  Old(v0)
+-1.253658937  Old(a1)
+
+// -4.089405122  Musical(v0)
+-4.089405122  Musical(a1)
+
+// 1.253658937  Young(v0)
+1.253658937  Young(a1)
+
+// -4.089405122  Animation(v0)
+-4.089405122  Animation(a1)
+
+// -2.923213521  Sci-Fi(v0)
+-2.923213521  Sci-Fi(a1)
+
+// -2.81808063  Documentary(v0)
+-2.81808063  Documentary(a1)
+
+// -2.638908994  Crime(v0)
+-2.638908994  Crime(a1)
+
+// 0.8700742649  Male(v0)
+0.8700742649  Male(a1)
+
+// -6.669544415  Western(v0)
+-6.669544415  Western(a1)
+
+// -0.1391030201  Drama(v0)
+-0.1391030201  Drama(a1)
+
+// -3.801543367  Rating(v0,v1,v2)
+-3.801543367  Rating(a1,a2,a3)
+
+// -0.8700742649  Female(v0)
+-0.8700742649  Female(a1)
+

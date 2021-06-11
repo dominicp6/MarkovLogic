@@ -1,0 +1,10 @@
+Genre(movie, genre)
+Age(user, age)
+Gender(user, gender)
+Rating(user, movie, rating)
+
+
+Genre(v0,v1)
+Gender(v0,v1)
+Age(v0,v1)
+Rating(v0,v1,v2)

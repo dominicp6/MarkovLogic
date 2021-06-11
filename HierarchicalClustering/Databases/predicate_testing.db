@@ -1,0 +1,6 @@
+Murder(DrGreen, LivingRoom, LeadPipe)
+Murder(MsScarlet, Kitchen, CandleStick)
+Motive(MsScarlet, Money)
+Motive(DrGreen, Revenge)
+Alibi(SargentMustard)
+Witness(SargentMustard, MsScarlet)
