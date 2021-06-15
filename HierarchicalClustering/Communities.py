@@ -45,8 +45,8 @@ class Communities(object):
 
     def __str__(self):
         output_string = ''
-        for community_number, community in enumerate(self.communities.values()):
-            output_string += f'COMMUNITY {community_number+1} \n'+community.__str__()
+        for community_id, community in enumerate(self.communities.values()):
+            output_string += f'COMMUNITY {community_id+1} \n'+community.__str__()
 
         return output_string
 
