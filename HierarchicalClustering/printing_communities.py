@@ -5,48 +5,9 @@ from collections import defaultdict
 import itertools
 
 
-# def remove_duplicate_communities(list_of_communities: list[Communities]):
-#     """
-#     Takes a list of communities objects and then checks, for each source node appearing in these communities,
-#     if more than one community is associated with that source node. In the event of duplicates, removes
-#     all but the smallest of these associated communities. Returns a modified list[Communities] object containing only
-#     these smallest communities.
-#     """
-#
-#     source_nodes_checked = set()
-#     min_community_size = {}  # dict[source_node (str), int]
-#     index_of_smallest_community = {}  # dict[source_node (str), int]
-#
-#     # find the indices in list_of_communities of the smallest community associated with each source_node
-#     for index, communities in enumerate(list_of_communities):
-#         for community in communities.communities.values():
-#             if community.source_node not in source_nodes_checked:
-#                 source_nodes_checked.add(community.source_node)
-#                 min_community_size[community.source_node] = community.number_of_nodes
-#                 index_of_smallest_community[community.source_node] = index
-#
-#             else:
-#                 if community.number_of_nodes < min_community_size[community.source_node]:
-#                     min_community_size[community.source_node] = community.number_of_nodes
-#                     index_of_smallest_community[community.source_node] = index
-#                 else:
-#                     pass
-#
-#     # remove all non-smallest communities associated with each source node
-#     for source_node, smallest_community_index in index_of_smallest_community.items():
-#         for community_index, community in enumerate(list_of_communities):
-#             if community_index != smallest_community_index:
-#                 if source_node in list_of_communities[community_index].communities.keys():
-#                     list_of_communities[community_index].communities.pop(source_node)
-#
-#     return list_of_communities
-
-
 class CommunityPrinter(object):
     def __init__(self, list_of_communities: list[Communities], original_hypergraph: Hypergraph):
 
-        # remove duplicate communities from the same source nodes, only keeping those which are smallest
-        #self.list_of_communities = remove_duplicate_communities(list_of_communities)
         self.list_of_communities = list_of_communities
 
         self.num_of_communities = sum(len(communities.communities) for communities in self.list_of_communities)
