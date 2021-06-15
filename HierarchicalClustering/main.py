@@ -1,7 +1,7 @@
 from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from Communities import Communities
-from printing_communities import write_communities_to_file
+from printing_communities import CommunityPrinter
 
 config = {
     'clustering_params': {
@@ -28,7 +28,7 @@ hypergraph_communities = []
 for hypergraph in hypergraph_clusters:
     hypergraph_communities.append(Communities(hypergraph, config=config['random_walk_params']))
 
-write_communities_to_file(list_of_communities=hypergraph_communities, original_hypergraph=original_hypergraph,
-                          file_name='imdb')
+community_printer = CommunityPrinter(list_of_communities=hypergraph_communities, original_hypergraph=original_hypergraph)
+community_printer.write_files(file_name='imdb')
 
 

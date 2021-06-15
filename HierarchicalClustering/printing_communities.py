@@ -5,11 +5,6 @@ from collections import defaultdict
 import itertools
 
 
-def write_communities_to_file(list_of_communities: list[Communities], original_hypergraph: Hypergraph, file_name: str):
-    com_printer = CommunityPrinter(list_of_communities, original_hypergraph)
-    com_printer.write_files(file_name)
-
-
 def remove_duplicate_communities(list_of_communities: list[Communities]):
     """
     Takes a list of communities objects and then checks, for each source node appearing in these communities,

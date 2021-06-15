@@ -9,45 +9,7 @@ from datetime import datetime
 from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from Communities import Communities
-from printing_communities import write_communities_to_file
-
-
-# def watch_for_timeout_on_process(process, timeout):
-#     process.start()
-#     process.join(timeout=timeout)
-#     if process.is_alive():
-#         process.terminate()
-#         process.join()
-#         return TimeoutError
-#     else:
-#         return None
-#
-# def timeout_decorator(self, function):
-#     def wrapper(arg1):
-#         p = multiprocessing.Process(target=function, args=(arg1,))
-#         result = watch_for_timeout_on_process(process=p, timeout=5 * self.time_statistics['standard_method'][
-#             'total_structure_learning'])
-#         return result
-#
-#     return wrapper
-
-# def set_config(self, *args):
-#     assert len(args) == 3
-#     parameter_type = args[0]
-#     parameter = args[1]
-#     new_parameter_value = args[2]
-#
-#     old_parameter_value = self.config[parameter_type][parameter]
-#     config_parameter_types = self.config.keys()
-#     parameters = self.config[parameter_type].keys()
-#     assert parameter_type in config_parameter_types
-#     assert parameter in parameters
-#     assert type(new_parameter_value) is type(old_parameter_value)
-#     if args[0] == 'directory_params' and args[1] == 'data_dir':
-#         raise ValueError(
-#             'Cannot update "data_dir" config option. Instead change the DATA_DIR variable when initialising '
-#             'MLNEvaluator.')
-#     self.config[parameter_type][parameter] = new_parameter_value
+from printing_communities import CommunityPrinter
 
 
 class MLNEvaluator(object):
@@ -240,12 +202,11 @@ class MLNEvaluator(object):
         hypergraph_communities = []
         for hypergraph in hypergraph_clusters:
             hypergraph_communities.append(Communities(hypergraph, config=self.config['random_walk_params']))
-        #hypergraph_communities = [Communities(original_hypergraph,
-        #                                      config=self.config['random_walk_params'])]
-        write_communities_to_file(list_of_communities=hypergraph_communities,
-                                  original_hypergraph=original_hypergraph,
-                                  file_name=os.path.join(self.data_dir, database_file.rstrip('.db') +
-                                                         self.hierarchical_clustering_suffix))
+
+        community_printer = CommunityPrinter(list_of_communities=hypergraph_communities,
+                                             original_hypergraph=original_hypergraph)
+        community_printer.write_files(file_name=os.path.join(self.data_dir, database_file.rstrip('.db') +
+                                                             self.hierarchical_clustering_suffix))
 
     def _run_rest_of_structure_learning_pipeline(self, database, info_file, save_name, method):
         print(' Communities...')
