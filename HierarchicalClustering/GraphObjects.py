@@ -183,8 +183,8 @@ class Hypergraph(hnx.Hypergraph):
         predicate_argument_types = {}
         with open(path_to_info_file, 'r') as info_file:
             for line_idx, line in enumerate(info_file.readlines()):
-                # Skip empty lines
-                if not line:
+                # Skip empty lines, or lines which are commented out (// symbol)
+                if not line or line.lstrip()[0:2] == '//':
                     continue
 
                 predicate, types = self._parse_line(line=line)

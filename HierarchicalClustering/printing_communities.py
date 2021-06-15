@@ -57,7 +57,6 @@ class CommunityPrinter(object):
 
         self.node_to_node_id = defaultdict(int)
         for node_id, node in enumerate(original_hypergraph.nodes):
-            print(node)
             self.node_to_node_id[node] = node_id
 
         assert self.num_of_communities <= original_hypergraph.number_of_nodes(), f"Incorrect hypergraph provided for " \
@@ -135,8 +134,9 @@ class CommunityPrinter(object):
         file.write(header)
 
     def _write_atoms_to_file(self, atoms, file):
-        file.write('#START_DB CLUSTER {} COMMUNITY {} NUM_ATOMS {}\n'.format(self.hypergraph_number + 1,
-                                                                             self.community_number + 1, len(atoms)))
+        file.write('#START_DB {} #COM 1 #NUM_ATOMS {} (CLUSTER {})\n'.format(self.community_number, len(atoms),
+                                                                             self.hypergraph_number+1))
+
         for atom in atoms:
             file.write(atom)
         file.write('#END_DB\n\n')
@@ -170,26 +170,31 @@ class CommunityPrinter(object):
         all_node_ids = single_node_ids + flattened_cluster_node_ids
         all_node_ids.sort(key=int)
         string_of_all_node_ids = ' '.join(all_node_ids)
-        file.write("NODES {}\n\n".format(string_of_all_node_ids))
+        file.write("NODES {}\n".format(string_of_all_node_ids))
+        file.write("#END_DB\n\n")
 
     def _get_atoms_of_community(self, community, hypergraph_of_community, string_type):
         atoms = set()
 
         for single_node in community.single_nodes:
             edges = hypergraph_of_community.nodes[single_node].memberships.values()
-            atoms.update(self._get_atoms_of_edges(edges, string_type))
+            atoms.update(self._get_atoms_of_edges_for_community(edges, community, string_type))
 
         for cluster in community.clusters:
             for cluster_node in cluster:
                 edges = hypergraph_of_community.nodes[cluster_node].memberships.values()
-                atoms.update(self._get_atoms_of_edges(edges, string_type))
+                atoms.update(self._get_atoms_of_edges_for_community(edges, community, string_type))
 
         return atoms
 
-    def _get_atoms_of_edges(self, edges, string_type):
+    def _get_atoms_of_edges_for_community(self, edges, community, string_type):
         atoms = set()
         for edge in edges:
-            atoms.add(self._get_atom_for_edge(edge, string_type))
+            nodes_of_edge = set(edge.elements.keys())
+            if nodes_of_edge.issubset(community.nodes):
+                atoms.add(self._get_atom_for_edge(edge, string_type))
+            else:
+                continue
 
         return atoms
 

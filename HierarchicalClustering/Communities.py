@@ -44,8 +44,11 @@ class Communities(object):
             self.communities[node.name] = community
 
     def __str__(self):
-        for community in self.communities.values():
-            print(community)
+        output_string = ''
+        for community_number, community in enumerate(self.communities.values()):
+            output_string += f'COMMUNITY {community_number+1} \n'+community.__str__()
+
+        return output_string
 
     def get_community(self, source_node: Node, config: dict):
 
@@ -79,10 +82,13 @@ class Community(object):
         self.source_node = source_node
         self.single_nodes = single_nodes
         self.clusters = clusters
-        self.number_of_single_nodes = len(single_nodes)
-        self.number_of_cluster_nodes = sum([len(cluster) for cluster in clusters])
+        self.cluster_nodes = set().union(*self.clusters)
+        self.nodes = self.single_nodes.union(self.cluster_nodes)
+
         self.number_of_clusters = len(clusters)
-        self.number_of_nodes = self.number_of_single_nodes + self.number_of_cluster_nodes
+        self.number_of_single_nodes = len(self.single_nodes)
+        self.number_of_cluster_nodes = len(self.cluster_nodes)
+        self.number_of_nodes = len(self.nodes)
 
     def __str__(self):
         output_str = ''

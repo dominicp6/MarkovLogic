@@ -89,24 +89,24 @@ class TestRandomWalks(unittest.TestCase):
                     assert node_data.average_hitting_time > 0
 
     def test_no_empty_communities(self):
-        for node_name, node_cluster_dict in communities.items():
+        for node_name, community in communities.items():
             all_nodes = []
-            all_nodes.extend(node_cluster_dict['single_nodes'])
-            for cluster in node_cluster_dict['clusters']:
+            all_nodes.extend(community.single_nodes)
+            for cluster in community.clusters:
                 all_nodes.extend(cluster)
             assert len(all_nodes) > 0
 
     def test_fewer_nodes_in_communities_than_in_original_hypergraph(self):
-        for node_name, node_cluster_dict in communities.items():
-            total_nodes = len(node_cluster_dict['single_nodes']) + sum([len(node_cluster) for node_cluster in
-                                                                        node_cluster_dict['clusters']])
+        for node_name, community in communities.items():
+            total_nodes = len(community.single_nodes) + sum([len(node_cluster) for node_cluster in
+                                                                        community.clusters])
             assert total_nodes <= H.number_of_nodes()
 
     def test_no_duplicate_nodes_in_communities(self):
-        for node_name, node_cluster_dict in communities.items():
+        for node_name, community in communities.items():
             all_nodes = []
-            all_nodes.extend(node_cluster_dict['single_nodes'])
-            for cluster in node_cluster_dict['clusters']:
+            all_nodes.extend(community.single_nodes)
+            for cluster in community.clusters:
                 all_nodes.extend(cluster)
             assert len(all_nodes) == len(set(all_nodes))
 
@@ -148,10 +148,9 @@ class TestRandomWalks(unittest.TestCase):
         clusters_and_single_nodes = []
         nodes = []
         communities2 = Communities(H2, config2).communities
-        for node_name, node_cluster_dict in communities2.items():
-            num_c_and_sn = len(node_cluster_dict['single_nodes']) + len(node_cluster_dict['clusters'])
-            num_nodes = len(node_cluster_dict['single_nodes']) + sum([len(node_cluster) for node_cluster in
-                                                                      node_cluster_dict['clusters']])
+        for node_name, community in communities2.items():
+            num_c_and_sn = community.number_of_single_nodes + community.number_of_clusters
+            num_nodes = community.number_of_nodes
             clusters_and_single_nodes.append(num_c_and_sn)
             nodes.append(num_nodes)
 
