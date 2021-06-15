@@ -82,15 +82,17 @@ class CommunityPrinter(object):
 
             self._write_header(file)
 
+            self.community_number = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
-                for community_number, community in enumerate(communities.communities.values()):
-                    self.community_number = community_number
+                for community in communities.communities.values():
 
                     ldb_atoms = self._get_atoms_of_community(community, hypergraph_of_community=communities.hypergraph,
                                                              string_type='ldb')
 
                     self._write_atoms_to_file(ldb_atoms, file)
+
+                    self.community_number += 1
 
             self._write_footer(file)
 
@@ -99,14 +101,17 @@ class CommunityPrinter(object):
 
             self._write_header(file)
 
+            self.community_number = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
-                for community_number, community in enumerate(communities.communities.values()):
-                    self.community_number = community_number
+                for community in communities.communities.values():
 
                     uldb_atoms = self._get_atoms_of_community(community, hypergraph_of_community=communities.hypergraph,
                                                               string_type='uldb')
                     self._write_atoms_to_file(uldb_atoms, file)
+
+                    self.community_number += 1
+
 
             self._write_footer(file)
 
@@ -115,10 +120,10 @@ class CommunityPrinter(object):
 
             self._write_header(file)
 
+            self.community_number = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
-                for community_number, community in enumerate(communities.communities.values()):
-                    self.community_number = community_number
+                for community in communities.communities.values():
 
                     single_node_ids, cluster_node_ids = self._get_node_ids(community)
 
@@ -127,6 +132,9 @@ class CommunityPrinter(object):
                     self._write_cluster_node_ids_to_file(cluster_node_ids, file)
                     self._write_all_node_ids_to_file(single_node_ids, cluster_node_ids, file)
 
+                    self.community_number += 1
+
+
             self._write_footer(file)
 
     def _write_header(self, file):
@@ -134,8 +142,7 @@ class CommunityPrinter(object):
         file.write(header)
 
     def _write_atoms_to_file(self, atoms, file):
-        file.write('#START_DB {} #COM 1 #NUM_ATOMS {} (CLUSTER {})\n'.format(self.community_number, len(atoms),
-                                                                             self.hypergraph_number+1))
+        file.write('#START_DB {} #COM 1 #NUM_ATOMS {} \n'.format(self.community_number, len(atoms)))
 
         for atom in atoms:
             file.write(atom)
