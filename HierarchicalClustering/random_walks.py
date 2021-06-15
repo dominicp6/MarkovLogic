@@ -12,12 +12,6 @@ def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, nu
     led to hitting the node.
     """
 
-    # initialise empty random walk data
-    # nodes_random_walk_data = {}
-
-    # for node in hypergraph.nodes():
-    #    nodes_random_walk_data[node.name] = NodeRandomWalkData(node.name, node.node_type)
-
     nodes_random_walk_data = {node.name: NodeRandomWalkData(node.name, node.node_type) for node in hypergraph.nodes()}
 
     for walk in range(number_of_walks):
