@@ -82,12 +82,12 @@ class Community(object):
         self.source_node = source_node
         self.single_nodes = single_nodes
         self.clusters = clusters
-        self.cluster_nodes = set().union(*self.clusters)
-        self.nodes = self.single_nodes.union(self.cluster_nodes)
+        self.nodes_in_clusters = set().union(*self.clusters)
+        self.nodes = self.single_nodes.union(self.nodes_in_clusters)
 
         self.number_of_clusters = len(clusters)
         self.number_of_single_nodes = len(self.single_nodes)
-        self.number_of_cluster_nodes = len(self.cluster_nodes)
+        self.number_of_nodes_in_clusters = len(self.nodes_in_clusters)
         self.number_of_nodes = len(self.nodes)
 
     def __str__(self):
