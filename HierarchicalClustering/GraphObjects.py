@@ -31,6 +31,8 @@ class Graph(nx.Graph):
             for hyperedge_id, edge in hyperedges_of_node.items():
                 hypergraph.add_edge(edge)
 
+            hypergraph.nodes[node].is_source_node = True
+
         hypergraph.node_types = template_hypergraph.node_types
 
         return hypergraph

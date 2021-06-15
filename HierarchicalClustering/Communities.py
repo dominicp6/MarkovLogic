@@ -39,9 +39,11 @@ class Communities(object):
         self.hypergraph = hypergraph
         self.communities = {}
 
-        for node in self.hypergraph.nodes():
-            community = self.get_community(source_node=node, config=config)
-            self.communities[node.name] = community
+        self.communities = {node.name: self.get_community(source_node=node, config=config) for node in
+                            hypergraph.nodes() if node.is_source_node}
+        #for node in self.hypergraph.nodes() if node.is_source_node:
+        #    community = self.get_community(source_node=node, config=config)
+        #    self.communities[node.name] = community
 
     def __str__(self):
         output_string = ''
