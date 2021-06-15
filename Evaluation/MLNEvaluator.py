@@ -77,13 +77,11 @@ class MLNEvaluator(object):
             'random_walk_params': {
                 'num_walks': 10000,
                 'max_length': 5,
-                # 'walk_scaling_param': 5,
                 'theta_hit': 4.9,
                 'theta_sym': 0.1,
                 'theta_js': 1.0,
                 'num_top': 3
             },
-            # 'data_directory': self.DATA_DIR,
         }
 
     def evaluate(self, database_files, info_file, type_file):
@@ -141,6 +139,7 @@ class MLNEvaluator(object):
         print('Structure Learning (Standard Method)')
         print(' Random walks...')
         save_name = database.rstrip('.db') + self.standard_method_suffix
+        # TODO: make all these numbers parameters from the config file
         random_walks_command = f'{self.lsm_dir}/rwl/rwl {self.data_dir}/{info_file} {self.data_dir}/' \
                                f'{database} {self.data_dir}/{type_file} 10000 5 0.05 0.1 4.9 0.1 1 3 1 ' \
                                f'{self.data_dir}/{save_name}.ldb {self.data_dir}/{save_name}.uldb {self.data_dir}/' \

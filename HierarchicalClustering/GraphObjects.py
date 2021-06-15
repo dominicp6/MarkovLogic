@@ -29,7 +29,12 @@ class Graph(nx.Graph):
         for node in self.nodes():
             hyperedges_of_node = template_hypergraph.nodes[node].memberships
             for hyperedge_id, edge in hyperedges_of_node.items():
-                hypergraph.add_edge(edge)
+
+                # only add a hyperedge if a strict majority of vertices in the edge are part of the cluster
+                nodes_of_edge = set(node.name for node in edge.elements.values())
+                number_of_edge_nodes_in_graph = len(set(self.nodes()).intersection(nodes_of_edge))
+                if number_of_edge_nodes_in_graph > len(nodes_of_edge)/2:
+                    hypergraph.add_edge(edge)
 
             hypergraph.nodes[node].is_source_node = True
 
