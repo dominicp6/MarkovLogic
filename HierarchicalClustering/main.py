@@ -21,17 +21,14 @@ config = {
 
 original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
-# hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
-# hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
-#
-# hypergraph_communities = []
-# for hypergraph in hypergraph_clusters:
-#     hypergraph_communities.append(Communities(hypergraph, config=config['random_walk_params']))
+hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
+hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
 
+hypergraph_communities = []
+for hypergraph in hypergraph_clusters:
+    hypergraph_communities.append(Communities(hypergraph, config=config['random_walk_params']))
 
-hypergraph_communities = Communities(original_hypergraph, config['random_walk_params'])
-print(hypergraph_communities)
-write_communities_to_file(list_of_communities=[hypergraph_communities], original_hypergraph=original_hypergraph,
+write_communities_to_file(list_of_communities=hypergraph_communities, original_hypergraph=original_hypergraph,
                           file_name='imdb')
 
 
