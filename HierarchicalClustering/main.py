@@ -1,14 +1,14 @@
 from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from Communities import Communities
-
+from printing_communities import CommunityPrinter
 
 config = {
-    'clustering_params' : {
-        'min_cluster_size' : 10,
-        'max_lambda2' : 0.8,
+    'clustering_params': {
+        'min_cluster_size': 10,
+        'max_lambda2': 0.8,
     },
-    'random_walk_params' : {
+    'random_walk_params': {
         'num_walks': 1000,
         'max_length': 5,
         'walk_scaling_param': 5,
@@ -19,10 +19,16 @@ config = {
     }
 }
 
-hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
+original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
-communities = Communities(hypergraph, config['random_walk_params'])
-print(communities)
+hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
+hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
 
+hypergraph_communities = []
+for hypergraph in hypergraph_clusters:
+    hypergraph_communities.append(Communities(hypergraph, config=config['random_walk_params']))
+
+community_printer = CommunityPrinter(list_of_communities=hypergraph_communities, original_hypergraph=original_hypergraph)
+community_printer.write_files(file_name='imdb')
 
 

@@ -31,6 +31,8 @@ class Graph(nx.Graph):
             for hyperedge_id, edge in hyperedges_of_node.items():
                 hypergraph.add_edge(edge)
 
+            hypergraph.nodes[node].is_source_node = True
+
         hypergraph.node_types = template_hypergraph.node_types
 
         return hypergraph
@@ -183,8 +185,8 @@ class Hypergraph(hnx.Hypergraph):
         predicate_argument_types = {}
         with open(path_to_info_file, 'r') as info_file:
             for line_idx, line in enumerate(info_file.readlines()):
-                # Skip empty lines
-                if not line:
+                # Skip empty lines, or lines which are commented out (// symbol)
+                if not line or line.lstrip()[0:2] == '//':
                     continue
 
                 predicate, types = self._parse_line(line=line)
@@ -196,3 +198,9 @@ class Hypergraph(hnx.Hypergraph):
                 self.node_types.update(types)
 
         return predicate_argument_types
+
+
+
+
+
+

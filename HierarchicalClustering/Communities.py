@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from random_walks import generate_node_random_walk_data
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
@@ -38,26 +36,18 @@ class Communities(object):
         assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
         assert type(config['num_top']) is int and config['num_top'] > 0, "num_top must be a positive int"
 
-        self.communities = defaultdict(lambda: {})
         self.hypergraph = hypergraph
+        self.communities = {}
 
-        for node in self.hypergraph.nodes():
-            community = self.get_community(source_node=node, config=config)
-            self.communities[node.name] = community
-            
-     def __str__(self):
-        output_str = ""
-        for source_node, cluster_dict in self.communities.items():
-            source_str = f"SOURCE: {source_node}\n ---------------------------- \n"
-            single_nodes_str = "".join([f"SINGLE: {node}\n" for node in cluster_dict['single_nodes']])
-            clusters_str = ""
-            for cluster_number, cluster in enumerate(cluster_dict['clusters']):
-                clusters_str += f"CLUSTER {cluster_number}: \n"
-                clusters_str += "".join([f"        {node}\n" for node in cluster])
+        self.communities = {node.name: self.get_community(source_node=node, config=config) for node in
+                            hypergraph.nodes() if node.is_source_node}
 
-            output_str += source_str + single_nodes_str + clusters_str + "\n"
+    def __str__(self):
+        output_string = ''
+        for community_id, community in enumerate(self.communities.values()):
+            output_string += f'COMMUNITY {community_id+1} \n'+community.__str__()
 
-        return output_str
+        return output_string
 
     def get_community(self, source_node: Node, config: dict):
 
@@ -80,8 +70,37 @@ class Communities(object):
                 single_nodes.update(single_nodes_of_type)
                 clusters.extend(clusters_of_type)
 
-        community = {'single_nodes': single_nodes, 'clusters': clusters}
+        community = Community(source_node.name, single_nodes, clusters)
 
         return community
+
+
+class Community(object):
+
+    def __init__(self, source_node: str, single_nodes: set[str], clusters: list[set[str]]):
+        self.source_node = source_node
+        self.single_nodes = single_nodes
+        self.clusters = clusters
+        self.nodes_in_clusters = set().union(*self.clusters)
+        self.nodes = self.single_nodes.union(self.nodes_in_clusters)
+
+        self.number_of_clusters = len(clusters)
+        self.number_of_single_nodes = len(self.single_nodes)
+        self.number_of_nodes_in_clusters = len(self.nodes_in_clusters)
+        self.number_of_nodes = len(self.nodes)
+
+    def __str__(self):
+        output_str = ''
+        source_str = f"SOURCE: {self.source_node}\n ---------------------------- \n"
+        single_nodes_str = "".join([f"SINGLE: {node}\n" for node in self.single_nodes])
+        clusters_str = ""
+        for cluster_id, cluster in enumerate(self.clusters):
+            clusters_str += f"CLUSTER {cluster_id}: \n"
+            clusters_str += "".join([f"        {node}\n" for node in cluster])
+
+        output_str += source_str + single_nodes_str + clusters_str + "\n"
+
+        return output_str
+
 
 

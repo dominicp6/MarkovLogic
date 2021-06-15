@@ -7,3 +7,4 @@ class Node(Entity):
         super().__init__(uid=name)
         self.name = name
         self.node_type = node_type
+        self.is_source_node = False

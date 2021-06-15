@@ -3,7 +3,8 @@ from GraphObjects import Hypergraph
 from Node import Node
 
 
-def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, number_of_walks: int, max_path_length: int):
+def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, number_of_walks: int,
+                                   max_path_length: int):
     """
     Runs a total of 'number_of_walks' random walks on 'hypergraph', each originating from the 'source_node' with a
     maximum length of 'max_path_length'. Returns a data structure which holds information about the number of times
@@ -11,10 +12,7 @@ def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, nu
     led to hitting the node.
     """
 
-    # initialise empty random walk data
-    nodes_random_walk_data = {}
-    for node in hypergraph.nodes():
-        nodes_random_walk_data[node.name] = NodeRandomWalkData(node.name, node.node_type)
+    nodes_random_walk_data = {node.name: NodeRandomWalkData(node.name, node.node_type) for node in hypergraph.nodes()}
 
     for walk in range(number_of_walks):
         nodes_random_walk_data = update_node_data_with_random_walk(hypergraph, source_node, max_path_length,
