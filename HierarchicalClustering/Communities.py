@@ -95,8 +95,8 @@ class Community(object):
         source_str = f"SOURCE: {self.source_node}\n ---------------------------- \n"
         single_nodes_str = "".join([f"SINGLE: {node}\n" for node in self.single_nodes])
         clusters_str = ""
-        for cluster_number, cluster in enumerate(self.clusters):
-            clusters_str += f"CLUSTER {cluster_number}: \n"
+        for cluster_id, cluster in enumerate(self.clusters):
+            clusters_str += f"CLUSTER {cluster_id}: \n"
             clusters_str += "".join([f"        {node}\n" for node in cluster])
 
         output_str += source_str + single_nodes_str + clusters_str + "\n"
