@@ -12,6 +12,7 @@ class CommunityPrinter(object):
 
         self.num_of_communities = sum(len(communities.communities) for communities in self.list_of_communities)
 
+        # Alchemy requires that each node in the original hypergraph is indexed with a unique id number
         self.node_to_node_id = defaultdict(int)
         for node_id, node in enumerate(original_hypergraph.nodes):
             self.node_to_node_id[node] = node_id
@@ -24,6 +25,7 @@ class CommunityPrinter(object):
                                                                                  f"original_hypergraph (" \
                                                                                  f"{original_hypergraph.number_of_nodes()})."
 
+        # .ldb is a type of file used by Alchemy. This maps each node to its string representation for the ldb file.
         self.node_to_ldb_string = self._get_node_to_ldb_string_map()
 
         self.hypergraph_number = 0
@@ -35,6 +37,7 @@ class CommunityPrinter(object):
         self._write_srcnclust_file(file_name)
 
     def _write_ldb_file(self, file_name: str):
+        #TODO: add description
         with open(os.path.join(file_name + '.ldb'), 'w') as file:
 
             self._write_header(file)
@@ -54,6 +57,7 @@ class CommunityPrinter(object):
             self._write_footer(file)
 
     def _write_uldb_file(self, file_name: str):
+        # TODO: add description
         with open(os.path.join(file_name + '.uldb'), 'w') as file:
 
             self._write_header(file)
@@ -73,6 +77,7 @@ class CommunityPrinter(object):
             self._write_footer(file)
 
     def _write_srcnclust_file(self, file_name: str):
+        # TODO: add description
         with open(os.path.join(file_name + '.srcnclusts'), 'w') as file:
 
             self._write_header(file)
