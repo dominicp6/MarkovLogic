@@ -8,13 +8,10 @@ from NodeRandomWalkData import NodeClusterRandomWalkData
 from js_divergence_utils import kl_divergence, js_divergence, compute_js_divergence_of_top_n_paths
 from Communities import Communities
 from random_walks import generate_node_random_walk_data
-from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_truncated_hitting_times, \
-    cluster_nodes_by_js_divergence
+from clustering_nodes_by_path_similarity import get_close_nodes
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
-config = {'num_walks': 1000,
-          'max_length': 7,
-          'walk_scaling_param': 5,
+config = {'epsilon': 0.01,
           'theta_hit': 6.9,
           'theta_sym': 0.1,
           'theta_js': 1.0,
@@ -23,9 +20,7 @@ config = {'num_walks': 1000,
 communities = Communities(H, config).communities
 
 H2 = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
-config2 = {'num_walks': 10000,
-           'max_length': 5,
-           'walk_scaling_param': 5,
+config2 = {'epsilon': 0.01,
            'theta_hit': 4.9,
            'theta_sym': 0.1,
            'theta_js': 1.0,
@@ -36,8 +31,7 @@ class TestRandomWalks(unittest.TestCase):
 
     def test_correct_node_cluster_merging(self):
         for node in H.nodes():
-            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, number_of_walks=100,
-                                                           max_path_length=5)
+            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, epsilon=0.01)
             close_nodes = get_close_nodes(nodes_rw_data, threshold_hitting_time=5)
 
             # MERGE SOME CLUSTERS ------------------------------------------------------------------------------
@@ -52,7 +46,7 @@ class TestRandomWalks(unittest.TestCase):
                 for i in range(len(js_clusters)):
                     for j in range(i + 1, len(js_clusters)):
                         js_div = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j],
-                                                                             3)
+                                                                      3)
 
                         if js_div < smallest_divergence and js_div < 0.25:
                             smallest_divergence = js_div
@@ -79,8 +73,7 @@ class TestRandomWalks(unittest.TestCase):
     def test_valid_average_hitting_time(self):
         max_path_length = 5
         for node in H.nodes():
-            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, number_of_walks=10,
-                                                           max_path_length=max_path_length)
+            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, epsilon=0.01)
             for node_data in nodes_rw_data.values():
                 if node_data.number_of_hits == 0:
                     assert node_data.average_hitting_time == max_path_length
@@ -99,7 +92,7 @@ class TestRandomWalks(unittest.TestCase):
     def test_fewer_nodes_in_communities_than_in_original_hypergraph(self):
         for node_name, community in communities.items():
             total_nodes = len(community.single_nodes) + sum([len(node_cluster) for node_cluster in
-                                                                        community.clusters])
+                                                             community.clusters])
             assert total_nodes <= H.number_of_nodes()
 
     def test_no_duplicate_nodes_in_communities(self):
@@ -134,8 +127,7 @@ class TestRandomWalks(unittest.TestCase):
     def test_number_of_close_nodes_same_as_SOTA(self):
         len_of_close_nodes = []
         for node in H2.nodes():
-            nodes_rw_data = generate_node_random_walk_data(H2, source_node=node, number_of_walks=config2['num_walks'],
-                                                           max_path_length=config2['max_length'])
+            nodes_rw_data = generate_node_random_walk_data(H2, source_node=node, epsilon=config2['epsilon'])
             close_nodes_rw_data = get_close_nodes(nodes_rw_data, threshold_hitting_time=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
 

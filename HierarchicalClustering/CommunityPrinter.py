@@ -37,65 +37,103 @@ class CommunityPrinter(object):
         self._write_srcnclust_file(file_name)
 
     def _write_ldb_file(self, file_name: str):
-        #TODO: add description
+        """
+        A type of file required by Alchemy for structure learning.
+
+        To construct the ldb file, consider each community in turn, find all hyperedges from the original
+        hypergraph whose nodes are members of the community, then return a list of these hyperedges, but formatted with
+        each constant replaced by either a node id (if the constant corresponds to a single node), or a cluster id
+        (if the constant corresponds to a node belonging to a cluster).
+
+        Example output (for a single community):
+
+        #START_DB 0 #COM 1 #NUM_ATOMS 5
+        movie(NODE_59,NODE_2)
+        director(NODE_2)
+        actor(CLUST_0)
+        movie(NODE_59,CLUST_0)
+        workedUnder(CLUST_0,NODE_2)
+        #END_DB
+        """
         with open(os.path.join(file_name + '.ldb'), 'w') as file:
 
             self._write_header(file)
 
-            self.community_number = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
-                for community in communities.communities.values():
-
+                for community_number, community in enumerate(communities.communities.values()):
+                    self.community_number = community_number
                     ldb_atoms = self._get_atoms_of_community(community, hypergraph_of_community=communities.hypergraph,
                                                              string_type='ldb')
-
                     self._write_atoms_to_file(ldb_atoms, file)
-
-                    self.community_number += 1
 
             self._write_footer(file)
 
     def _write_uldb_file(self, file_name: str):
-        # TODO: add description
+        """
+        A type of file required by Alchemy for structure learning.
+
+        To construct the uldb file, consider each community in turn, find all hyperedges from the original
+        hypergraph whose nodes are members of the community, then return a list of these hyperedges, formatted with
+        each constant replaced by its node id.
+
+        Example output (for a single community):
+
+        #START_DB 0 #COM 1 #NUM_ATOMS 7
+        workedUnder(NODE_53,NODE_2)
+        movie(NODE_59,NODE_41)
+        movie(NODE_59,NODE_33)
+        actor(NODE_35)
+        actor(NODE_40)
+        workedUnder(NODE_34,NODE_2)
+        actor(NODE_34)
+        #END_DB
+        """
         with open(os.path.join(file_name + '.uldb'), 'w') as file:
 
             self._write_header(file)
 
-            self.community_number = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
-                for community in communities.communities.values():
-
+                for community_number, community in enumerate(communities.communities.values()):
+                    self.community_number = community_number
                     uldb_atoms = self._get_atoms_of_community(community, hypergraph_of_community=communities.hypergraph,
                                                               string_type='uldb')
                     self._write_atoms_to_file(uldb_atoms, file)
 
-                    self.community_number += 1
-
-
             self._write_footer(file)
 
     def _write_srcnclust_file(self, file_name: str):
-        # TODO: add description
+        """
+        A type of file required by Alchemy for structure learning.
+
+        To construct the srcnclust file, consider each community and output the node ids of the source nodes,
+        single nodes, nodes that are members of clusters, and finally the ids of all nodes in the community.
+
+        Example output (for a single community):
+
+        #START_DB 0 #NUM_SINGLES 2 #NUM_CLUSTS 1 #NUM_NODES 17
+        SRC 59
+        2
+        59
+        CLUST 0  14 15 21 23 29 30 33 34 35 39 40 41 45 48 53
+        NODES 2 14 15 21 23 29 30 33 34 35 39 40 41 45 48 53 59
+        #END_DB
+        """
         with open(os.path.join(file_name + '.srcnclusts'), 'w') as file:
 
             self._write_header(file)
 
-            self.community_number = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
-                for community in communities.communities.values():
-
+                for community_number, community in enumerate(communities.communities.values()):
+                    self.community_number = community_number
                     single_node_ids, cluster_node_ids = self._get_node_ids(community)
 
                     self._write_community_source_node_to_file(community, file)
                     self._write_single_node_ids_to_file(single_node_ids, file)
                     self._write_cluster_node_ids_to_file(cluster_node_ids, file)
                     self._write_all_node_ids_to_file(single_node_ids, cluster_node_ids, file)
-
-                    self.community_number += 1
-
 
             self._write_footer(file)
 
@@ -119,7 +157,6 @@ class CommunityPrinter(object):
                                                                                         community.number_of_single_nodes
                                                                                         , community.number_of_clusters,
                                                                                         community.number_of_nodes))
-        # print(community.source_node)
         file.write("SRC {}\n".format(self.node_to_node_id[community.source_node]))
 
     @staticmethod
@@ -178,12 +215,7 @@ class CommunityPrinter(object):
 
     def _get_node_name(self, node, string_type):
         if string_type == 'ldb':
-            try:
-                return self.node_to_ldb_string[self.hypergraph_number][self.community_number][node.name]
-            except:
-                # if the node is not in the community then it is not a member of a community cluster, hence label it as
-                # you would a single node
-                return 'NODE_' + str(self.node_to_node_id[node.name])
+            return self.node_to_ldb_string[self.hypergraph_number][self.community_number][node.name]
 
         elif string_type == 'uldb':
             return 'NODE_' + str(self.node_to_node_id[node.name])

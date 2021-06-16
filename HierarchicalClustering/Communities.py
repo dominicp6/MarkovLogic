@@ -18,8 +18,8 @@ class Communities(object):
         the same cluster if they are of the same type.
 
         Config parameters:
-            num_walks    -  The number of random walks to run from each node.
-            max_length   -  The maximum length of the random walks.
+            epsilon      -  The maximum fractional error for the mean truncated hitting time.
+                            Used to determine the number of random walks that need to be run from each source node.
             theta_hit    -  Threshold for the average truncated hitting time (ATHT). Nodes with larger ATHT are excluded
                             from the community.
             theta_sym    -  Threshold difference in ATHT for nodes to be considered as potentially symmetric.
@@ -29,14 +29,21 @@ class Communities(object):
                             between path distributions.
         """
 
-        assert type(config['num_walks']) is int and config['num_walks'] > 0, "num_walks must be a positive integer"
-        assert type(config['max_length']) is int and config['max_length'] > 0, "max_length must be a positive integer"
+        assert type(config['epsilon']) is float and 1 > config['epsilon'] > 0, "epsilon must be a positive float " \
+                                                                               "between 0 and 1"
         assert type(config['theta_hit']) is float and config['theta_hit'] > 0, "theta_hit must be a positive float"
         assert type(config['theta_sym']) is float and config['theta_sym'] > 0, "theta_sym must be a positive float"
         assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
         assert type(config['num_top']) is int and config['num_top'] > 0, "num_top must be a positive int"
 
+        assert len(hypergraph.node_types) > 0, "Cannot generate communities for Hypergraph without typed nodes." \
+                                               "To specify typing, regenerate the Hypergraph using a .info file."
+
         self.hypergraph = hypergraph
+        if hypergraph.estimated_graph_diameter is None:
+            print(f"Warning: Graph diameter of the hypergraph not known. Resulting to using default length of random "
+                  f"walks.")
+
         self.communities = {}
 
         self.communities = {node.name: self.get_community(source_node=node, config=config) for node in
@@ -45,15 +52,14 @@ class Communities(object):
     def __str__(self):
         output_string = ''
         for community_id, community in enumerate(self.communities.values()):
-            output_string += f'COMMUNITY {community_id+1} \n'+community.__str__()
+            output_string += f'COMMUNITY {community_id + 1} \n' + community.__str__()
 
         return output_string
 
     def get_community(self, source_node: Node, config: dict):
-
-        random_walk_data = generate_node_random_walk_data(self.hypergraph, source_node=source_node,
-                                                          number_of_walks=config['num_walks'],
-                                                          max_path_length=config['max_length'])
+        random_walk_data = generate_node_random_walk_data(self.hypergraph,
+                                                          source_node=source_node,
+                                                          epsilon=config['epsilon'])
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node.name]
@@ -101,6 +107,3 @@ class Community(object):
         output_str += source_str + single_nodes_str + clusters_str + "\n"
 
         return output_str
-
-
-

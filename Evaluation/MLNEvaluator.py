@@ -9,7 +9,7 @@ from datetime import datetime
 from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from Communities import Communities
-from printing_communities import CommunityPrinter
+from CommunityPrinter import CommunityPrinter
 
 
 class MLNEvaluator(object):
@@ -139,9 +139,10 @@ class MLNEvaluator(object):
         print('Structure Learning (Standard Method)')
         print(' Random walks...')
         save_name = database.rstrip('.db') + self.standard_method_suffix
-        # TODO: make all these numbers parameters from the config file
         random_walks_command = f'{self.lsm_dir}/rwl/rwl {self.data_dir}/{info_file} {self.data_dir}/' \
-                               f'{database} {self.data_dir}/{type_file} 10000 5 0.05 0.1 4.9 0.1 1 3 1 ' \
+                               f'{database} {self.data_dir}/{type_file} {self.config["num_walks"]} ' \
+                               f'{self.config["max_length"]} 0.05 0.1 {self.config["theta_hit"]} ' \
+                               f'{self.config["theta_sym"]} {self.config["theta_js"]} {self.config["num_top"]} 1 ' \
                                f'{self.data_dir}/{save_name}.ldb {self.data_dir}/{save_name}.uldb {self.data_dir}/' \
                                f'{save_name}.srcnclusts > {self.log_dir}/{save_name}-rwl.log'
         initial_time = time.time()
