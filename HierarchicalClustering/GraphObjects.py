@@ -6,6 +6,8 @@ import re
 from Edge import Edge
 from Node import Node
 from itertools import combinations
+from collections import defaultdict
+from networkx.algorithms.approximation.distance_measures import diameter as estimate_diameter
 
 
 class Graph(nx.Graph):
@@ -15,6 +17,12 @@ class Graph(nx.Graph):
 
     def __init__(self):
         super().__init__()
+
+    def get_estimated_diameter(self):
+        """
+        Uses the 2-sweep algorithm to find a lower bound for the diameter of the graph in O(|V|) time.
+        """
+        return estimate_diameter(self)
 
     def convert_to_hypergraph_from_template(self, template_hypergraph):
         """
@@ -29,11 +37,17 @@ class Graph(nx.Graph):
         for node in self.nodes():
             hyperedges_of_node = template_hypergraph.nodes[node].memberships
             for hyperedge_id, edge in hyperedges_of_node.items():
-                hypergraph.add_edge(edge)
+
+                # only add a hyperedge if a strict majority of vertices in the edge are part of the cluster
+                nodes_of_edge = set(node.name for node in edge.elements.values())
+                number_of_edge_nodes_in_graph = len(set(self.nodes()).intersection(nodes_of_edge))
+                if number_of_edge_nodes_in_graph > len(nodes_of_edge) / 2:
+                    hypergraph.add_edge(edge)
 
             hypergraph.nodes[node].is_source_node = True
 
         hypergraph.node_types = template_hypergraph.node_types
+        hypergraph.estimated_graph_diameter = self.get_estimated_diameter()
 
         return hypergraph
 
@@ -63,9 +77,14 @@ class Hypergraph(hnx.Hypergraph):
     def __init__(self, database_file=None, info_file=None):
         super().__init__()
         self.node_types = set()
+        # An estimate of the diameter of the graph used to construct the Hypergraph. 'None', unless the Hypergraph
+        # was generated from a graph object via Graph.convert_to_hypergraph(). Used as a heuristic to determine
+        # how long random walks should be when generating Communities.
+        self.estimated_graph_diameter = None
 
         if database_file and not info_file:
-            raise ValueError("Cannot generate hypergraph. Database file provided but no info file provided.")
+            self.construct_from_database(path_to_db_file=database_file)
+            print("Warning: Hypergraph created without info file, expect limited functionality.")
         elif info_file and not database_file:
             raise ValueError("Cannot generate hypergraph. Info file provided but no database file provided.")
         elif info_file and database_file:
@@ -75,7 +94,7 @@ class Hypergraph(hnx.Hypergraph):
         else:
             pass
 
-    def construct_from_database(self, path_to_db_file: str, path_to_info_file: str):
+    def construct_from_database(self, path_to_db_file: str, path_to_info_file=None):
 
         predicate_argument_types = self._get_predicate_argument_types_from_info_file(path_to_info_file)
 
@@ -90,9 +109,14 @@ class Hypergraph(hnx.Hypergraph):
                     raise IOError(f'Line {line_idx} "{line}" of {path_to_db_file} has incorrect syntax. Make sure '
                                   f'that each predicate is correctly formatted with braces and commas e.g. Friends('
                                   f'Anna, Bob)')
-                node_types = predicate_argument_types[predicate]
 
-                nodes = [Node(name=node_names[i], node_type=node_types[i]) for i in range(len(node_names))]
+                if predicate_argument_types[predicate] is not None:
+                    node_types = predicate_argument_types[predicate]
+                else:
+                    node_types = ["unspecified_type"] * len(node_names)
+
+                nodes = [Node(name=node_names[i], node_type=node_types[i], is_source_node=True)
+                         for i in range(len(node_names))]
                 edge = Edge(uid=line_idx, nodes=nodes, predicate=predicate)
 
                 self.add_edge(edge)
@@ -126,7 +150,7 @@ class Hypergraph(hnx.Hypergraph):
 
         return graph
 
-    def get_random_edge_and_neighbor_of_node(self, node: str):
+    def get_random_edge_and_neighbor_of_node(self, node: Node):
         """
         Given a node, gets a random non-single-vertex hyperedge that the node belongs to. Then gets a random node
         from the other nodes in that hyperedge (neighbor). Returns the hyperedge and the neighbor.
@@ -170,7 +194,7 @@ class Hypergraph(hnx.Hypergraph):
         Family(Jane, Edward, Steve), Smokes(John) - i.e. alpha-numeric characters followed by an open parenthesis
         followed by comma-separated alpha-numeric characters followed by a closed parenthesis.
         """
-        correct_syntax = re.match("\w+\((\w+|(\w+,\s*)+\w+)\)$", line)
+        correct_syntax = re.match("(\w|-)+\(((\w|-)+|((\w|-)+,\s*)+(\w|-)+)\)$", line)
         is_correct_syntax = bool(correct_syntax)
 
         return is_correct_syntax
@@ -182,25 +206,21 @@ class Hypergraph(hnx.Hypergraph):
 
         e.g. {'Friends' : ['person', 'person'], 'Family' : ['person', 'person', 'person'], 'Smokes', ['person']}
         """
-        predicate_argument_types = {}
-        with open(path_to_info_file, 'r') as info_file:
-            for line_idx, line in enumerate(info_file.readlines()):
-                # Skip empty lines, or lines which are commented out (// symbol)
-                if not line or line.lstrip()[0:2] == '//':
-                    continue
+        predicate_argument_types = defaultdict(lambda: None)
 
-                predicate, types = self._parse_line(line=line)
-                if predicate is None or types is None:
-                    raise IOError(f'Line {line_idx} "{line}" of {path_to_info_file} has incorrect syntax. Make sure '
-                                  f'that each predicate is correctly formatted with braces and commas e.g. Friends('
-                                  f'person, person)')
-                predicate_argument_types[predicate] = types
-                self.node_types.update(types)
+        if path_to_info_file:
+            with open(path_to_info_file, 'r') as info_file:
+                for line_idx, line in enumerate(info_file.readlines()):
+                    # Skip empty lines, or lines which are commented out (// symbol)
+                    if not line or line.lstrip()[0:2] == '//':
+                        continue
+
+                    predicate, types = self._parse_line(line=line)
+                    if predicate is None or types is None:
+                        raise IOError(f'Line {line_idx} "{line}" of {path_to_info_file} has incorrect syntax. Make sure'
+                                      f' that each predicate is correctly formatted with braces and commas e.g. Friends'
+                                      f'(person, person)')
+                    predicate_argument_types[predicate] = types
+                    self.node_types.update(types)
 
         return predicate_argument_types
-
-
-
-
-
-
