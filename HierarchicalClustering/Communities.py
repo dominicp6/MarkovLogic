@@ -59,7 +59,9 @@ class Communities(object):
     def get_community(self, source_node: Node, config: dict):
         random_walk_data = generate_node_random_walk_data(self.hypergraph,
                                                           source_node=source_node,
-                                                          epsilon=config['epsilon'])
+                                                          epsilon=config['epsilon'],
+                                                          k=config['k'],
+                                                          max_path_length=config['max_path_length'])
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node.name]

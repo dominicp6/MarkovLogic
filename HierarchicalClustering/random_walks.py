@@ -3,7 +3,7 @@ from GraphObjects import Hypergraph
 from Node import Node
 
 
-def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, epsilon: float, k=1.25, L=5):
+def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, epsilon: float, k=1.25, max_path_length=5):
     """
     Runs random walks on 'hypergraph', each originating from the 'source_node'. Returns a data structure which holds
     information about the number of times each node was hit, the average hitting time, and the frequency distribution
@@ -21,9 +21,9 @@ def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: Node, ep
     if hypergraph.estimated_graph_diameter is not None:
         length_of_walk = int(round(k * hypergraph.estimated_graph_diameter))
     else:
-        length_of_walk = L
+        length_of_walk = max_path_length
 
-    number_of_walks = int(round((length_of_walk-1)/(4*epsilon**2)))
+    number_of_walks = int(round((length_of_walk-1)**2/(4*epsilon**2)))
 
     nodes_random_walk_data = {node.name: NodeRandomWalkData(node.name, node.node_type) for node in hypergraph.nodes()}
 
