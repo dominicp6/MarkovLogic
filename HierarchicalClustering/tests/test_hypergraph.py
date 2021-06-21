@@ -26,7 +26,7 @@ class TestHypergraph(unittest.TestCase):
         assert all(node_type in H2.node_types for node_type in ['person', 'motive', 'location', 'item']), \
             f"Unexpected node types: {H2.node_types}"
         assert len(H2.node_types) == 4, f"Expected #types: {4}, Actual: {len(H2.node_types)}"
-        assert H2.nodes['MsScarlet'].node_type == 'person'
-        assert H2.nodes['CandleStick'].node_type == 'item'
-        assert H2.nodes['Kitchen'].node_type == 'location'
-        assert H2.nodes['Money'].node_type == 'motive'
+        assert H2.nodes['MsScarlet'] == 'person'
+        assert H2.nodes['CandleStick'] == 'item'
+        assert H2.nodes['Kitchen'] == 'location'
+        assert H2.nodes['Money'] == 'motive'

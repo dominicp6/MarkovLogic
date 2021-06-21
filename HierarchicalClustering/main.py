@@ -2,6 +2,7 @@ from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
 from Communities import Communities
 from CommunityPrinter import CommunityPrinter
+import cProfile
 
 config = {
     'clustering_params': {
@@ -24,9 +25,10 @@ original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file
 hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
 hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
 
-hypergraph_communities = []
-for hypergraph in hypergraph_clusters:
-    hypergraph_communities.append(Communities(hypergraph, config=config['random_walk_params']))
+hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params'])
+                          for hypergraph in hypergraph_clusters]
+
+cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
 
 for communities in hypergraph_communities:
     print(communities)

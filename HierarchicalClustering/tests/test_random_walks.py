@@ -12,6 +12,8 @@ from clustering_nodes_by_path_similarity import get_close_nodes
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
 config = {'epsilon': 0.01,
+          'k': 1.25,
+          'max_path_length': 5,
           'theta_hit': 6.9,
           'theta_sym': 0.1,
           'theta_js': 1.0,
@@ -21,6 +23,8 @@ communities = Communities(H, config).communities
 
 H2 = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 config2 = {'epsilon': 0.01,
+           'k': 1.25,
+           'max_path_length': 5,
            'theta_hit': 4.9,
            'theta_sym': 0.1,
            'theta_js': 1.0,
@@ -30,7 +34,7 @@ config2 = {'epsilon': 0.01,
 class TestRandomWalks(unittest.TestCase):
 
     def test_correct_node_cluster_merging(self):
-        for node in H.nodes():
+        for node in H.nodes.keys():
             nodes_rw_data = generate_node_random_walk_data(H, source_node=node, epsilon=0.01)
             close_nodes = get_close_nodes(nodes_rw_data, threshold_hitting_time=5)
 
@@ -72,7 +76,7 @@ class TestRandomWalks(unittest.TestCase):
 
     def test_valid_average_hitting_time(self):
         max_path_length = 5
-        for node in H.nodes():
+        for node in H.nodes.keys():
             nodes_rw_data = generate_node_random_walk_data(H, source_node=node, epsilon=0.01)
             for node_data in nodes_rw_data.values():
                 if node_data.number_of_hits == 0:
@@ -126,7 +130,7 @@ class TestRandomWalks(unittest.TestCase):
 
     def test_number_of_close_nodes_same_as_SOTA(self):
         len_of_close_nodes = []
-        for node in H2.nodes():
+        for node in H2.nodes.keys():
             nodes_rw_data = generate_node_random_walk_data(H2, source_node=node, epsilon=config2['epsilon'])
             close_nodes_rw_data = get_close_nodes(nodes_rw_data, threshold_hitting_time=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
