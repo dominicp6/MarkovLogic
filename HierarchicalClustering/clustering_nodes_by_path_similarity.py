@@ -1,4 +1,8 @@
+import numpy as np
 from NodeRandomWalkData import *
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 from js_divergence_utils import compute_js_divergence_of_top_n_paths
 
 
@@ -27,13 +31,12 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], config: di
     single_nodes.update(node.name for node in distance_symmetric_single_nodes)
 
     for distance_symmetric_cluster in distance_symmetric_clusters:
-        js_single_nodes, js_clusters = cluster_nodes_by_js_divergence(distance_symmetric_cluster,
-                                                                      threshold_js_divergence=
-                                                                      config['theta_js'],
-                                                                      number_of_paths=config['num_top'])
+        path_symmetric_single_nodes, path_symmetric_clusters = cluster_nodes_by_path_distributions(
+            distance_symmetric_cluster,
+            number_of_paths=config['num_top'])
 
-        single_nodes.update(js_single_nodes)
-        clusters.extend(js_clusters)
+        single_nodes.update(path_symmetric_single_nodes)
+        clusters.extend(path_symmetric_clusters)
 
     return single_nodes, clusters
 
@@ -53,10 +56,10 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     current_hitting_time = nodes[0].average_hitting_time
     distance_symmetric_clusters = []
     distance_symmetric_single_nodes = set()
-    distance_symmetric_cluster = set()
+    distance_symmetric_cluster = []
     for node in nodes:
         if (node.average_hitting_time - current_hitting_time) < threshold_hitting_time_difference:
-            distance_symmetric_cluster.add(node)
+            distance_symmetric_cluster.append(node)
         else:
             if len(distance_symmetric_cluster) == 1:
                 distance_symmetric_single_nodes.update(distance_symmetric_cluster)
@@ -64,7 +67,7 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
                 distance_symmetric_clusters.append(distance_symmetric_cluster.copy())
 
             distance_symmetric_cluster.clear()
-            distance_symmetric_cluster.add(node)
+            distance_symmetric_cluster.append(node)
 
         current_hitting_time = node.average_hitting_time
 
@@ -75,7 +78,92 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     return distance_symmetric_single_nodes, distance_symmetric_clusters
 
 
-def cluster_nodes_by_js_divergence(nodes: set[NodeRandomWalkData],
+def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_paths: int,
+                                        pca_target_dimension=2):
+
+    if len(nodes) <= 5:
+        print('Small cluster')
+        input()
+        return cluster_nodes_by_js_divergence(nodes=nodes, threshold_js_divergence=1.0, number_of_paths=3)
+
+    else:
+        print('Large cluster')
+        input()
+
+        print(f'Number of nodes {len(nodes)}')
+
+        encountered_paths = set()
+        path_to_path_id = defaultdict(lambda: -1)
+        top_n_paths = []
+        for node in nodes:
+            top_n_paths.append(node.get_top_n_paths(number_of_paths))
+
+        path_list = []
+        [path_list.extend(paths.keys()) for paths in top_n_paths]
+        number_unique_paths = len(set(path_list))
+        path_count_array = np.zeros([number_unique_paths, len(nodes)])
+
+        print(f'Number of unique paths {number_unique_paths}')
+
+        for node_id, node_paths in enumerate(top_n_paths):
+            print(nodes[node_id].name)
+            for path, path_count in node_paths.items():
+                if path_to_path_id[path] == -1:
+                    encountered_paths.add(path)
+                    path_id = len(encountered_paths) - 1
+                    path_to_path_id[path] = path_id
+                else:
+                    path_id = path_to_path_id[path]
+
+                path_count_array[path_id][node_id] = path_count
+
+        mean_adjusted_path_count_array = ((path_count_array - np.mean(path_count_array, axis=1)[:, None])/np.mean(path_count_array, axis=1)[:, None]).T
+        print(mean_adjusted_path_count_array)
+
+        pca = PCA(n_components=2)
+        principal_components = pca.fit_transform(mean_adjusted_path_count_array)
+        plt.plot(principal_components)
+        plt.show()
+        print(principal_components)
+        print(pca.explained_variance_)
+
+        max_number_clusters = len(nodes)
+        silhouette_scores_for_number_clusters = []
+
+        for n_clusters in range(max_number_clusters - 2):
+            n_clusters += 2  # we start counting at 1, since zero or one clusters is invalid
+            clusterer = KMeans(n_clusters=n_clusters, random_state=10)
+            cluster_labels = clusterer.fit_predict(mean_adjusted_path_count_array)
+            silhouette_avg = silhouette_score(mean_adjusted_path_count_array, cluster_labels)
+            silhouette_scores_for_number_clusters.append(silhouette_avg)
+
+        print(silhouette_scores_for_number_clusters)
+        optimal_number_clusters = np.argmax(silhouette_scores_for_number_clusters) + 2
+        clusterer = KMeans(n_clusters=optimal_number_clusters, random_state=10)
+        cluster_labels = clusterer.fit_predict(mean_adjusted_path_count_array)
+        print(optimal_number_clusters)
+        print(cluster_labels)
+
+        path_distribution_clusters = [[] for _ in range(optimal_number_clusters)]
+        for node_id, cluster_id in enumerate(cluster_labels):
+            path_distribution_clusters[cluster_id].append(nodes[node_id].name)
+
+        print(path_distribution_clusters)
+
+        # split up the path_distribution_clusters into single nodes and clusters
+        single_nodes = set()
+        clusters = []
+        for path_distribution_cluster in path_distribution_clusters:
+            if len(path_distribution_cluster) == 1:
+                node_name = path_distribution_cluster[0]
+                single_nodes.add(node_name)
+            else:
+                clusters.append(path_distribution_cluster)
+
+        return single_nodes, clusters
+
+
+def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
                                    threshold_js_divergence: float, number_of_paths: int):
     """
     Performs agglomerative clustering of nodes based on the distribution of their paths obtained through random walks.

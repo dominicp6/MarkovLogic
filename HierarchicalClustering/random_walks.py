@@ -1,8 +1,11 @@
+import numpy as np
+
 from NodeRandomWalkData import NodeRandomWalkData
 from GraphObjects import Hypergraph
 
 
-def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: str, epsilon: float, k=1.25, max_path_length=5):
+def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: str, epsilon: float, k=1.25, max_path_length=5,
+                                   number_of_paths=20):
     """
     Runs random walks on 'hypergraph', each originating from the 'source_node'. Returns a data structure which holds
     information about the number of times each node was hit, the average hitting time, and the frequency distribution
@@ -22,7 +25,15 @@ def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: str, eps
     else:
         length_of_walk = max_path_length
 
-    number_of_walks = int(round((length_of_walk-1)**2/(4*epsilon**2)))
+    n_pred = hypergraph.number_of_predicates()
+    max_num_unique_paths = (n_pred ** (n_pred**length_of_walk - 1) / (n_pred-1))
+
+    min_walks_for_accurate_truncated_hitting_times = int(round((length_of_walk-1)**2/(4*epsilon**2)))
+    min_walks_for_accurate_path_distributions = int(round(min(number_of_paths, max_num_unique_paths) *
+                                                          np.log(max_num_unique_paths)
+                                                          / (epsilon**2)))
+
+    number_of_walks = max(min_walks_for_accurate_truncated_hitting_times, min_walks_for_accurate_path_distributions)
 
     nodes_random_walk_data = {node: NodeRandomWalkData(node, node_type) for node, node_type in hypergraph.nodes.items()}
 

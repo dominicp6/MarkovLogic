@@ -22,6 +22,8 @@ config = {
 
 original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
+cProfile.run("Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')")
+
 hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
 hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
 
