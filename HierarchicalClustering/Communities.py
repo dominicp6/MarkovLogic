@@ -1,5 +1,5 @@
 from multiprocessing import Pool, cpu_count
-from random_walks import generate_node_random_walk_data
+from random_walks import RandomWalker
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
 
@@ -52,6 +52,10 @@ class Communities(object):
             print(f"Warning: Graph diameter of the hypergraph not known. Reverting to using default length of random "
                   f"walks.")
 
+        self.random_walker = RandomWalker(hypergraph=hypergraph, epsilon=config['epsilon'],
+                                          k=config['k'], max_path_length=config['max_path_length'],
+                                          number_of_paths=config['num_top'])
+
         self.communities = {}
 
         if config['multiprocessing']:
@@ -71,12 +75,7 @@ class Communities(object):
         return output_string
 
     def get_community(self, source_node: str, config: dict):
-        random_walk_data = generate_node_random_walk_data(self.hypergraph,
-                                                          source_node=source_node,
-                                                          epsilon=config['epsilon'],
-                                                          k=config['k'],
-                                                          max_path_length=config['max_path_length'],
-                                                          number_of_paths=config['num_top'])
+        random_walk_data = self.random_walker.generate_node_random_walk_data_from_source_node(source_node=source_node)
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node]

@@ -21,7 +21,7 @@ if __name__ == "__main__":
             'pca_threshold': 40,
             'k': 1.25,
             'max_path_length': 5,
-            'multiprocessing': True,
+            'multiprocessing': False,
         }
     }
 
