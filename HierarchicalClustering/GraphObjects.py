@@ -83,14 +83,15 @@ class Hypergraph(object):
     """
 
     def __init__(self, database_file=None, info_file=None):
-        self.singleton_edges = defaultdict(lambda: set())  # dict(node_name: set(predicate))
+        self.singleton_edges = defaultdict(set)  # dict(node_name: set(predicate))
         self.edges = {}  # dict(edge_id: list(node_name))
         self.predicates = {}  # dict(edge_id: predicate_name)
         self.nodes = {}  # dict(node_name: node_type)
-        self.memberships = defaultdict(lambda: set())  # dict(node_name: set(edge_id))
+        self.memberships = defaultdict(set)  # dict(node_name: set(edge_id))
         self.predicate_argument_types = {}  # dict(predicate_name: list(node_type))
         self.node_types = set()  # set(node_types)
-        self.is_source_node = defaultdict(lambda: False)  # dict(node_name: bool)
+        self.is_source_node = defaultdict(bool)  # dict(node_name: bool)
+        self.is_source_node.setdefault(False)
         self.estimated_graph_diameter = None
 
         if database_file and not info_file:

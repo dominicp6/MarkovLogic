@@ -5,7 +5,7 @@ from GraphObjects import Hypergraph
 
 
 def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: str, epsilon: float, k=1.25, max_path_length=5,
-                                   number_of_paths=20):
+                                   number_of_paths=5):
     """
     Runs random walks on 'hypergraph', each originating from the 'source_node'. Returns a data structure which holds
     information about the number of times each node was hit, the average hitting time, and the frequency distribution
@@ -19,30 +19,30 @@ def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: str, eps
                       the estimated graph diameter of the hypergraph.
     :param: L       - The length of the random walk to default to if an estimate of the graph diameter of the hypergraph
                       is not known.
+    TODO: update this description
     """
     if hypergraph.estimated_graph_diameter is not None:
         length_of_walk = int(round(k * hypergraph.estimated_graph_diameter))
     else:
         length_of_walk = max_path_length
 
-    n_pred = hypergraph.number_of_predicates()
-    max_num_unique_paths = (n_pred ** (n_pred**length_of_walk - 1) / (n_pred-1))
+    num_of_predicates = hypergraph.number_of_predicates()
+    max_num_of_unique_paths = (num_of_predicates * (num_of_predicates ** length_of_walk - 1) / (num_of_predicates - 1))
 
     min_walks_for_accurate_truncated_hitting_times = int(round((length_of_walk-1)**2/(4*epsilon**2)))
-    min_walks_for_accurate_path_distributions = int(round(min(number_of_paths, max_num_unique_paths) *
-                                                          np.log(max_num_unique_paths)
+    min_walks_for_accurate_path_distributions = int(round(min(number_of_paths, max_num_of_unique_paths) *
+                                                          np.log(max_num_of_unique_paths)
                                                           / (epsilon**2)))
 
     number_of_walks = max(min_walks_for_accurate_truncated_hitting_times, min_walks_for_accurate_path_distributions)
 
     nodes_random_walk_data = {node: NodeRandomWalkData(node, node_type) for node, node_type in hypergraph.nodes.items()}
 
-    for walk in range(number_of_walks):
-        nodes_random_walk_data = update_node_data_with_random_walk(hypergraph, source_node, length_of_walk,
-                                                                   nodes_random_walk_data)
+    [update_node_data_with_random_walk(hypergraph, source_node, length_of_walk, nodes_random_walk_data)
+     for walk in range(number_of_walks)]
 
-    for node in hypergraph.nodes.keys():
-        nodes_random_walk_data[node].calculate_average_hitting_time(number_of_walks, length_of_walk)
+    [nodes_random_walk_data[node].calculate_average_hitting_time(number_of_walks, length_of_walk)
+     for node in hypergraph.nodes.keys()]
 
     return nodes_random_walk_data  # dict[str, NodeRandomWalkData]
 
@@ -50,7 +50,7 @@ def generate_node_random_walk_data(hypergraph: Hypergraph, source_node: str, eps
 def update_node_data_with_random_walk(hypergraph: Hypergraph, source_node: str, length_of_walk: int,
                                       nodes_random_walk_data: dict[str, NodeRandomWalkData]):
     """
-    Runs a single random walk on a hypergraph, then returns the updated random walk data.
+    Runs a single random walk on a hypergraph, updating the nodes_random_walk_data in place.
     """
     current_node = source_node
     encountered_nodes = set()
@@ -69,4 +69,4 @@ def update_node_data_with_random_walk(hypergraph: Hypergraph, source_node: str, 
 
         current_node = next_node
 
-    return nodes_random_walk_data
+
