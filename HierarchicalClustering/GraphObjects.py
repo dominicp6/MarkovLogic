@@ -1,64 +1,10 @@
 import random
 import networkx as nx
-import re
+import multiprocessing
 from itertools import combinations
 from collections import defaultdict
 from networkx.algorithms.approximation.distance_measures import diameter as estimate_diameter
-
-
-class InvalidLineSyntaxError(Exception):
-    def __init__(self, line, line_number, file_name):
-        self.line = line
-        self.line_number = line_number
-        self.file_name = file_name
-
-    def __str__(self):
-        return f'Line {self.line_number} "{self.line}" of {self.file_name} has incorrect syntax. Make sure that each ' \
-               f'predicate is correctly formatted with braces and commas e.g. Friends(person, person)'
-
-
-def parse_line(line: str):
-    """
-    Parses a correctly-formatted predicate. e.g. Friends(Alice, Bob) returns 'Friends', ['Alice', 'Bob'].
-    Returns None, None if the predicate is incorrectly formatted.
-    """
-    line = line.strip()
-
-    if not is_good_line_syntax(line):
-        return None, None
-
-    line_fragments = line.split('(')
-    # the predicate name e.g. 'Friends'
-    predicate = line_fragments[0]
-    # a string of predicate arguments separated by commas e.g. 'Alice, Bob'
-    predicate_argument_string = line_fragments[1].split(')')[0]
-    # a list of predicate arguments e.g. ['Alice', 'Bob']
-    predicate_arguments = [predicate_argument.strip() for predicate_argument in
-                           predicate_argument_string.split(',')]
-
-    return predicate, predicate_arguments
-
-
-def is_good_line_syntax(line: str):
-    """
-    Checks for correct line syntax, returning either True or False.
-
-    For the database and info files, examples of correct line syntax are e.g. Friends(Alice, Bob),
-    Family(Jane, Edward, Steve), Smokes(John) - i.e. alpha-numeric characters followed by an open parenthesis
-    followed by comma-separated alpha-numeric characters followed by a closed parenthesis.
-    """
-    correct_syntax = re.match("(\w|-|')+\(((\w|-|')+|((\w|-|')+,\s*)+(\w|-|')+)\)$", line)
-    is_correct_syntax = bool(correct_syntax)
-
-    return is_correct_syntax
-
-
-def is_empty_or_comment(line: str):
-    if line is None or line.isspace() or line.lstrip()[0:2] == '//':
-        return True
-    else:
-        return False
-
+from database import parse_line, is_empty_or_comment
 
 
 class Graph(nx.Graph):
@@ -88,15 +34,15 @@ class Graph(nx.Graph):
 
         for node in self.nodes():
             # add non-singleton edges to the hypergraph
-            hyperedge_ids_of_node = template_hypergraph.memberships[node]
-            for edge_id in hyperedge_ids_of_node:
+            hyperedges_of_node = template_hypergraph.memberships[node]
+            for edge in hyperedges_of_node:
                 # only add a hyperedge if a strict majority of vertices in the edge are part of the cluster
-                predicate = template_hypergraph.predicates[edge_id]
-                edge_nodes = template_hypergraph.edges[edge_id]
+                predicate = template_hypergraph.predicates[edge]
+                edge_nodes = template_hypergraph.edges[edge]
                 number_of_edge_nodes_in_graph = len(set(self.nodes()).intersection(set(edge_nodes)))
 
                 if number_of_edge_nodes_in_graph > len(edge_nodes) / 2:
-                    hypergraph.add_edge(edge_id=edge_id,
+                    hypergraph.add_edge(edge_id=edge,
                                         predicate=predicate,
                                         nodes=edge_nodes)
 
@@ -112,6 +58,7 @@ class Graph(nx.Graph):
         hypergraph.estimated_graph_diameter = self.get_estimated_diameter()
 
         return hypergraph
+
 
 class Hypergraph(object):
     """
@@ -136,14 +83,17 @@ class Hypergraph(object):
     """
 
     def __init__(self, database_file=None, info_file=None):
-        self.singleton_edges = defaultdict(lambda: set()) # dict(node_name: set(predicate))
-        self.edges = {}                                   # dict(edge_id: list(node_name))
-        self.predicates = {}                              # dict(edge_id: predicate_name)
-        self.nodes = {}                                   # dict(node_name: node_type)
-        self.memberships = defaultdict(lambda: set())     # dict(node_name: set(edge_id))
-        self.predicate_argument_types = {}                # dict(predicate_name: list(node_type))
-        self.node_types = set()                           # set(node_types)
-        self.is_source_node = defaultdict(lambda: False)  # dict(node_name: bool)
+        self.singleton_edges = defaultdict(set)  # dict(node_name: set(predicate)), all edges with one node
+        self.edges = {}                          # dict(edge_id: list(node_name)), all edges joining two or more nodes
+        self.predicates = {}                     # dict(edge_id: predicate_name), the predicate name of each edge
+        self.nodes = {}                          # dict(node_name: node_type), each node and their type
+        self.memberships = defaultdict(set)      # dict(node_name: set(edge_id)), the edges each node is a member of
+        self.predicate_argument_types = {}       # dict(predicate_name: list(node_type)), the node types that go into
+                                                 # arguments of the predicate
+        self.node_types = set()                  # set(node_types), all unique node types in the hypergraph
+        self.is_source_node = defaultdict(bool)  # dict(node_name: bool), whether each node is a source node for
+                                                 # random walks
+        self.is_source_node.setdefault(False)
         self.estimated_graph_diameter = None
 
         if database_file and not info_file:
@@ -169,15 +119,21 @@ class Hypergraph(object):
         self.predicate_argument_types = self._get_predicate_argument_types_from_info_file(path_to_info_file)
 
         with open(path_to_db_file, 'r') as database_file:
-            for line_idx, line in enumerate(database_file.readlines()):
-                if is_empty_or_comment(line):
-                    continue
+            lines_in_db = database_file.readlines()
+            # for large databases, use multiprocessing to speed-up line imports
+            if len(lines_in_db) > 5000:
+                pool = multiprocessing.Pool()
+                predicates_and_node_names = pool.starmap_async(parse_line,
+                                                               [(line, line_idx, path_to_db_file)
+                                                                for line_idx, line in enumerate(lines_in_db)
+                                                                if not is_empty_or_comment(line)]).get()
+            else:
+                predicates_and_node_names = [parse_line(line, line_idx, path_to_db_file)
+                                             for line_idx, line in enumerate(lines_in_db)
+                                             if not is_empty_or_comment(line)]
 
-                predicate, node_names = parse_line(line=line)
-                if predicate is None or node_names is None:
-                    raise InvalidLineSyntaxError(line, line_idx, file_name=path_to_db_file)
-
-                self.add_edge(edge_id=line_idx, predicate=predicate, nodes=node_names)
+        [self.add_edge(edge_id=edge_idx, predicate=predicate, nodes=node_names)
+         for edge_idx, (predicate, node_names) in enumerate(predicates_and_node_names)]
 
         for node_name in self.nodes.keys():
             self.is_source_node[node_name] = True
@@ -199,9 +155,7 @@ class Hypergraph(object):
                 if is_empty_or_comment(line):
                     continue
 
-                predicate, types = parse_line(line=line)
-                if predicate is None or types is None:
-                    raise InvalidLineSyntaxError(line, line_idx, file_name=path_to_info_file)
+                predicate, types = parse_line(line=line, line_idx=line_idx, file_name=path_to_info_file)
 
                 predicate_argument_types[predicate] = types
                 self.node_types.update(types)
@@ -227,20 +181,25 @@ class Hypergraph(object):
         return len(set(self.nodes.keys()).union(set(self.singleton_edges.keys())))
 
     def number_of_edges(self):
-        return len(self.edges) + sum(len(predicate_set) for predicate_set in self.singleton_edges.values())
+        number_of_singleton_edges = sum(len(predicate_set) for predicate_set in self.singleton_edges.values())
+        number_of_non_singleton_edges = len(self.edges)
+        return number_of_non_singleton_edges + number_of_singleton_edges
+
+    def number_of_predicates(self):
+        return len(set(self.predicates.values()))
 
     def get_random_edge_and_neighbor_of_node(self, node: str):
         """
         Given a node, gets a random non-single-vertex hyperedge that the node belongs to. Then gets a random node
         from the other nodes in that hyperedge (neighbor). Returns the hyperedge and the neighbor.
         """
-        edge_ids = self.memberships[node]
-        edge_id = random.choice(list(edge_ids))
-        nodes_of_edge = self.edges[edge_id].copy()
+        edges = self.memberships[node]
+        edge = random.choice(list(edges))
+        nodes_of_edge = self.edges[edge].copy()
         nodes_of_edge.remove(node)
         neighbor = random.choice(nodes_of_edge)
 
-        return edge_id, neighbor
+        return edge, neighbor
 
     def convert_to_graph(self, weighted=True):
         """
@@ -268,8 +227,3 @@ class Hypergraph(object):
         assert nx.is_connected(graph)
 
         return graph
-
-
-
-
-

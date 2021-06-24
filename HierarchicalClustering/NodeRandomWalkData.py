@@ -33,6 +33,14 @@ class NodeRandomWalkData(object):
         self.average_hitting_time = (self.accumulated_hitting_time + (number_of_walks - self.number_of_hits)
                                      * max_length) / number_of_walks
 
+    def get_top_paths(self, number_of_paths):
+        if number_of_paths < len(self.path_counts):
+            top_paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)[:number_of_paths]
+        else:
+            top_paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)
+
+        return dict(top_paths)
+
 
 class NodeClusterRandomWalkData(object):
     """

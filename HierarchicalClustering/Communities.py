@@ -1,4 +1,5 @@
-from random_walks import generate_node_random_walk_data
+from multiprocessing import Pool, cpu_count
+from RandomWalker import RandomWalker
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
 
@@ -26,24 +27,45 @@ class Communities(object):
                             symmetric nodes to be clustered together.
             num_top      -  The num_top most frequent paths to consider when calculating the Jensen-Shannon divergence
                             between path distributions.
+            TODO: write the other parameters
         """
 
         assert type(config['epsilon']) is float and 1 > config['epsilon'] > 0, "epsilon must be a positive float " \
                                                                                "between 0 and 1"
+        assert type(config['num_top']) is int and config['max_num_paths'] > 0, "max_num_paths must be a positive integer"
         assert type(config['theta_hit']) is float and config['theta_hit'] > 0, "theta_hit must be a positive float"
         assert type(config['theta_sym']) is float and config['theta_sym'] > 0, "theta_sym must be a positive float"
         assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
-        assert type(config['num_top']) is int and config['num_top'] > 0, "num_top must be a positive int"
+        assert type(config['max_js_div']) is float and config['max_js_div'] > 0, "max_js_div must be a positive float"
+        assert type(config['pca_dim']) is int and config['pca_dim'] >= 2, "pca_dim must be an integer " \
+                                                                          "greater than or equal to 2"
+        assert type(config['pca_threshold']) is int and config['pca_threshold'] >= 4, "pca_threshold must be an " \
+                                                                                      "integer greater than " \
+                                                                                      "or equal to 4"
+        assert type(config['k']) is float and config['k'] >= 1, "k must be a float greater than or equal to 1"
+        assert type(config['max_path_length']) is int and config['max_path_length'] > 0, "max_path_length must be a" \
+                                                                                         "positive integer"
+        assert type(config['multiprocessing']) is bool
 
         self.hypergraph = hypergraph
         if hypergraph.estimated_graph_diameter is None:
             print(f"Warning: Graph diameter of the hypergraph not known. Reverting to using default length of random "
                   f"walks.")
 
+        self.random_walker = RandomWalker(hypergraph=hypergraph, epsilon=config['epsilon'],
+                                          k=config['k'], max_path_length=config['max_path_length'],
+                                          number_of_paths=config['max_num_paths'])
+
         self.communities = {}
 
-        self.communities = {node: self.get_community(source_node=node, config=config) for node in
-                            hypergraph.nodes.keys() if hypergraph.is_source_node[node]}
+        if config['multiprocessing']:
+            pool = Pool(processes=cpu_count())
+            communities = pool.starmap_async(self.get_community, [(node, config) for node in hypergraph.nodes.keys()
+                                                                  if hypergraph.is_source_node[node]]).get()
+            self.communities = {community.source_node: community for community in communities}
+        else:
+            self.communities = {node: self.get_community(source_node=node, config=config) for node in
+                                hypergraph.nodes.keys() if hypergraph.is_source_node[node]}
 
     def __str__(self):
         output_string = ''
@@ -53,11 +75,7 @@ class Communities(object):
         return output_string
 
     def get_community(self, source_node: str, config: dict):
-        random_walk_data = generate_node_random_walk_data(self.hypergraph,
-                                                          source_node=source_node,
-                                                          epsilon=config['epsilon'],
-                                                          k=config['k'],
-                                                          max_path_length=config['max_path_length'])
+        random_walk_data = self.random_walker.generate_node_random_walk_data(source_node=source_node)
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node]
