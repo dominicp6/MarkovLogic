@@ -34,11 +34,7 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], config: di
     for distance_symmetric_cluster in distance_symmetric_clusters:
         path_symmetric_single_nodes, path_symmetric_clusters = cluster_nodes_by_path_distributions(
             distance_symmetric_cluster,
-            number_of_paths=config['num_top'],
-            max_js_divergence=config['max_js_div'],
-            threshold_js_divergence=config['theta_js'],
-            pca_target_dimension=config['pca_dim'],
-            threshold_for_pca_clustering=config['pca_threshold'],
+            config
             )
 
         single_nodes.update(path_symmetric_single_nodes)
@@ -87,42 +83,40 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     return distance_symmetric_single_nodes, distance_symmetric_clusters
 
 
-def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_paths: int, max_js_divergence=0.003,
-                                        pca_target_dimension=2, threshold_for_pca_clustering=4,
-                                        threshold_js_divergence=0.0005):
+def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], config: dict):
 
     assert len(nodes) > 1, "Clustering by path distribution requires more than one node"
-    assert threshold_for_pca_clustering >= 4, "PCA clustering requires at least 4 nodes"
+    assert config['pca_threshold'] >= 4, "PCA clustering requires at least 4 nodes"
 
     # if the largest js divergence is smaller than a max_js_divergence parameter, then all the nodes are considered
     # path symmetric and so appear in a single cluster
-    largest_js_divergence = compute_largest_js_divergence(nodes, number_of_paths)
-    if largest_js_divergence < max_js_divergence:
+    largest_js_divergence = compute_largest_js_divergence(nodes, config['num_top'])
+    if largest_js_divergence < config['max_js_div']:
         single_nodes = set()
         clusters = [[node.name for node in nodes]]
     else:
         # if the number of nodes is smaller than then then the threshold size required for pca clustering,
         # then cluster nodes based on agglomerative clustering of js divergence
-        if len(nodes) <= threshold_for_pca_clustering:
+        if len(nodes) <= config['pca_threshold']:
             single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
-                                                                    threshold_js_divergence=threshold_js_divergence,
-                                                                    number_of_paths=number_of_paths)
+                                                                    threshold_js_divergence=config['theta_js'],
+                                                                    max_number_of_paths=config['num_top'])
         # else cluster based on a pca reduction of the path counts
         else:
             single_nodes, clusters = cluster_nodes_by_pca_of_path_counts(nodes=nodes,
-                                                                         pca_target_dimension=pca_target_dimension,
-                                                                         number_of_paths=number_of_paths)
+                                                                         pca_target_dimension=config['pca_dim'],
+                                                                         max_number_of_paths=config['num_top'])
 
     return single_nodes, clusters
 
 
-def compute_largest_js_divergence(nodes: list[NodeRandomWalkData], number_of_paths: int):
+def compute_largest_js_divergence(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
     """
     Given a list of NodeRandomWalkData, computes the largest Jensen-Shannon divergence between the path
     distributions of all possible pairings of nodes.
 
     :param nodes: the set of nodes to calculate the Jensen-Shannon divergence between
-    :param number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
+    :param max_number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
                             between the path distributions (we consider only the top number_of_paths most common).
     :return largest_divergence: the largest Jensen-Shannon divergence between any two node pairings
     """
@@ -130,7 +124,7 @@ def compute_largest_js_divergence(nodes: list[NodeRandomWalkData], number_of_pat
     largest_divergence = - float('inf')
     for i in range(len(js_clusters)):
         for j in range(i + 1, len(js_clusters)):
-            js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], number_of_paths)
+            js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], max_number_of_paths)
 
             if js_divergence > largest_divergence:
                 largest_divergence = js_divergence
@@ -139,7 +133,7 @@ def compute_largest_js_divergence(nodes: list[NodeRandomWalkData], number_of_pat
 
 
 def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
-                                   threshold_js_divergence: float, number_of_paths: int):
+                                   threshold_js_divergence: float, max_number_of_paths: int):
     """
     Performs agglomerative clustering of nodes based on the Jensen-Shannon divergence between the distributions of
     their paths.
@@ -150,7 +144,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
 
     :param nodes: the set of nodes to be clustered
     :param threshold_js_divergence: the maximum permitted Jensen-Shannon divergence for merging two clusters
-    :param number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
+    :param max_number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
                             between the distributions (we consider only the top number_of_paths most common).
     :return single_nodes, clusters: the final clustering of the nodes
     """
@@ -164,7 +158,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
         smallest_divergence = max_divergence
         for i in range(len(js_clusters)):
             for j in range(i + 1, len(js_clusters)):
-                js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], number_of_paths)
+                js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], max_number_of_paths)
 
                 if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
                     smallest_divergence = js_divergence
@@ -194,7 +188,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
 
 def cluster_nodes_by_pca_of_path_counts(nodes: list[NodeRandomWalkData],
                                         pca_target_dimension: int,
-                                        number_of_paths: int):
+                                        max_number_of_paths: int):
     """
     Considers the top number_of_paths most frequent paths for each node, standardises these path distributions, then
     dimensionality reduces them using PCA (from a space of dimension equal to the number of distinct paths into a space
@@ -205,12 +199,12 @@ def cluster_nodes_by_pca_of_path_counts(nodes: list[NodeRandomWalkData],
 
     :param nodes: The nodes to be clustered.
     :param pca_target_dimension: The dimension of feature space after dimensionality reduction with PCA.
-    :param number_of_paths: The number of paths to consider for the path distribution feature vectors (we consider the
+    :param max_number_of_paths: The number of paths to consider for the path distribution feature vectors (we consider the
                             number_of_paths most common).
     :return: single_nodes, clusters: the final clustering of the nodes
     """
     standardized_path_distributions, number_of_unique_paths = \
-        compute_standardized_path_distributions_and_number_of_unique_paths(nodes, number_of_paths)
+        compute_standardized_path_distributions_and_number_of_unique_paths(nodes, max_number_of_paths)
 
     path_distribution_principal_components = compute_principal_components(
         feature_vectors=standardized_path_distributions,
@@ -218,7 +212,7 @@ def cluster_nodes_by_pca_of_path_counts(nodes: list[NodeRandomWalkData],
 
     clustering_labels = compute_optimal_k_means_clustering(path_distribution_principal_components)
 
-    plot_clustering(path_distribution_principal_components, clustering_labels)
+    plot_clustering(path_distribution_principal_components, clustering_labels)  # TODO: remove after debugging
 
     single_nodes, clusters = group_nodes_by_clustering_labels(nodes, clustering_labels)
 
@@ -226,7 +220,7 @@ def cluster_nodes_by_pca_of_path_counts(nodes: list[NodeRandomWalkData],
 
 
 def compute_standardized_path_distributions_and_number_of_unique_paths(nodes: list[NodeRandomWalkData],
-                                                                       number_of_paths: int):
+                                                                       max_number_of_paths: int):
     """
     From a list of node random walk data, finds the top number_of_paths most common paths for each node and
     constructs a path count vector. A feature vector is then constructed from the path counts via the transformation:
@@ -235,14 +229,14 @@ def compute_standardized_path_distributions_and_number_of_unique_paths(nodes: li
     data.
 
     :param nodes: The nodes to compute the standardized path distributions for.
-    :param number_of_paths: The number of most common paths to consider for each node.
+    :param max_number_of_paths: The number of most common paths to consider for each node.
     :return number_unique_paths: The number of unique paths appearing amongst the nodes' top number_of_paths most
                                  common paths.
             mean_adjusted_path_counts: (number of unique paths) x (number of nodes)
     """
 
     top_paths_of_each_node = []  # list[dict(path: path_counts)]
-    [top_paths_of_each_node.append(node.get_top_paths(number_of_paths)) for node in nodes]
+    [top_paths_of_each_node.append(node.get_top_paths(max_number_of_paths)) for node in nodes]
 
     unique_paths = set()
     [unique_paths.update(paths.keys()) for paths in top_paths_of_each_node]

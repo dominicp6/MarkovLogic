@@ -162,7 +162,7 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
     if js_divergence_method or len(nodes) <= 4:
         single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
                                                                 threshold_js_divergence=js_div_threshold,
-                                                                number_of_paths=20)
+                                                                max_number_of_paths=20)
 
         if len(nodes) > 4:
             single_node_counts.append(len(single_nodes))
