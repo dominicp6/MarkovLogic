@@ -1,5 +1,6 @@
 from graph_utils import get_second_eigenpair
 from cheeger_cut import cheeger_cut
+from GraphObjects import Graph, Hypergraph
 
 
 class HierarchicalClusterer(object):
@@ -25,7 +26,7 @@ class HierarchicalClusterer(object):
                                   signify that it is more challenging to find a sparse-cut for the graph)
     """
 
-    def __init__(self, hypergraph, config):
+    def __init__(self, hypergraph: Hypergraph, config: dict):
         self.min_cluster_size = config['min_cluster_size']
         self.max_lambda2 = config['max_lambda2']
         self.hypergraph = hypergraph
@@ -51,7 +52,7 @@ class HierarchicalClusterer(object):
 
         return self.hypergraph_clusters
 
-    def get_clusters(self, graph):
+    def get_clusters(self, graph: Graph):
         v_2, lambda2 = get_second_eigenpair(graph)
 
         # stop splitting if lambda2 stop criterion met

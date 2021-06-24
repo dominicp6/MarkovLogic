@@ -6,7 +6,7 @@ import itertools
 
 
 class CommunityPrinter(object):
-    def __init__(self, list_of_communities: list[Communities], original_hypergraph: Hypergraph):
+    def __init__(self, list_of_communities: list[Communities], original_hypergraph):
 
         self.list_of_communities = list_of_communities
 
@@ -14,7 +14,7 @@ class CommunityPrinter(object):
 
         # Alchemy requires that each node in the original hypergraph is indexed with a unique id number
         self.node_to_node_id = defaultdict(int)
-        for node_id, node in enumerate(original_hypergraph.nodes):
+        for node_id, node in enumerate(original_hypergraph.nodes.keys()):
             self.node_to_node_id[node] = node_id
 
         assert self.num_of_communities <= original_hypergraph.number_of_nodes(), f"Incorrect hypergraph provided for " \
@@ -179,46 +179,65 @@ class CommunityPrinter(object):
         file.write("NODES {}\n".format(string_of_all_node_ids))
         file.write("#END_DB\n\n")
 
-    def _get_atoms_of_community(self, community, hypergraph_of_community, string_type):
+    def _get_atoms_of_community(self, community, hypergraph_of_community, string_type: str):
         atoms = set()
 
         for single_node in community.single_nodes:
-            edges = hypergraph_of_community.nodes[single_node].memberships.values()
-            atoms.update(self._get_atoms_of_edges_for_community(edges, community, string_type))
+            atoms.update(self._get_atoms_of_node_in_community(single_node,
+                                                              community,
+                                                              hypergraph_of_community,
+                                                              string_type))
 
         for cluster in community.clusters:
             for cluster_node in cluster:
-                edges = hypergraph_of_community.nodes[cluster_node].memberships.values()
-                atoms.update(self._get_atoms_of_edges_for_community(edges, community, string_type))
+                atoms.update(self._get_atoms_of_node_in_community(cluster_node,
+                                                                  community,
+                                                                  hypergraph_of_community,
+                                                                  string_type))
 
         return atoms
 
-    def _get_atoms_of_edges_for_community(self, edges, community, string_type):
+    def _get_atoms_of_node_in_community(self, node, community, hypergraph_of_community, string_type):
         atoms = set()
-        for edge in edges:
-            nodes_of_edge = set(edge.elements.keys())
-            if nodes_of_edge.issubset(community.nodes):
-                atoms.add(self._get_atom_for_edge(edge, string_type))
+        non_singleton_edges = hypergraph_of_community.memberships[node]
+        for edge in non_singleton_edges:
+            nodes_of_edge = hypergraph_of_community.edges[edge]
+            if set(nodes_of_edge).issubset(community.nodes):
+                predicate = hypergraph_of_community.predicates[edge]
+                atoms.add(self._get_atom_for_edge(edge_predicate=predicate,
+                                                  nodes_of_edge=nodes_of_edge,
+                                                  string_type=string_type))
             else:
                 continue
 
+        for node, singleton_edges in hypergraph_of_community.singleton_edges.items():
+            if node in community.nodes:
+                for predicate in singleton_edges:
+                    atoms.add(self._get_atom_for_edge(edge_predicate=predicate,
+                                                      nodes_of_edge=node,
+                                                      string_type=string_type))
+
         return atoms
 
-    def _get_atom_for_edge(self, edge, string_type):
-        atom = edge.predicate + '('
-        nodes_of_edge = list(edge.elements.values())
-        for node in nodes_of_edge[:-1]:
-            atom += self._get_node_name(node, string_type) + ','
-        atom += self._get_node_name(nodes_of_edge[-1], string_type) + ')\n'
+    def _get_atom_for_edge(self, edge_predicate, nodes_of_edge, string_type):
+        if type(nodes_of_edge) == list:
+            atom = edge_predicate + '('
+            for node in nodes_of_edge[:-1]:
+                atom += self._get_node_name(node, string_type) + ','
+            atom += self._get_node_name(nodes_of_edge[-1], string_type) + ')\n'
+        elif type(nodes_of_edge) == str:
+            atom = edge_predicate + '(' + self._get_node_name(nodes_of_edge, string_type) + ')\n'
+        else:
+            raise TypeError
 
         return atom
 
     def _get_node_name(self, node, string_type):
         if string_type == 'ldb':
-            return self.node_to_ldb_string[self.hypergraph_number][self.community_number][node.name]
+            return self.node_to_ldb_string[self.hypergraph_number][self.community_number][node]
 
         elif string_type == 'uldb':
-            return 'NODE_' + str(self.node_to_node_id[node.name])
+            return 'NODE_' + str(self.node_to_node_id[node])
         else:
             raise ValueError('String types other than "ldb" or "uldb" are not supported.')
 

@@ -12,6 +12,8 @@ config = {
     },
     'random_walk_params': {
         'epsilon': 0.05,
+        'k': 1.25,
+        'max_path_length': 5,
         'theta_hit': 4.9,
         'theta_sym': 0.1,
         'theta_js': 1.0,

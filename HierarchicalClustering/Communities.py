@@ -1,7 +1,6 @@
 from random_walks import generate_node_random_walk_data
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
-from Node import Node
 
 
 class Communities(object):
@@ -36,18 +35,15 @@ class Communities(object):
         assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
         assert type(config['num_top']) is int and config['num_top'] > 0, "num_top must be a positive int"
 
-        assert len(hypergraph.node_types) > 0, "Cannot generate communities for Hypergraph without typed nodes." \
-                                               "To specify typing, regenerate the Hypergraph using a .info file."
-
         self.hypergraph = hypergraph
         if hypergraph.estimated_graph_diameter is None:
-            print(f"Warning: Graph diameter of the hypergraph not known. Resulting to using default length of random "
+            print(f"Warning: Graph diameter of the hypergraph not known. Reverting to using default length of random "
                   f"walks.")
 
         self.communities = {}
 
-        self.communities = {node.name: self.get_community(source_node=node, config=config) for node in
-                            hypergraph.nodes() if node.is_source_node}
+        self.communities = {node: self.get_community(source_node=node, config=config) for node in
+                            hypergraph.nodes.keys() if hypergraph.is_source_node[node]}
 
     def __str__(self):
         output_string = ''
@@ -56,7 +52,7 @@ class Communities(object):
 
         return output_string
 
-    def get_community(self, source_node: Node, config: dict):
+    def get_community(self, source_node: str, config: dict):
         random_walk_data = generate_node_random_walk_data(self.hypergraph,
                                                           source_node=source_node,
                                                           epsilon=config['epsilon'],
@@ -64,8 +60,8 @@ class Communities(object):
                                                           max_path_length=config['max_path_length'])
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
-        del random_walk_data[source_node.name]
-        single_nodes = {source_node.name}
+        del random_walk_data[source_node]
+        single_nodes = {source_node}
         clusters = []
 
         close_nodes = get_close_nodes(random_walk_data, threshold_hitting_time=config['theta_hit'])
@@ -78,7 +74,7 @@ class Communities(object):
                 single_nodes.update(single_nodes_of_type)
                 clusters.extend(clusters_of_type)
 
-        community = Community(source_node.name, single_nodes, clusters)
+        community = Community(source_node, single_nodes, clusters)
 
         return community
 
