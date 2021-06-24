@@ -88,14 +88,14 @@ class RandomWalker:
         about the number of times each node was hit, the average hitting time, and the frequency distribution
         of unique random walks paths that led to hitting the node.
         """
-        nodes_random_walk_data, number_of_walks = self._run_random_walks_from_source_node(source_node)
+        nodes_random_walk_data, number_of_walks = self._run_random_walks(source_node)
 
         [nodes_random_walk_data[node].calculate_average_hitting_time(number_of_walks, self.length_of_walk)
          for node in self.hypergraph.nodes.keys()]
 
         return nodes_random_walk_data  # dict[str, NodeRandomWalkData]
 
-    def _run_random_walks_from_source_node(self, source_node: str):
+    def _run_random_walks(self, source_node: str):
         """
         Run random walks from a source node.
 
