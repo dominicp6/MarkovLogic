@@ -34,15 +34,15 @@ class Graph(nx.Graph):
 
         for node in self.nodes():
             # add non-singleton edges to the hypergraph
-            hyperedge_ids_of_node = template_hypergraph.memberships[node]
-            for edge_id in hyperedge_ids_of_node:
+            hyperedges_of_node = template_hypergraph.memberships[node]
+            for edge in hyperedges_of_node:
                 # only add a hyperedge if a strict majority of vertices in the edge are part of the cluster
-                predicate = template_hypergraph.predicates[edge_id]
-                edge_nodes = template_hypergraph.edges[edge_id]
+                predicate = template_hypergraph.predicates[edge]
+                edge_nodes = template_hypergraph.edges[edge]
                 number_of_edge_nodes_in_graph = len(set(self.nodes()).intersection(set(edge_nodes)))
 
                 if number_of_edge_nodes_in_graph > len(edge_nodes) / 2:
-                    hypergraph.add_edge(edge_id=edge_id,
+                    hypergraph.add_edge(edge_id=edge,
                                         predicate=predicate,
                                         nodes=edge_nodes)
 
@@ -83,14 +83,16 @@ class Hypergraph(object):
     """
 
     def __init__(self, database_file=None, info_file=None):
-        self.singleton_edges = defaultdict(set)  # dict(node_name: set(predicate))
-        self.edges = {}  # dict(edge_id: list(node_name))
-        self.predicates = {}  # dict(edge_id: predicate_name)
-        self.nodes = {}  # dict(node_name: node_type)
-        self.memberships = defaultdict(set)  # dict(node_name: set(edge_id))
-        self.predicate_argument_types = {}  # dict(predicate_name: list(node_type))
-        self.node_types = set()  # set(node_types)
-        self.is_source_node = defaultdict(bool)  # dict(node_name: bool)
+        self.singleton_edges = defaultdict(set)  # dict(node_name: set(predicate)), all edges with one node
+        self.edges = {}                          # dict(edge_id: list(node_name)), all edges joining two or more nodes
+        self.predicates = {}                     # dict(edge_id: predicate_name), the predicate name of each edge
+        self.nodes = {}                          # dict(node_name: node_type), each node and their type
+        self.memberships = defaultdict(set)      # dict(node_name: set(edge_id)), the edges each node is a member of
+        self.predicate_argument_types = {}       # dict(predicate_name: list(node_type)), the node types that go into
+                                                 # arguments of the predicate
+        self.node_types = set()                  # set(node_types), all unique node types in the hypergraph
+        self.is_source_node = defaultdict(bool)  # dict(node_name: bool), whether each node is a source node for
+                                                 # random walks
         self.is_source_node.setdefault(False)
         self.estimated_graph_diameter = None
 
@@ -179,7 +181,9 @@ class Hypergraph(object):
         return len(set(self.nodes.keys()).union(set(self.singleton_edges.keys())))
 
     def number_of_edges(self):
-        return len(self.edges) + sum(len(predicate_set) for predicate_set in self.singleton_edges.values())
+        number_of_singleton_edges = sum(len(predicate_set) for predicate_set in self.singleton_edges.values())
+        number_of_non_singleton_edges = len(self.edges)
+        return number_of_non_singleton_edges + number_of_singleton_edges
 
     def number_of_predicates(self):
         return len(set(self.predicates.values()))
@@ -189,13 +193,13 @@ class Hypergraph(object):
         Given a node, gets a random non-single-vertex hyperedge that the node belongs to. Then gets a random node
         from the other nodes in that hyperedge (neighbor). Returns the hyperedge and the neighbor.
         """
-        edge_ids = self.memberships[node]
-        edge_id = random.choice(list(edge_ids))
-        nodes_of_edge = self.edges[edge_id].copy()
+        edges = self.memberships[node]
+        edge = random.choice(list(edges))
+        nodes_of_edge = self.edges[edge].copy()
         nodes_of_edge.remove(node)
         neighbor = random.choice(nodes_of_edge)
 
-        return edge_id, neighbor
+        return edge, neighbor
 
     def convert_to_graph(self, weighted=True):
         """

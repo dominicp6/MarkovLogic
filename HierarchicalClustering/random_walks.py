@@ -134,8 +134,8 @@ class RandomWalker:
         path = ''
         for step in range(self.length_of_walk):
 
-            next_edge_id, next_node = self.hypergraph.get_random_edge_and_neighbor_of_node(current_node)
-            path += str(self.hypergraph.predicates[next_edge_id]) + ','
+            next_edge, next_node = self.hypergraph.get_random_edge_and_neighbor_of_node(current_node)
+            path += str(self.hypergraph.predicates[next_edge]) + ','
 
             if next_node not in encountered_nodes:
                 nodes_random_walk_data[next_node].number_of_hits += 1
