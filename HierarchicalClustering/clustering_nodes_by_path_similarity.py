@@ -90,7 +90,7 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], config:
 
     # if the largest js divergence is smaller than a max_js_divergence parameter, then all the nodes are considered
     # path symmetric and so appear in a single cluster
-    largest_js_divergence = compute_largest_js_divergence(nodes, config['num_top'])
+    largest_js_divergence = compute_largest_js_divergence(nodes, config['max_num_paths'])
     if largest_js_divergence < config['max_js_div']:
         single_nodes = set()
         clusters = [[node.name for node in nodes]]
@@ -100,12 +100,12 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], config:
         if len(nodes) <= config['pca_threshold']:
             single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
                                                                     threshold_js_divergence=config['theta_js'],
-                                                                    max_number_of_paths=config['num_top'])
+                                                                    max_number_of_paths=config['max_num_paths'])
         # else cluster based on a pca reduction of the path counts
         else:
             single_nodes, clusters = cluster_nodes_by_pca_of_path_counts(nodes=nodes,
                                                                          pca_target_dimension=config['pca_dim'],
-                                                                         max_number_of_paths=config['num_top'])
+                                                                         max_number_of_paths=config['max_num_paths'])
 
     return single_nodes, clusters
 

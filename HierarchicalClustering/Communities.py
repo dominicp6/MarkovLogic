@@ -32,7 +32,7 @@ class Communities(object):
 
         assert type(config['epsilon']) is float and 1 > config['epsilon'] > 0, "epsilon must be a positive float " \
                                                                                "between 0 and 1"
-        assert type(config['num_top']) is int and config['num_top'] > 0, "num_top must be a positive integer"
+        assert type(config['num_top']) is int and config['max_num_paths'] > 0, "max_num_paths must be a positive integer"
         assert type(config['theta_hit']) is float and config['theta_hit'] > 0, "theta_hit must be a positive float"
         assert type(config['theta_sym']) is float and config['theta_sym'] > 0, "theta_sym must be a positive float"
         assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
@@ -54,7 +54,7 @@ class Communities(object):
 
         self.random_walker = RandomWalker(hypergraph=hypergraph, epsilon=config['epsilon'],
                                           k=config['k'], max_path_length=config['max_path_length'],
-                                          number_of_paths=config['num_top'])
+                                          number_of_paths=config['max_num_paths'])
 
         self.communities = {}
 
@@ -75,7 +75,7 @@ class Communities(object):
         return output_string
 
     def get_community(self, source_node: str, config: dict):
-        random_walk_data = self.random_walker.generate_node_random_walk_data_from_source_node(source_node=source_node)
+        random_walk_data = self.random_walker.generate_node_random_walk_data(source_node=source_node)
 
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node]

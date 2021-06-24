@@ -82,7 +82,7 @@ class RandomWalker:
 
         return int(round(min(M, max_num_of_unique_paths) * np.log(max_num_of_unique_paths) / (self.epsilon ** 2)))
 
-    def generate_node_random_walk_data_from_source_node(self, source_node: str):
+    def generate_node_random_walk_data(self, source_node: str):
         """
         Runs random walks originating from the source_node. Returns a data structure which holds information
         about the number of times each node was hit, the average hitting time, and the frequency distribution
