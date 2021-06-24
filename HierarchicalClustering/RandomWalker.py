@@ -6,7 +6,7 @@ from GraphObjects import Hypergraph
 
 class RandomWalker:
     """
-    An object to run random walks on a hypergraph and compute truncated hitting time and path distribution statistics
+    An class to run random walks on a hypergraph and compute truncated hitting time and path distribution statistics
     for the nodes.
 
     :param hypergraph: The hypergraph to run the random walks on

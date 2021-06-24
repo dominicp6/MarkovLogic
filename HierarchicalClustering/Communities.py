@@ -1,5 +1,5 @@
 from multiprocessing import Pool, cpu_count
-from random_walks import RandomWalker
+from RandomWalker import RandomWalker
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
 

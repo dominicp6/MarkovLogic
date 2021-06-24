@@ -7,7 +7,7 @@ from GraphObjects import Hypergraph
 from NodeRandomWalkData import NodeClusterRandomWalkData
 from js_divergence_utils import kl_divergence, js_divergence, compute_js_divergence_of_top_n_paths
 from Communities import Communities
-from random_walks import generate_node_random_walk_data
+from RandomWalker import generate_node_random_walk_data
 from clustering_nodes_by_path_similarity import get_close_nodes
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
