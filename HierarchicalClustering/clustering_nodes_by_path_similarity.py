@@ -1,28 +1,30 @@
 import numpy as np
 from NodeRandomWalkData import *
 from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans, Birch
 from js_divergence_utils import compute_js_divergence_of_top_n_paths
+
+from hypothesis_test import hypothesis_test_path_symmetric_nodes, test_quality_of_clusters
 import matplotlib.pyplot as plt
+import cProfile
 
 
 def get_close_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData], threshold_hitting_time: float):
     return {node for node in nodes_random_walk_data.values() if node.average_hitting_time < threshold_hitting_time}
 
 
-def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], config: dict):
+def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_walks: int, config: dict):
     """
     Clusters nodes from a hypergraph into groups which are symmetrically related relative to a source node.
 
     Firstly, nodes are grouped into distance-symmetric clusters; sets of nodes where the difference in the average
     truncated hitting times from the source node for any two nodes in the set is no greater than a specified threshold.
 
-    Secondly, within each distance-symmetric cluster, we identify path-symmetric nodes through agglomerative clustering
-    of the nodes based on their Jensen-Shannon divergence in their distribution of paths.
+    Secondly, within each distance-symmetric cluster, we further cluster together nodes based on the similarity
+    in their distribution of paths to yield a set of path-symmetric clusters. If the cluster is a singleton set then we
+    add its member to a set of 'single nodes'.
 
-    Finally, from these sets of path-symmetric nodes we output single nodes (a list of the nodes in all the
-    singleton sets) and clusters (a list of all the non-singleton sets).
+    returns: the set of single nodes and a list of path-symmetric node clusters
     """
     single_nodes = set()
     clusters = []
@@ -34,8 +36,9 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], config: di
     for distance_symmetric_cluster in distance_symmetric_clusters:
         path_symmetric_single_nodes, path_symmetric_clusters = cluster_nodes_by_path_distributions(
             distance_symmetric_cluster,
+            number_of_walks,
             config
-            )
+        )
 
         single_nodes.update(path_symmetric_single_nodes)
         clusters.extend(path_symmetric_clusters)
@@ -83,53 +86,74 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     return distance_symmetric_single_nodes, distance_symmetric_clusters
 
 
-def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], config: dict):
+def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_walks, config: dict):
+    """
+    Clusters a list of nodes based on their empirical path distributions into path-symmetric clusters as follows
 
+    1) Test statistically whether the path distributions of the nodes violate the null hypothesis of them being
+    all path-symmetric.
+    2) If the null hypothesis is violated, and the cluster is smaller than a threshold size, then cluster nodes by
+    agglomerative clustering of the Jensen-Shannon divergence in path probability distributions. For larger clusters,
+    k-means clustering of dimensionality-reduced path count features is used instead.
+    """
     assert len(nodes) > 1, "Clustering by path distribution requires more than one node"
-    assert config['pca_threshold'] >= 4, "PCA clustering requires at least 4 nodes"
+    assert config['k_means_cluster_size_threshold'] >= 4, "k-means clustering requires at least 4 nodes"
 
-    # if the largest js divergence is smaller than a max_js_divergence parameter, then all the nodes are considered
-    # path symmetric and so appear in a single cluster
-    largest_js_divergence = compute_largest_js_divergence(nodes, config['max_num_paths'])
-    if largest_js_divergence < config['max_js_div']:
+    node_path_counts = compute_top_paths_array(nodes, max_number_of_paths=config['max_num_paths'])
+
+    if hypothesis_test_path_symmetric_nodes(node_path_counts,
+                                            number_of_walks=number_of_walks,
+                                            significance_level=config['p_value']):
         single_nodes = set()
         clusters = [[node.name for node in nodes]]
     else:
-        # if the number of nodes is smaller than then then the threshold size required for pca clustering,
-        # then cluster nodes based on agglomerative clustering of js divergence
-        if len(nodes) <= config['pca_threshold']:
+        # if the number of nodes is smaller than then then the threshold size required for k-means clustering,
+        # then cluster nodes based on agglomerative clustering of js divergence instead
+        if len(nodes) <= config['k_means_cluster_size_threshold']:
             single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
                                                                     threshold_js_divergence=config['theta_js'],
                                                                     max_number_of_paths=config['max_num_paths'])
-        # else cluster based on a pca reduction of the path counts
+        # else cluster based k-means cluster on a PCA reduction of the path counts features
         else:
-            single_nodes, clusters = cluster_nodes_by_pca_of_path_counts(nodes=nodes,
-                                                                         pca_target_dimension=config['pca_dim'],
-                                                                         max_number_of_paths=config['max_num_paths'])
+            single_nodes, clusters = cluster_nodes_by_k_means(nodes=nodes,
+                                                              pca_target_dimension=config['pca_dim'],
+                                                              max_number_of_paths=config['max_num_paths'],
+                                                              number_of_walks=number_of_walks,
+                                                              significance_level=config['p_value'])
+
 
     return single_nodes, clusters
 
 
-def compute_largest_js_divergence(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
+def compute_top_paths_array(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
     """
-    Given a list of NodeRandomWalkData, computes the largest Jensen-Shannon divergence between the path
-    distributions of all possible pairings of nodes.
-
-    :param nodes: the set of nodes to calculate the Jensen-Shannon divergence between
-    :param max_number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
-                            between the path distributions (we consider only the top number_of_paths most common).
-    :return largest_divergence: the largest Jensen-Shannon divergence between any two node pairings
+    From each node in the list, finds the most common paths and constructs a path count vector.
+    Returns a path-count feature array of the nodes of size (number of paths) x (number of nodes) where the (i,j) entry
+    corresponds to the number of times that the ith indexed path occurred for the jth indexed node.
     """
-    js_clusters = [NodeClusterRandomWalkData([node]) for node in nodes]
-    largest_divergence = - float('inf')
-    for i in range(len(js_clusters)):
-        for j in range(i + 1, len(js_clusters)):
-            js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], max_number_of_paths)
 
-            if js_divergence > largest_divergence:
-                largest_divergence = js_divergence
+    top_paths_of_each_node = []  # list[dict(path: path_counts)]
+    [top_paths_of_each_node.append(node.get_top_paths(max_number_of_paths)) for node in nodes]
 
-    return largest_divergence
+    unique_paths = set()
+    [unique_paths.update(paths.keys()) for paths in top_paths_of_each_node]
+    number_unique_paths = len(unique_paths)
+    del unique_paths
+
+    path_string_to_path_index = {}
+    # Array size (number of paths) x (number of nodes), each entry is the count of that path for that node:
+    node_path_counts = np.zeros([number_unique_paths, len(nodes)])
+    for node_index, node_paths in enumerate(top_paths_of_each_node):
+        for path, path_count in node_paths.items():
+            if path not in path_string_to_path_index.keys():
+                path_index = len(path_string_to_path_index)
+                path_string_to_path_index[path] = path_index
+            else:
+                path_index = path_string_to_path_index[path]
+
+            node_path_counts[path_index][node_index] = path_count
+
+    return node_path_counts
 
 
 def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
@@ -158,7 +182,8 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
         smallest_divergence = max_divergence
         for i in range(len(js_clusters)):
             for j in range(i + 1, len(js_clusters)):
-                js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], max_number_of_paths)
+                js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j],
+                                                                     max_number_of_paths)
 
                 if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
                     smallest_divergence = js_divergence
@@ -186,84 +211,69 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
     return single_nodes, clusters
 
 
-def cluster_nodes_by_pca_of_path_counts(nodes: list[NodeRandomWalkData],
-                                        pca_target_dimension: int,
-                                        max_number_of_paths: int):
+def cluster_nodes_by_k_means(nodes: list[NodeRandomWalkData], pca_target_dimension: int, max_number_of_paths: int,
+                             number_of_walks: int, significance_level: float):
     """
     Considers the top number_of_paths most frequent paths for each node, standardises these path distributions, then
     dimensionality reduces them using PCA (from a space of dimension equal to the number of distinct paths into a space
     of dimension equal to pca_target_dimension), then finally performs k-means clustering on these principal components,
-    where the optimal number of clusters is the clustering which maximises the silhouette score [1].
-
-    [1] https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html.
+    where the optimal number of clusters is the smallest value of k whose clusters all pass the hypothesis test of the
+    nodes having path distributions consistent with being statistically similar.
 
     :param nodes: The nodes to be clustered.
     :param pca_target_dimension: The dimension of feature space after dimensionality reduction with PCA.
-    :param max_number_of_paths: The number of paths to consider for the path distribution feature vectors (we consider the
-                            number_of_paths most common).
+    :param max_number_of_paths: The number of paths to consider for the path distribution feature vectors (we consider
+                                the number_of_paths most common).
+    :param number_of_walks: the number of random walks that were run on the cluster to generate the random walk data
+    :param significance_level: the desired significance level for the hypothesis test of nodes being path symmetric.
+                               Smaller values means that a larger difference between the distribution of the node's
+                               paths is tolerated before they are considered not path-symmetric.
     :return: single_nodes, clusters: the final clustering of the nodes
     """
-    standardized_path_distributions, number_of_unique_paths = \
-        compute_standardized_path_distributions_and_number_of_unique_paths(nodes, max_number_of_paths)
+    node_path_counts = compute_top_paths_array(nodes, max_number_of_paths)
 
-    path_distribution_principal_components = compute_principal_components(
-        feature_vectors=standardized_path_distributions,
-        target_dimension=pca_target_dimension)
+    clustering_labels = compute_optimal_k_means_clustering(node_path_counts,
+                                                           pca_target_dimension,
+                                                           number_of_walks,
+                                                           significance_level)
 
-    clustering_labels = compute_optimal_k_means_clustering(path_distribution_principal_components)
-
-    plot_clustering(path_distribution_principal_components, clustering_labels)  # TODO: remove after debugging
 
     single_nodes, clusters = group_nodes_by_clustering_labels(nodes, clustering_labels)
 
     return single_nodes, clusters
 
 
-def compute_standardized_path_distributions_and_number_of_unique_paths(nodes: list[NodeRandomWalkData],
-                                                                       max_number_of_paths: int):
+def compute_optimal_k_means_clustering(node_path_counts: np.array,
+                                       pca_target_dimension: int,
+                                       number_of_walks: int,
+                                       significance_level: float):
     """
-    From a list of node random walk data, finds the top number_of_paths most common paths for each node and
-    constructs a path count vector. A feature vector is then constructed from the path counts via the transformation:
-    (path_count) -> ( (path_count - mean_path_count) / mean_path_count )
-    where mean_path_count is the average count for that path across all of the nodes in the list of node random walk
-    data.
-
-    :param nodes: The nodes to compute the standardized path distributions for.
-    :param max_number_of_paths: The number of most common paths to consider for each node.
-    :return number_unique_paths: The number of unique paths appearing amongst the nodes' top number_of_paths most
-                                 common paths.
-            mean_adjusted_path_counts: (number of unique paths) x (number of nodes)
+    Given an array of node path counts, clusters the nodes into an optimal number of clusters using k-means clustering.
+    k is incrementally increased with warm starts. The optimal number of clusters is the smallest value of k such that
+    all k clusters have statistically similar path count distributions.
     """
-
-    top_paths_of_each_node = []  # list[dict(path: path_counts)]
-    [top_paths_of_each_node.append(node.get_top_paths(max_number_of_paths)) for node in nodes]
-
-    unique_paths = set()
-    [unique_paths.update(paths.keys()) for paths in top_paths_of_each_node]
-    number_unique_paths = len(unique_paths)
-    del unique_paths
-
-    path_string_to_path_index = {}
-    # Array size (number of paths) x (number of nodes), each entry is the count of that path for that node:
-    node_path_counts = np.zeros([number_unique_paths, len(nodes)])
-    path_index = -1
-    for node_index, node_paths in enumerate(top_paths_of_each_node):
-        for path, path_count in node_paths.items():
-            if path not in path_string_to_path_index:
-                path_index += 1
-                path_string_to_path_index[path] = path_index
-            else:
-                path_index = path_string_to_path_index[path]
-
-            node_path_counts[path_index][node_index] = path_count
-
-    # This choice of standardization means that paths which have larger fractional variations in their counts between
-    # the nodes, and so are better indicators for distinguishing nodes, have higher-weighted features.
-    node_path_features = (
+    standardized_path_counts = (
             (node_path_counts - np.mean(node_path_counts, axis=1)[:, None]) / np.mean(node_path_counts, axis=1)[:,
                                                                               None]).T
 
-    return node_path_features, number_unique_paths
+    feature_vectors = compute_principal_components(feature_vectors=standardized_path_counts,
+                                                   target_dimension=pca_target_dimension)
+
+    number_of_feature_vectors = feature_vectors.shape[0]
+
+    cluster_labels = None
+    for number_of_clusters in range(2, number_of_feature_vectors):  # start from 2 since zero/one clusters is invalid
+        #clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
+        clusterer = Birch(n_clusters=number_of_clusters, threshold=0.05)
+
+        cluster_labels = clusterer.fit_predict(feature_vectors)
+        node_path_counts_of_clusters = get_node_path_counts_of_clusters(node_path_counts, cluster_labels)
+        if test_quality_of_clusters(node_path_counts_of_clusters, number_of_walks, significance_level):
+            return cluster_labels
+        else:
+            continue
+
+    return cluster_labels
 
 
 def compute_principal_components(feature_vectors: np.array, target_dimension: int):
@@ -284,32 +294,23 @@ def compute_principal_components(feature_vectors: np.array, target_dimension: in
     return principal_components
 
 
-def compute_optimal_k_means_clustering(feature_vectors: np.array):
-    """
-    Clusters feature vectors (shape (number_of_feature_vectors)x(dimensionality_of_feature_vector)) into an optimal
-    number of clusters. Returns a vector of cluster labels which indicates which cluster each feature vector belongs to.
-    """
+def get_node_path_counts_of_clusters(node_path_counts: np.array, cluster_labels: np.array):
+    number_of_clusters = len(set(cluster_labels))
 
-    number_of_feature_vectors = feature_vectors.shape[0]
+    path_counts_for_cluster = [[] for _ in range(number_of_clusters)]
 
-    # to limit unnecessary computation, only check clusterings up to number_clusters = (1/2) * number_of_feature_vectors
-    max_number_of_clusters = int(number_of_feature_vectors / 2)
+    for node_index, cluster_index in enumerate(cluster_labels):
+        path_counts_for_cluster[cluster_index].append(node_path_counts[:, node_index])
 
-    silhouette_scores_of_clusterings = np.zeros(max_number_of_clusters - 1)
-    cluster_labellings = np.zeros((max_number_of_clusters - 1, number_of_feature_vectors), dtype=int)
+    for cluster_index in range(number_of_clusters):
+        # transpose the arrays into the standard shape of (# unique paths in cluster) x (# nodes in cluster)
+        path_counts_for_cluster[cluster_index] = np.array(path_counts_for_cluster[cluster_index]).T
+        # remove any paths that have zero count for every node in the cluster
+        path_counts_for_cluster[cluster_index] = path_counts_for_cluster[cluster_index][~np.all(
+            path_counts_for_cluster[cluster_index] == 0,
+            axis=1)]
 
-    for number_of_clusters in range(2, max_number_of_clusters):  # start from 2 since zero/one clusters is invalid
-        clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
-        cluster_labels = clusterer.fit_predict(feature_vectors)
-        clustering_index = number_of_clusters - 2
-        cluster_labellings[clustering_index, :] = cluster_labels
-        silhouette_score_of_clustering = silhouette_score(feature_vectors, cluster_labels)
-        silhouette_scores_of_clusterings[clustering_index] = silhouette_score_of_clustering
-
-    optimal_clustering_index = np.argmax(silhouette_scores_of_clusterings)
-    cluster_labels = cluster_labellings[optimal_clustering_index, :]  # list[int]
-
-    return cluster_labels
+    return path_counts_for_cluster
 
 
 def group_nodes_by_clustering_labels(nodes: list[NodeRandomWalkData], cluster_labels: list[int]):
@@ -337,6 +338,7 @@ def group_nodes_by_clustering_labels(nodes: list[NodeRandomWalkData], cluster_la
     return single_nodes, clusters
 
 
+# TODO: remove after debugging
 def plot_clustering(principal_components: np.array, cluster_labels: list[int]):
     x, y = zip(*principal_components)
     x = np.array(x)

@@ -41,6 +41,8 @@ class RandomWalker:
         self.max_number_of_walks = max(self.number_of_walks_for_truncated_hitting_times,
                                        self.number_of_walks_for_path_distribution)
 
+        self.number_of_walks_ran = 0
+
     def _get_length_of_random_walks(self):
         """
         Calculates a suitable value for the length of the random walks based on the estimated diameter of the graph
@@ -74,13 +76,17 @@ class RandomWalker:
                   length of the random walk and the number of predicates in the hypergraph
         """
         if number_of_unique_paths is None:
-            max_num_of_unique_paths = (
-                    self.number_of_predicates * (self.number_of_predicates ** self.length_of_walk - 1)
-                    / (self.number_of_predicates - 1))
+            if self.number_of_predicates > 1:
+                max_num_of_unique_paths = 1 + (
+                        self.number_of_predicates * (self.number_of_predicates ** self.length_of_walk - 1)
+                        / (self.number_of_predicates - 1))
+            else:
+                max_num_of_unique_paths = 1 + self.max_path_length
         else:
             max_num_of_unique_paths = number_of_unique_paths
 
-        return int(round(min(M, max_num_of_unique_paths) * np.log(max_num_of_unique_paths) / (self.epsilon ** 2)))
+        return int(round(min(M + 1, max_num_of_unique_paths + 1) *
+                         np.log(max_num_of_unique_paths) / (self.epsilon ** 2)))
 
     def generate_node_random_walk_data(self, source_node: str):
         """
@@ -92,6 +98,8 @@ class RandomWalker:
 
         [nodes_random_walk_data[node].calculate_average_hitting_time(number_of_walks, self.length_of_walk)
          for node in self.hypergraph.nodes.keys()]
+
+        self.number_of_walks_ran = number_of_walks
 
         return nodes_random_walk_data  # dict[str, NodeRandomWalkData]
 
