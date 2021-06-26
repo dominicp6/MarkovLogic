@@ -237,7 +237,6 @@ def cluster_nodes_by_k_means(nodes: list[NodeRandomWalkData], pca_target_dimensi
                                                            number_of_walks,
                                                            significance_level)
 
-
     single_nodes, clusters = group_nodes_by_clustering_labels(nodes, clustering_labels)
 
     return single_nodes, clusters
