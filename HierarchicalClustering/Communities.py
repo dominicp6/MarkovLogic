@@ -1,8 +1,8 @@
 from multiprocessing import Pool, cpu_count
 from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
+from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity, compute_theta_sym
 from GraphObjects import Hypergraph
-import cProfile
+from errors import check_argument
 
 
 class Communities(object):
@@ -19,43 +19,25 @@ class Communities(object):
         the same cluster if they are of the same type.
 
         Config parameters:
-            epsilon      -  The maximum fractional error for the mean truncated hitting time.
-                            Used to determine the number of random walks that need to be run from each source node.
-            theta_hit    -  Threshold for the average truncated hitting time (ATHT). Nodes with larger ATHT are excluded
-                            from the community.
-            theta_sym    -  Threshold difference in ATHT for nodes to be considered as potentially symmetric.
-            theta_js     -  Threshold difference in Jensen-Shannon divergence of path distributions for potentially
-                            symmetric nodes to be clustered together.
-            num_top      -  The num_top most frequent paths to consider when calculating the Jensen-Shannon divergence
-                            between path distributions.
-            TODO: write the other parameters
+            epsilon, number_of_paths, max_num_paths, max_path_length, k, alpha_sym (see RandomWalker.py for details)
+            theta_hit: TODO: remove/change the theta_hit hyperparameter
+            theta_p: the desired significance level for testing the null hypothesis of nodes being path symmetric
+                     when clustering by JS divergence of by birch clustering on PCA path-count features. Smaller values
+                     of theta_p give fewer clusters.
+            pca_dim: the desired dimension of the path-count feature vectors after dimensionality reduction with PCA
+            clustering_method_threshold: the threshold cluster size at which birch clustering on PCA path-count features
+                     is used instead of clustering based on JS divergence (slower for large clusters)
+
         """
 
-        assert type(config['epsilon']) is float and 1 > config['epsilon'] > 0, "epsilon must be a positive float " \
-                                                                               "between 0 and 1"
-        assert type(config['max_num_paths']) is int and config[
-            'max_num_paths'] > 0, "max_num_paths must be a positive integer"
-        assert type(config['theta_hit']) is float and config['theta_hit'] > 0, "theta_hit must be a positive float"
-        assert type(config['theta_sym']) is float and config['theta_sym'] > 0, "theta_sym must be a positive float"
-        assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
-        assert type(config['pca_dim']) is int and config['pca_dim'] >= 2, "pca_dim must be an integer " \
-                                                                          "greater than or equal to 2"
-        assert type(config['k_means_cluster_size_threshold']) is int and config['k_means_cluster_size_threshold'] >= 4,\
-            "k_means_cluster_size_threshold must be an integer greater than or equal to 4"
-        assert type(config['k']) is float and config['k'] >= 1, "k must be a float greater than or equal to 1"
-        assert type(config['max_path_length']) is int and config['max_path_length'] > 0, "max_path_length must be a" \
-                                                                                         "positive integer"
-        assert type(config['p_value']) is float and config['p_value'] > 0, "p_value must be a positive float"
-        assert type(config['multiprocessing']) is bool
+        self._check_arguments(config)
 
         self.hypergraph = hypergraph
         if hypergraph.estimated_graph_diameter is None:
             print(f"Warning: Graph diameter of the hypergraph not known. Reverting to using default length of random "
                   f"walks.")
 
-        self.random_walker = RandomWalker(hypergraph=hypergraph, epsilon=config['epsilon'],
-                                          k=config['k'], max_path_length=config['max_path_length'],
-                                          number_of_paths=config['max_num_paths'])
+        self.random_walker = RandomWalker(hypergraph=hypergraph, config=config)
 
         self.communities = {}
 
@@ -83,6 +65,10 @@ class Communities(object):
         single_nodes = {source_node}
         clusters = []
 
+        theta_sym = compute_theta_sym(config['alpha_sym'],
+                                      self.random_walker.number_of_walks_ran,
+                                      self.random_walker.length_of_walk)
+
         close_nodes = get_close_nodes(random_walk_data, threshold_hitting_time=config['theta_hit'])
 
         for node_type in self.hypergraph.node_types:
@@ -91,6 +77,7 @@ class Communities(object):
                 single_nodes_of_type, clusters_of_type = \
                     cluster_nodes_by_path_similarity(nodes=nodes_of_type,
                                                      number_of_walks=self.random_walker.number_of_walks_ran,
+                                                     theta_sym=theta_sym,
                                                      config=config)
 
                 single_nodes.update(single_nodes_of_type)
@@ -99,6 +86,20 @@ class Communities(object):
         community = Community(source_node, single_nodes, clusters)
 
         return community
+
+    @staticmethod
+    def _check_arguments(config):
+        check_argument('epsilon', config['epsilon'], float, 0, 1)
+        check_argument('max_num_paths', config['max_num_paths'], int, 0)
+        check_argument('theta_hit', config['theta_hit'], float, 0)
+        check_argument('alpha_sym', config['alpha_sym'], float, 0, 1)
+        check_argument('pca_dim', config['pca_dim'], int, 2, strict_inequalities=False)
+        check_argument('clustering_method_threshold', config['clustering_method_threshold'], int, 4,
+                       strict_inequalities=False)
+        check_argument('k', config['k'], float, 1, strict_inequalities=False)
+        check_argument('max_path_length', config['max_path_length'], int, 0)
+        check_argument('theta_p', config['theta_p'], float, 0)
+        check_argument('multiprocessing', config['multiprocessing'], bool)
 
 
 class Community(object):

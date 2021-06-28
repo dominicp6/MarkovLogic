@@ -14,18 +14,17 @@ if __name__ == "__main__":
             'epsilon': 0.05,
             'max_num_paths': 30,
             'theta_hit': 4.9,
-            'theta_sym': 0.1,
-            'theta_js': 0.0005,
+            'alpha_sym': 0.1,
             'pca_dim': 2,
-            'k_means_cluster_size_threshold': 50,
+            'clustering_method_threshold': 50,
             'k': 1.25,
             'max_path_length': 5,
-            'p_value': 0.5,
+            'theta_p': 0.5,
             'multiprocessing': True
         }
     }
 
-    original_hypergraph = Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')
+    original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
 
     #cProfile.run("Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')")
 

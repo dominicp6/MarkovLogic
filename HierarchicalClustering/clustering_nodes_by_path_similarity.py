@@ -1,19 +1,32 @@
 import numpy as np
 from NodeRandomWalkData import *
 from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans, Birch
+from sklearn.cluster import Birch
+from scipy.stats import norm, t
 from js_divergence_utils import compute_js_divergence_of_top_n_paths
 
 from hypothesis_test import hypothesis_test_path_symmetric_nodes, test_quality_of_clusters
 import matplotlib.pyplot as plt
-import cProfile
+
+
+def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
+    """
+    Computes the threshold difference in the truncated hitting times of two nodes for the null hypothesis of the
+    two nodes being path-symmetric to be violated at a significance level given by alpha_sym.
+
+    return: theta_sym: used as a parameter for clustering based on truncated hitting time
+    """
+    assert number_of_walks_ran > 0, "Can only calculate a theta_sym value after running random walks. " \
+                                         "Call the generate_node_random_walk_data method first."
+    return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym, df=number_of_walks_ran - 1)
 
 
 def get_close_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData], threshold_hitting_time: float):
     return {node for node in nodes_random_walk_data.values() if node.average_hitting_time < threshold_hitting_time}
 
 
-def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_walks: int, config: dict):
+def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_walks: int, theta_sym: float,
+                                     config: dict):
     """
     Clusters nodes from a hypergraph into groups which are symmetrically related relative to a source node.
 
@@ -28,8 +41,9 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_
     """
     single_nodes = set()
     clusters = []
+
     distance_symmetric_single_nodes, distance_symmetric_clusters = cluster_nodes_by_truncated_hitting_times(
-        nodes, threshold_hitting_time_difference=config['theta_sym'])
+        nodes, threshold_hitting_time_difference=theta_sym)
 
     single_nodes.update(node.name for node in distance_symmetric_single_nodes)
 
@@ -86,7 +100,8 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     return distance_symmetric_single_nodes, distance_symmetric_clusters
 
 
-def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_walks, config: dict):
+def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_walks: int,
+                                        config: dict):
     """
     Clusters a list of nodes based on their empirical path distributions into path-symmetric clusters as follows
 
@@ -103,24 +118,23 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
 
     if hypothesis_test_path_symmetric_nodes(node_path_counts,
                                             number_of_walks=number_of_walks,
-                                            significance_level=config['p_value']):
+                                            significance_level=config['theta_p']):
         single_nodes = set()
         clusters = [[node.name for node in nodes]]
     else:
         # if the number of nodes is smaller than then then the threshold size required for k-means clustering,
         # then cluster nodes based on agglomerative clustering of js divergence instead
-        if len(nodes) <= config['k_means_cluster_size_threshold']:
+        if len(nodes) <= config['clustering_method_threshold']:
             single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
-                                                                    threshold_js_divergence=config['theta_js'],
-                                                                    max_number_of_paths=config['max_num_paths'])
+                                                                    significance_level=config['theta_p'],
+                                                                    max_number_of_paths=3)
         # else cluster based k-means cluster on a PCA reduction of the path counts features
         else:
-            single_nodes, clusters = cluster_nodes_by_k_means(nodes=nodes,
-                                                              pca_target_dimension=config['pca_dim'],
-                                                              max_number_of_paths=config['max_num_paths'],
-                                                              number_of_walks=number_of_walks,
-                                                              significance_level=config['p_value'])
-
+            single_nodes, clusters = cluster_nodes_by_birch(nodes=nodes,
+                                                            pca_target_dimension=config['pca_dim'],
+                                                            max_number_of_paths=config['max_num_paths'],
+                                                            number_of_walks=number_of_walks,
+                                                            significance_level=config['theta_p'])
 
     return single_nodes, clusters
 
@@ -156,8 +170,8 @@ def compute_top_paths_array(nodes: list[NodeRandomWalkData], max_number_of_paths
     return node_path_counts
 
 
-def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
-                                   threshold_js_divergence: float, max_number_of_paths: int):
+def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData], significance_level: float,
+                                   max_number_of_paths: int):
     """
     Performs agglomerative clustering of nodes based on the Jensen-Shannon divergence between the distributions of
     their paths.
@@ -167,11 +181,16 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
     threshold_js_divergence). This is repeated until all clusters have a divergence greater than the threshold.
 
     :param nodes: the set of nodes to be clustered
-    :param threshold_js_divergence: the maximum permitted Jensen-Shannon divergence for merging two clusters
+    :param significance_level: the desired significance level for the hypothesis test of nodes being path symmetric.
+                               Smaller values means that a larger difference between the distribution of the node's
+                               paths is tolerated before they are considered not path-symmetric.
     :param max_number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
                             between the distributions (we consider only the top number_of_paths most common).
     :return single_nodes, clusters: the final clustering of the nodes
     """
+
+    # z-score for hypothesis test
+    z = norm.isf(significance_level)
     js_clusters = [NodeClusterRandomWalkData([node]) for node in nodes]
 
     max_divergence = float('inf')
@@ -182,8 +201,8 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
         smallest_divergence = max_divergence
         for i in range(len(js_clusters)):
             for j in range(i + 1, len(js_clusters)):
-                js_divergence = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j],
-                                                                     max_number_of_paths)
+                js_divergence, threshold_js_divergence = \
+                    compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], max_number_of_paths, z=z)
 
                 if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
                     smallest_divergence = js_divergence
@@ -211,13 +230,13 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
     return single_nodes, clusters
 
 
-def cluster_nodes_by_k_means(nodes: list[NodeRandomWalkData], pca_target_dimension: int, max_number_of_paths: int,
-                             number_of_walks: int, significance_level: float):
+def cluster_nodes_by_birch(nodes: list[NodeRandomWalkData], pca_target_dimension: int, max_number_of_paths: int,
+                           number_of_walks: int, significance_level: float):
     """
     Considers the top number_of_paths most frequent paths for each node, standardises these path distributions, then
     dimensionality reduces them using PCA (from a space of dimension equal to the number of distinct paths into a space
-    of dimension equal to pca_target_dimension), then finally performs k-means clustering on these principal components,
-    where the optimal number of clusters is the smallest value of k whose clusters all pass the hypothesis test of the
+    of dimension equal to pca_target_dimension), then finally performs birch clustering on these principal components,
+    where the optimal number of clusters is the smallest value whose clusters all pass the hypothesis test of the
     nodes having path distributions consistent with being statistically similar.
 
     :param nodes: The nodes to be clustered.
@@ -232,24 +251,24 @@ def cluster_nodes_by_k_means(nodes: list[NodeRandomWalkData], pca_target_dimensi
     """
     node_path_counts = compute_top_paths_array(nodes, max_number_of_paths)
 
-    clustering_labels = compute_optimal_k_means_clustering(node_path_counts,
-                                                           pca_target_dimension,
-                                                           number_of_walks,
-                                                           significance_level)
+    clustering_labels = compute_optimal_birch_clustering(node_path_counts,
+                                                         pca_target_dimension,
+                                                         number_of_walks,
+                                                         significance_level)
 
     single_nodes, clusters = group_nodes_by_clustering_labels(nodes, clustering_labels)
 
     return single_nodes, clusters
 
 
-def compute_optimal_k_means_clustering(node_path_counts: np.array,
-                                       pca_target_dimension: int,
-                                       number_of_walks: int,
-                                       significance_level: float):
+def compute_optimal_birch_clustering(node_path_counts: np.array,
+                                     pca_target_dimension: int,
+                                     number_of_walks: int,
+                                     significance_level: float):
     """
-    Given an array of node path counts, clusters the nodes into an optimal number of clusters using k-means clustering.
-    k is incrementally increased with warm starts. The optimal number of clusters is the smallest value of k such that
-    all k clusters have statistically similar path count distributions.
+    Given an array of node path counts, clusters the nodes into an optimal number of clusters using birch clustering.
+    The number of clusters is incrementally increased. The optimal number of clusters is the smallest number of clusters
+    such that have statistically similar path count distributions at a specified significance level.
     """
     standardized_path_counts = (
             (node_path_counts - np.mean(node_path_counts, axis=1)[:, None]) / np.mean(node_path_counts, axis=1)[:,
@@ -262,7 +281,7 @@ def compute_optimal_k_means_clustering(node_path_counts: np.array,
 
     cluster_labels = None
     for number_of_clusters in range(2, number_of_feature_vectors):  # start from 2 since zero/one clusters is invalid
-        #clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
+        # clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
         clusterer = Birch(n_clusters=number_of_clusters, threshold=0.05)
 
         cluster_labels = clusterer.fit_predict(feature_vectors)

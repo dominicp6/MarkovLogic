@@ -1,5 +1,4 @@
 import numpy as np
-
 from NodeRandomWalkData import NodeRandomWalkData
 from GraphObjects import Hypergraph
 
@@ -10,22 +9,30 @@ class RandomWalker:
     for the nodes.
 
     :param hypergraph: The hypergraph to run the random walks on
-    :param epsilon: The desired fractional precision in the empirical estimations for the average truncated hitting
+    :param config: The configuration dictionary of random walk hyperparameters that should contain,
+    epsilon: The desired fractional precision in the empirical estimations for the average truncated hitting
             times and the path probability distributions of the nodes. Used when calculating the number of random walks
             required to be run.
-    :param number_of_paths: Used when calculating the number of random walks required to be run. Only the path
+    number_of_paths: Used when calculating the number of random walks required to be run. Only the path
             probabilities of the number_of_paths most common paths will be estimated to the precision set by epsilon.
-    :param max_path_length: The maximum length of a random walk. The actual length of the walk will be smaller than
+    max_num_paths: The maximum number of paths to consider when birch clustering on PCA path-count features.
+             Used when computing the number of random walks required for the desired statistical significance.
+    max_path_length: The maximum length of a random walk. The actual length of the walk will be smaller than
             this, unless the diameter of the hypergraph exceeds max_path_length.
-
+    k: Used when estimating the required length of the random walks. The length is set to be k times the estimated
+       diameter of the graph from which the hypergraph is based.
+    alpha_sym: The significance level at which the truncated hitting times of two nodes need to deviate by for the null
+                hypothesis of them being path-symmetric to be rejected. Used in the calculation of theta_sym.
     """
 
-    def __init__(self, hypergraph: Hypergraph, epsilon: float, k=1.25, max_path_length=5, number_of_paths=5):
+    def __init__(self, hypergraph: Hypergraph, config: dict):
         self.hypergraph = hypergraph
-        self.number_of_paths = number_of_paths
-        self.max_path_length = max_path_length
-        self.epsilon = epsilon
-        self.k = k
+        self.number_of_paths = config['max_num_paths']
+        self.max_path_length = config['max_path_length']
+        self.epsilon = config['epsilon']
+        self.k = config['k']
+        self.alpha_sym = config['alpha_sym']
+
         self.fraction_of_max_walks_to_always_complete = 0.25
 
         self.length_of_walk = self._get_length_of_random_walks()
@@ -36,12 +43,14 @@ class RandomWalker:
         self.number_of_predicates = hypergraph.number_of_predicates()
 
         self.number_of_walks_for_path_distribution = \
-            self._get_number_of_walks_for_path_distribution(M=number_of_paths)
+            self._get_number_of_walks_for_path_distribution(M=self.number_of_paths)
 
         self.max_number_of_walks = max(self.number_of_walks_for_truncated_hitting_times,
                                        self.number_of_walks_for_path_distribution)
 
         self.number_of_walks_ran = 0
+
+        self.theta_sym = 0
 
     def _get_length_of_random_walks(self):
         """
