@@ -1,7 +1,7 @@
 from Communities import Community
 from GraphObjects import Hypergraph
 from RandomWalker import generate_node_random_walk_data
-from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_js_divergence, group_nodes_by_clustering_labels, compute_principal_components, compute_standardized_path_distributions_and_number_of_unique_paths, compute_optimal_k_means_clustering
+from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_js_divergence, group_nodes_by_clustering_labels, compute_principal_components, compute_standardized_path_distributions_and_number_of_unique_paths, compute_optimal_birch_clustering
 from NodeRandomWalkData import NodeRandomWalkData
 from HierarchicalClusterer import HierarchicalClusterer
 from collections import defaultdict
@@ -175,7 +175,7 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
         principal_components = compute_principal_components(feature_vectors=mean_adjusted_path_counts,
                                                             original_dimension=number_unique_paths)
 
-        number_of_clusters, cluster_labels = compute_optimal_k_means_clustering(principal_components)
+        number_of_clusters, cluster_labels = compute_optimal_birch_clustering(principal_components)
 
         single_nodes, clusters = group_nodes_by_clustering_labels(nodes, number_of_clusters, cluster_labels)
 

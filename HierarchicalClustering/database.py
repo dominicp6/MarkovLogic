@@ -1,15 +1,5 @@
 import re
-
-
-class InvalidLineSyntaxError(Exception):
-    def __init__(self, line, line_number, file_name):
-        self.line = line
-        self.line_number = line_number
-        self.file_name = file_name
-
-    def __str__(self):
-        return f'Line {self.line_number} "{self.line}" of {self.file_name} has incorrect syntax. Make sure that each ' \
-               f'predicate is correctly formatted with braces and commas e.g. Friends(person, person)'
+from errors import InvalidLineSyntaxError
 
 
 def parse_line(line: str, line_idx: int, file_name: str):

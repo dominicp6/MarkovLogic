@@ -1,6 +1,7 @@
 from graph_utils import get_second_eigenpair
 from cheeger_cut import cheeger_cut
 from GraphObjects import Graph, Hypergraph
+from errors import check_argument
 
 
 class HierarchicalClusterer(object):
@@ -33,10 +34,10 @@ class HierarchicalClusterer(object):
         self.graph_clusters = []
         self.hypergraph_clusters = []
 
-        assert self.min_cluster_size > 2, "Argument Error: min_cluster_size must be greater than 2"
-        assert 0 < self.max_lambda2 < 2, "Argument Error: max_lambda2 needs to be greater than 0 and less than 2"
+        check_argument('min_cluster_size', self.min_cluster_size, int, 2)
+        check_argument('max_lambda2', self.max_lambda2, float, 0, 2)
         assert self.hypergraph.number_of_nodes() > self.min_cluster_size, \
-            "Argument Error: min_cluster_size needs to be smaller than the number of nodes in the hypergraph"
+            "min_cluster_size needs to be smaller than the number of nodes in the hypergraph"
 
     def run_hierarchical_clustering(self):
 
