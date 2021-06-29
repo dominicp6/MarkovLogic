@@ -2,6 +2,7 @@ from multiprocessing import Pool, cpu_count
 from RandomWalker import RandomWalker
 from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity
 from GraphObjects import Hypergraph
+import cProfile
 
 
 class Communities(object):
@@ -32,19 +33,19 @@ class Communities(object):
 
         assert type(config['epsilon']) is float and 1 > config['epsilon'] > 0, "epsilon must be a positive float " \
                                                                                "between 0 and 1"
-        assert type(config['num_top']) is int and config['max_num_paths'] > 0, "max_num_paths must be a positive integer"
+        assert type(config['max_num_paths']) is int and config[
+            'max_num_paths'] > 0, "max_num_paths must be a positive integer"
         assert type(config['theta_hit']) is float and config['theta_hit'] > 0, "theta_hit must be a positive float"
         assert type(config['theta_sym']) is float and config['theta_sym'] > 0, "theta_sym must be a positive float"
         assert type(config['theta_js']) is float and config['theta_js'] > 0, "theta_js must be a positive float"
-        assert type(config['max_js_div']) is float and config['max_js_div'] > 0, "max_js_div must be a positive float"
         assert type(config['pca_dim']) is int and config['pca_dim'] >= 2, "pca_dim must be an integer " \
                                                                           "greater than or equal to 2"
-        assert type(config['pca_threshold']) is int and config['pca_threshold'] >= 4, "pca_threshold must be an " \
-                                                                                      "integer greater than " \
-                                                                                      "or equal to 4"
+        assert type(config['k_means_cluster_size_threshold']) is int and config['k_means_cluster_size_threshold'] >= 4,\
+            "k_means_cluster_size_threshold must be an integer greater than or equal to 4"
         assert type(config['k']) is float and config['k'] >= 1, "k must be a float greater than or equal to 1"
         assert type(config['max_path_length']) is int and config['max_path_length'] > 0, "max_path_length must be a" \
                                                                                          "positive integer"
+        assert type(config['p_value']) is float and config['p_value'] > 0, "p_value must be a positive float"
         assert type(config['multiprocessing']) is bool
 
         self.hypergraph = hypergraph
@@ -87,7 +88,10 @@ class Communities(object):
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
             if nodes_of_type:
-                single_nodes_of_type, clusters_of_type = cluster_nodes_by_path_similarity(nodes_of_type, config)
+                single_nodes_of_type, clusters_of_type = \
+                    cluster_nodes_by_path_similarity(nodes=nodes_of_type,
+                                                     number_of_walks=self.random_walker.number_of_walks_ran,
+                                                     config=config)
 
                 single_nodes.update(single_nodes_of_type)
                 clusters.extend(clusters_of_type)
