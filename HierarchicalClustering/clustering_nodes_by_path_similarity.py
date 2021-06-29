@@ -114,7 +114,7 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
     assert len(nodes) > 1, "Clustering by path distribution requires more than one node"
     assert config['k_means_cluster_size_threshold'] >= 4, "k-means clustering requires at least 4 nodes"
 
-    node_path_counts = compute_top_paths_array(nodes, max_number_of_paths=config['max_num_paths'])
+    node_path_counts = compute_top_paths(nodes, max_number_of_paths=config['max_num_paths'])
 
     if hypothesis_test_path_symmetric_nodes(node_path_counts,
                                             number_of_walks=number_of_walks,
@@ -139,7 +139,7 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
     return single_nodes, clusters
 
 
-def compute_top_paths_array(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
+def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
     """
     From each node in the list, finds the most common paths and constructs a path count vector.
     Returns a path-count feature array of the nodes of size (number of paths) x (number of nodes) where the (i,j) entry
@@ -202,7 +202,10 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData], significance
         for i in range(len(js_clusters)):
             for j in range(i + 1, len(js_clusters)):
                 js_divergence, threshold_js_divergence = \
-                    compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], max_number_of_paths, z=z)
+                    compute_js_divergence_of_top_n_paths(js_clusters[i],
+                                                         js_clusters[j],
+                                                         max_number_of_paths,
+                                                         z=z)
 
                 if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
                     smallest_divergence = js_divergence
@@ -249,7 +252,7 @@ def cluster_nodes_by_birch(nodes: list[NodeRandomWalkData], pca_target_dimension
                                paths is tolerated before they are considered not path-symmetric.
     :return: single_nodes, clusters: the final clustering of the nodes
     """
-    node_path_counts = compute_top_paths_array(nodes, max_number_of_paths)
+    node_path_counts = compute_top_paths(nodes, max_number_of_paths)
 
     clustering_labels = compute_optimal_birch_clustering(node_path_counts,
                                                          pca_target_dimension,

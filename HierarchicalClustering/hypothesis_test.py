@@ -3,14 +3,14 @@ from numba import njit
 from scipy.stats import chi2
 
 
-def test_quality_of_clusters(clusters: list[np.array], number_of_walks: int, significance_level: float):
+def test_quality_of_clusters(cluster_node_path_counts: list[np.array], number_of_walks: int, significance_level: float):
     """
     Tests whether each cluster is a list of clusters passes the hypothesis test of the path count distributions
     being statistically similar.
 
     returns: True/False
     """
-    for node_path_counts in clusters:
+    for node_path_counts in cluster_node_path_counts:
         result = hypothesis_test_path_symmetric_nodes(node_path_counts, number_of_walks, significance_level)
         if not result:
             return result
