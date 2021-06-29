@@ -16,8 +16,7 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
 
     return: theta_sym: used as a parameter for clustering based on truncated hitting time
     """
-    assert number_of_walks_ran > 0, "Can only calculate a theta_sym value after running random walks. " \
-                                         "Call the generate_node_random_walk_data method first."
+
     return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym, df=number_of_walks_ran - 1)
 
 
