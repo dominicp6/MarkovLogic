@@ -126,6 +126,7 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
         if len(nodes) <= config['clustering_method_threshold']:
             single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
                                                                     significance_level=config['theta_p'],
+                                                                    number_of_walks=number_of_walks,
                                                                     max_number_of_paths=3)
         # else cluster based k-means cluster on a PCA reduction of the path counts features
         else:
@@ -169,7 +170,9 @@ def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int)
     return node_path_counts
 
 
-def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData], significance_level: float,
+def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
+                                   significance_level: float,
+                                   number_of_walks: int,
                                    max_number_of_paths: int):
     """
     Performs agglomerative clustering of nodes based on the Jensen-Shannon divergence between the distributions of
@@ -183,6 +186,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData], significance
     :param significance_level: the desired significance level for the hypothesis test of nodes being path symmetric.
                                Smaller values means that a larger difference between the distribution of the node's
                                paths is tolerated before they are considered not path-symmetric.
+    :param number_of_walks: the number of random walks that were run on the cluster to generate the random walk data
     :param max_number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
                             between the distributions (we consider only the top number_of_paths most common).
     :return single_nodes, clusters: the final clustering of the nodes
@@ -204,7 +208,8 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData], significance
                     compute_js_divergence_of_top_n_paths(js_clusters[i],
                                                          js_clusters[j],
                                                          max_number_of_paths,
-                                                         z=z)
+                                                         number_of_walks,
+                                                         z_score=z)
 
                 if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
                     smallest_divergence = js_divergence
