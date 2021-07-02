@@ -33,6 +33,21 @@ class NodeRandomWalkData(object):
         self.average_hitting_time = (self.accumulated_hitting_time + (number_of_walks - self.number_of_hits)
                                      * max_length) / number_of_walks
 
+    def get_count_of_nth_path(self, n):
+        """
+        Returns the path count of the nth most common path. If there are fewer than n distinct paths, then returns the
+        count of the least frequent path.
+        """
+        paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)
+        if n < len(self.path_counts):
+            count = paths[n-1][1]  # get the count of the nth most common path
+        elif len(self.path_counts) >= 1:
+            count = paths[-1][1]   # get the count of the least common path
+        else:
+            count = 0              # no paths found - node was never hit
+
+        return count
+
     def get_top_paths(self, number_of_paths, as_list=False):
         if number_of_paths < len(self.path_counts):
             top_paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)[:number_of_paths]

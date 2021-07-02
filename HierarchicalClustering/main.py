@@ -13,7 +13,6 @@ if __name__ == "__main__":
         'random_walk_params': {
             'epsilon': 0.05,
             'max_num_paths': 30,
-            'theta_hit': 4.9,
             'alpha_sym': 0.1,
             'pca_dim': 2,
             'clustering_method_threshold': 50,

@@ -47,10 +47,12 @@ def compute_threshold_js_divergence(number_of_walks: int,
     """
 
     average_probability = list(average_path_probabilities.values())
+    average_probability.sort(reverse=True)
+    k = min(len(average_probability), number_of_top_paths)
     sigma_J_squared = (13/(8*number_of_walks))*sum([average_probability[i] * (1-average_probability[i])
-                                                    for i in range(number_of_top_paths)])
+                                                    for i in range(k)])
     sigma_J = np.sqrt(sigma_J_squared)
-    mu_J = (1/(2*number_of_walks))*sum([(1-average_probability[i]) for i in range(number_of_top_paths)])
+    mu_J = (1/(2*number_of_walks))*sum([(1-average_probability[i]) for i in range(k)])
 
     theta_JS = mu_J + z_score * sigma_J
 

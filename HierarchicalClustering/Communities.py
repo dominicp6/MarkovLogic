@@ -1,6 +1,6 @@
 from multiprocessing import Pool, cpu_count
 from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import get_close_nodes, cluster_nodes_by_path_similarity, compute_theta_sym
+from clustering_nodes_by_path_similarity import get_commonly_encountered_nodes, cluster_nodes_by_path_similarity, compute_theta_sym
 from GraphObjects import Hypergraph
 from errors import check_argument
 
@@ -69,7 +69,10 @@ class Communities(object):
                                       self.random_walker.number_of_walks_ran,
                                       self.random_walker.length_of_walk)
 
-        close_nodes = get_close_nodes(random_walk_data, threshold_hitting_time=config['theta_hit'])
+        close_nodes = get_commonly_encountered_nodes(random_walk_data)
+
+        for node in close_nodes:
+            print(node.path_counts)
 
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
@@ -91,7 +94,6 @@ class Communities(object):
     def _check_arguments(config):
         check_argument('epsilon', config['epsilon'], float, 0, 1)
         check_argument('max_num_paths', config['max_num_paths'], int, 0)
-        check_argument('theta_hit', config['theta_hit'], float, 0)
         check_argument('alpha_sym', config['alpha_sym'], float, 0, 1)
         check_argument('pca_dim', config['pca_dim'], int, 2, strict_inequalities=False)
         check_argument('clustering_method_threshold', config['clustering_method_threshold'], int, 4,
