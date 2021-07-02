@@ -77,8 +77,8 @@ class NodeClusterRandomWalkData(object):
     def number_of_nodes(self):
         return len(self.node_names)
 
-    def get_top_n_path_probabilities(self, n):
-        path_probabilities = {key: value / self.total_count for key, value in self.path_counts.items()}
+    def get_top_n_path_probabilities(self, n, number_of_walks):
+        path_probabilities = {key: value / number_of_walks for key, value in self.path_counts.items()}
         sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
 
         if n < len(sorted_probabilities):

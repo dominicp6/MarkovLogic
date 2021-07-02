@@ -3,7 +3,10 @@ from NodeRandomWalkData import NodeClusterRandomWalkData
 
 
 def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkData,
-                                         node_cluster2: NodeClusterRandomWalkData, n: int, z=None):
+                                         node_cluster2: NodeClusterRandomWalkData,
+                                         number_of_top_paths: int,
+                                         number_of_walks: int,
+                                         z_score=None):
     """
     Computes the Jensen-Shannon divergence between the probability distributions of the top n most common
     paths in the path distributions of two node clusters.
@@ -11,41 +14,47 @@ def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkDat
     If a z-score is provided, then also computes the corresponding threshold JS divergence at which the null hypothesis
     of the two node clusters being path-symmetric is rejected.
     """
-    p = node_cluster1.get_top_n_path_probabilities(n)
-    q = node_cluster2.get_top_n_path_probabilities(n)
+    p = node_cluster1.get_top_n_path_probabilities(number_of_top_paths, number_of_walks=number_of_walks)
+    q = node_cluster2.get_top_n_path_probabilities(number_of_top_paths, number_of_walks=number_of_walks)
 
     m = compute_average_distribution(p, q)
 
     js_div = js_divergence(p, q, m)
 
-    if z is not None:
-        N_p = node_cluster1.total_count
-        N_q = node_cluster2.total_count
-        theta_js = compute_threshold_js_divergence(N_p, N_q, m, n, z)
+    if z_score is not None:
+        theta_js = compute_threshold_js_divergence(number_of_walks=number_of_walks,
+                                                   average_path_probabilities=m,
+                                                   number_of_top_paths=number_of_top_paths,
+                                                   z_score=z_score)
         return js_div, theta_js
     else:
         return js_div
 
 
-def compute_threshold_js_divergence(N_p: int, N_q: int, m: dict, n: int, z: float):
+def compute_threshold_js_divergence(number_of_walks: int,
+                                    average_path_probabilities: dict,
+                                    number_of_top_paths: int,
+                                    z_score: float):
     """
-    Given the number of path counts in two clusters, N_p and N_q, and the average path distribution of the two clusters,
-     m, calculates a suitable value for the Jensen-Shannon divergence threshold for merger of the node clusters. Only
-     if the JS divergence is strictly less than the threshold should the nodes be considered path-symmetric and merged.
+    Given the number of random walks ran, and the average path distribution of the two clusters, calculates a
+    Jensen-Shannon divergence threshold for merger of the node clusters.
 
-    To compute the threshold one must additionally specify:
-    n: the number of paths considered in the calculation of the Jensen-Shannon divergence
-    z: the threshold z-score which defines how extreme the deviations between the Jensen-Shannon divergence of
+    Computing the threshold requires additionally specifying
+    (1) the number of top paths used when calculating the Jensen-Shannon divergence
+    (2) the threshold z-score (defines how extreme the deviations between the Jensen-Shannon divergence of
        two distributions is permitted to be before the differences are no longer assumed to be explainable
-       due to chance alone. The threshold JS divergence depends linearly on z.
+       due to chance alone)
     """
 
-    p_bar = list(m.values())
-    sigma_J_squared = sum([0.5 * (1 + p_bar[i] ** (-4)) * (1 / N_p + 1 / N_q) *
-                           p_bar[i] ** 2 * (1 - p_bar[i]) ** 2 for i in range(n)])
+    average_probability = list(average_path_probabilities.values())
+    sigma_J_squared = (13/(8*number_of_walks))*sum([average_probability[i] * (1-average_probability[i])
+                                                    for i in range(number_of_top_paths)])
     sigma_J = np.sqrt(sigma_J_squared)
+    mu_J = (1/(2*number_of_walks))*sum([(1-average_probability[i]) for i in range(number_of_top_paths)])
 
-    return z * sigma_J
+    theta_JS = mu_J + z_score * sigma_J
+
+    return theta_JS
 
 
 def js_divergence(p: dict, q: dict, m=None):
