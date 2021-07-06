@@ -12,14 +12,14 @@ if __name__ == "__main__":
         },
         'random_walk_params': {
             'epsilon': 0.05,
-            'max_num_paths': 30,
+            'max_num_paths': 3,
             'alpha_sym': 0.1,
             'pca_dim': 2,
             'clustering_method_threshold': 50,
             'k': 1.25,
             'max_path_length': 5,
             'theta_p': 0.5,
-            'multiprocessing': True
+            'multiprocessing': False
         }
     }
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #                           for hypergraph in hypergraph_clusters]
 
     #[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]
-
+    #cProfile.run("Communities(hypergraph_clusters[0], config=config['random_walk_params'])")
     cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
 
     # for communities in hypergraph_communities:

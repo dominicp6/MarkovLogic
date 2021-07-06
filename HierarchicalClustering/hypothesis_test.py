@@ -1,5 +1,4 @@
 import numpy as np
-from numba import njit
 from scipy.stats import chi2
 
 
@@ -58,7 +57,6 @@ def hypothesis_test_path_symmetric_nodes(node_path_counts, number_of_walks, sign
                                         mean_number_of_hits)
 
 
-@njit
 def Q_test_if_single_path(Q_max: float, node_path_counts: np.array, mean_path_count: int, number_of_nodes: int,
                           number_of_walks: int):
     """
@@ -80,7 +78,6 @@ def Q_test_if_single_path(Q_max: float, node_path_counts: np.array, mean_path_co
     return True
 
 
-@njit
 def Q_test_if_multiple_paths(Q_max: float, node_path_counts: np.array, node_path_count_means: np.array,
                              number_of_nodes: int, number_of_paths: int, mean_number_of_hits: np.array):
     """

@@ -20,7 +20,6 @@ class Communities(object):
 
         Config parameters:
             epsilon, number_of_paths, max_num_paths, max_path_length, k, alpha_sym (see RandomWalker.py for details)
-            theta_hit: TODO: remove/change the theta_hit hyperparameter
             theta_p: the desired significance level for testing the null hypothesis of nodes being path symmetric
                      when clustering by JS divergence of by birch clustering on PCA path-count features. Smaller values
                      of theta_p give fewer clusters.
@@ -70,9 +69,6 @@ class Communities(object):
                                       self.random_walker.length_of_walk)
 
         close_nodes = get_commonly_encountered_nodes(random_walk_data)
-
-        for node in close_nodes:
-            print(node.path_counts)
 
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
