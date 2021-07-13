@@ -7,37 +7,59 @@ from GraphObjects import Hypergraph
 from NodeRandomWalkData import NodeClusterRandomWalkData
 from js_divergence_utils import kl_divergence, js_divergence, compute_js_divergence_of_top_n_paths
 from Communities import Communities
-from RandomWalker import generate_node_random_walk_data
-from clustering_nodes_by_path_similarity import get_commonly_encountered_nodes
+from RandomWalker import RandomWalker
+from clustering_nodes_by_path_similarity import get_close_nodes
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
-config = {'epsilon': 0.01,
-          'k': 1.25,
-          'max_path_length': 5,
-          'theta_hit': 6.9,
-          'theta_sym': 0.1,
-          'theta_js': 1.0,
-          'num_top': 3}
+config = {  'epsilon': 0.05,
+            'max_num_paths': 3,
+            'alpha_sym': 0.1,
+            'pca_dim': 2,
+            'clustering_method_threshold': 50,
+            'k': 1.25,
+            'max_path_length': 5,
+            'theta_p': 0.5,
+            'multiprocessing': False,
+            'num_walks': 10000,
+            'max_length': 5,
+            'theta_hit': 4.9,
+            'theta_sym': 0.1,
+            'theta_js': 1}
 
-communities = Communities(H, config).communities
+communities = Communities(H,
+                          config,
+                          num_walks=config['num_walks'],
+                          theta_hit=config['theta_hit'],
+                          theta_sym=config['theta_sym'],
+                          theta_js=config['theta_js']).communities
 
 H2 = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
-config2 = {'epsilon': 0.01,
-           'k': 1.25,
-           'max_path_length': 5,
-           'theta_hit': 4.9,
-           'theta_sym': 0.1,
-           'theta_js': 1.0,
-           'num_top': 3}
+config2 = { 'epsilon': 0.05,
+            'max_num_paths': 3,
+            'alpha_sym': 0.1,
+            'pca_dim': 2,
+            'clustering_method_threshold': 50,
+            'k': 1.25,
+            'max_path_length': 5,
+            'theta_p': 0.5,
+            'multiprocessing': False,
+            'num_walks': 10000,
+            'max_length': 5,
+            'theta_hit': 4.9,
+            'theta_sym': 0.1,
+            'theta_js': 1
+            }
+
+RW1 = RandomWalker(hypergraph=H, config=config, num_walks=10000, walk_length=5)
+RW2 = RandomWalker(hypergraph=H2, config=config2, num_walks=10000, walk_length=5)
 
 
 class TestRandomWalks(unittest.TestCase):
 
     def test_correct_node_cluster_merging(self):
         for node in H.nodes.keys():
-            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, epsilon=0.01)
-            close_nodes = get_commonly_encountered_nodes(nodes_rw_data, threshold_hitting_time=5)
-
+            nodes_rw_data = RW1.generate_node_random_walk_data(source_node=node)
+            close_nodes = get_close_nodes(nodes_rw_data, threshold_average_truncated_hitting_time=5)
             # MERGE SOME CLUSTERS ------------------------------------------------------------------------------
             js_clusters = [NodeClusterRandomWalkData([node]) for node in close_nodes]
 
@@ -49,8 +71,7 @@ class TestRandomWalks(unittest.TestCase):
                 smallest_divergence = max_divergence
                 for i in range(len(js_clusters)):
                     for j in range(i + 1, len(js_clusters)):
-                        js_div = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j],
-                                                                      3)
+                        js_div, _ = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], 20, 10000, 2)
 
                         if js_div < smallest_divergence and js_div < 0.25:
                             smallest_divergence = js_div
@@ -72,12 +93,14 @@ class TestRandomWalks(unittest.TestCase):
 
                 # verify that the probability distribution of path counts is correctly normalised
                 assert math.isclose(
-                    sum(node_cluster.get_top_n_path_probabilities(len(node_cluster.path_counts)).values()), 1)
+                    sum(node_cluster.get_top_n_path_probabilities(len(node_cluster.path_counts),
+                                                                  number_of_walks=node_cluster.total_count).values()),
+                    1)
 
     def test_valid_average_hitting_time(self):
         max_path_length = 5
         for node in H.nodes.keys():
-            nodes_rw_data = generate_node_random_walk_data(H, source_node=node, epsilon=0.01)
+            nodes_rw_data = RW1.generate_node_random_walk_data(source_node=node)
             for node_data in nodes_rw_data.values():
                 if node_data.number_of_hits == 0:
                     assert node_data.average_hitting_time == max_path_length
@@ -131,8 +154,9 @@ class TestRandomWalks(unittest.TestCase):
     def test_number_of_close_nodes_same_as_SOTA(self):
         len_of_close_nodes = []
         for node in H2.nodes.keys():
-            nodes_rw_data = generate_node_random_walk_data(H2, source_node=node, epsilon=config2['epsilon'])
-            close_nodes_rw_data = get_commonly_encountered_nodes(nodes_rw_data, threshold_hitting_time=config2['theta_hit'])
+            nodes_rw_data = RW2.generate_node_random_walk_data(source_node=node)
+            close_nodes_rw_data = get_close_nodes(nodes_rw_data,
+                                                  threshold_average_truncated_hitting_time=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
 
         print("Average # close nodes")
@@ -143,7 +167,12 @@ class TestRandomWalks(unittest.TestCase):
     def test_average_number_of_clusters_and_single_nodes_same_as_SOTA(self):
         clusters_and_single_nodes = []
         nodes = []
-        communities2 = Communities(H2, config2).communities
+        communities2 = Communities(H2,
+                                   config2,
+                                   num_walks=config2['num_walks'],
+                                   theta_hit=config2['theta_hit'],
+                                   theta_sym=config2['theta_sym'],
+                                   theta_js=config2['theta_js']).communities
         for node_name, community in communities2.items():
             num_c_and_sn = community.number_of_single_nodes + community.number_of_clusters
             num_nodes = community.number_of_nodes

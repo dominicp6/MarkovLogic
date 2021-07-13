@@ -40,11 +40,11 @@ class NodeRandomWalkData(object):
         """
         paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)
         if n < len(self.path_counts):
-            count = paths[n-1][1]  # get the count of the nth most common path
+            count = paths[n - 1][1]  # get the count of the nth most common path
         elif len(self.path_counts) >= 1:
-            count = paths[-1][1]   # get the count of the least common path
+            count = paths[-1][1]  # get the count of the least common path
         else:
-            count = 0              # no paths found - node was never hit
+            count = 0  # no paths found - node was never hit
 
         return count
 
@@ -69,9 +69,12 @@ class NodeClusterRandomWalkData(object):
     Data structure to store path count information for a collection of nodes.
     """
 
-    def __init__(self, nodes_random_walk_data: list[NodeRandomWalkData]):
+    def __init__(self, nodes_random_walk_data: list[NodeRandomWalkData], minimum_path_count_for_good_path=15):
         super().__init__()
+        assert len(set(node.node_type for node in nodes_random_walk_data)) == 1, "Cannot merge nodes of different type"
+        self.node_type = nodes_random_walk_data[0].node_type
         self.node_names = set(node.name for node in nodes_random_walk_data)
+        self.minimum_path_count_for_good_path = minimum_path_count_for_good_path
 
         path_counts = defaultdict(int)
         total_count = 0
@@ -79,18 +82,25 @@ class NodeClusterRandomWalkData(object):
             for key, value in node.path_counts.items():
                 path_counts[key] += value
                 total_count += value
-
         self.path_counts = path_counts  # dict<str,int>
         self.total_count = total_count  # int
+        self.paths_with_good_count_data = {path for path, path_count in self.path_counts.items()
+                                           if path_count > self.minimum_path_count_for_good_path}
 
     def merge(self, other):
+        assert self.node_type == other.node_type, "Cannot merge nodes of different type"
         self.node_names.update(other.node_names)
         self.total_count += other.total_count
-        for key, value in other.path_counts.items():
-            self.path_counts[key] += value
+        for path, path_count in other.path_counts.items():
+            self.path_counts[path] += path_count
+            if self.path_counts[path] > self.minimum_path_count_for_good_path:
+                self.paths_with_good_count_data.add(path)
 
     def number_of_nodes(self):
         return len(self.node_names)
+
+    def number_of_good_paths(self):
+        return len(self.paths_with_good_count_data)
 
     def get_top_n_path_probabilities(self, n, number_of_walks):
         path_probabilities = {key: value / number_of_walks for key, value in self.path_counts.items()}

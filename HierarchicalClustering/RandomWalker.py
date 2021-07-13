@@ -19,23 +19,21 @@ class RandomWalker:
              Used when computing the number of random walks required for the desired statistical significance.
     max_path_length: The maximum length of a random walk. The actual length of the walk will be smaller than
             this, unless the diameter of the hypergraph exceeds max_path_length.
-    k: Used when estimating the required length of the random walks. The length is set to be k times the estimated
-       diameter of the graph from which the hypergraph is based.
-    alpha_sym: The significance level at which the truncated hitting times of two nodes need to deviate by for the null
-                hypothesis of them being path-symmetric to be rejected. Used in the calculation of theta_sym.
     """
 
-    def __init__(self, hypergraph: Hypergraph, config: dict):
+    def __init__(self, hypergraph: Hypergraph, config: dict, num_walks=None, walk_length=None):
         self.hypergraph = hypergraph
         self.number_of_paths = config['max_num_paths']
         self.max_path_length = config['max_path_length']
         self.epsilon = config['epsilon']
-        self.k = config['k']
-        self.alpha_sym = config['alpha_sym']
+        self.fixed_num_walks = num_walks
 
         self.fraction_of_max_walks_to_always_complete = 0.25
 
-        self.length_of_walk = self._get_length_of_random_walks()
+        if walk_length is None:
+            self.length_of_walk = self._get_length_of_random_walks()
+        else:
+            self.length_of_walk = walk_length
 
         self.number_of_walks_for_truncated_hitting_times = \
             self._get_number_of_walks_for_truncated_hitting_times(self.length_of_walk)
@@ -57,8 +55,8 @@ class RandomWalker:
         Calculates a suitable value for the length of the random walks based on the estimated diameter of the graph
         that generated the hypergraph.
         """
-        if self.hypergraph.estimated_graph_diameter is not None:
-            length_of_walk = int(round(self.k * self.hypergraph.estimated_graph_diameter))
+        if self.hypergraph.diameter is not None:
+            length_of_walk = self.hypergraph.diameter
         else:
             length_of_walk = self.max_path_length
 
@@ -123,21 +121,27 @@ class RandomWalker:
         nodes_random_walk_data = {node: NodeRandomWalkData(node, node_type) for node, node_type in
                                   self.hypergraph.nodes.items()}
 
-        number_of_walks = int(self.max_number_of_walks * self.fraction_of_max_walks_to_always_complete)
+        if self.fixed_num_walks is None:
+            number_of_walks = int(self.max_number_of_walks * self.fraction_of_max_walks_to_always_complete)
 
-        # run a fraction of the number of walks initially estimated
-        [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
-         for _ in range(number_of_walks)]
-
-        # compute a refined estimate of number of additional walks needed based on the path distribution statistics
-        # obtained so far
-        number_of_additional_walks = self._compute_number_of_additional_walks(nodes_random_walk_data, number_of_walks)
-
-        # if additional walks are needed, then run them
-        if number_of_additional_walks > 0:
+            # run a fraction of the number of walks initially estimated
             [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
-             for _ in range(number_of_additional_walks)]
-            number_of_walks += number_of_additional_walks
+             for _ in range(number_of_walks)]
+
+            # compute a refined estimate of number of additional walks needed based on the path distribution statistics
+            # obtained so far
+            number_of_additional_walks = self._compute_number_of_additional_walks(nodes_random_walk_data,
+                                                                                  number_of_walks)
+
+            # if additional walks are needed, then run them
+            if number_of_additional_walks > 0:
+                [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
+                 for _ in range(number_of_additional_walks)]
+                number_of_walks += number_of_additional_walks
+        else:
+            [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
+             for _ in range(self.fixed_num_walks)]
+            number_of_walks = self.fixed_num_walks
 
         return nodes_random_walk_data, number_of_walks
 

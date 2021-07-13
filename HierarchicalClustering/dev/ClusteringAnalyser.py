@@ -41,7 +41,7 @@ class TEST_Communities(object):
         assert type(config['num_top']) is int and config['num_top'] > 0, "num_top must be a positive int"
 
         self.hypergraph = hypergraph
-        if hypergraph.estimated_graph_diameter is None:
+        if hypergraph.diameter is None:
             print(f"Warning: Graph diameter of the hypergraph not known. Reverting to using default length of random "
                   f"walks.")
 

@@ -1,7 +1,10 @@
 import numpy as np
+import math
+import heapq
 from NodeRandomWalkData import *
 from sklearn.decomposition import PCA
 from sklearn.cluster import Birch
+from sklearn.cluster import KMeans
 from scipy.stats import norm, t
 from js_divergence_utils import compute_js_divergence_of_top_n_paths
 
@@ -16,8 +19,17 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
 
     return: theta_sym: used as a parameter for clustering based on truncated hitting time
     """
+    # divide alpha sym by 2 because of the two-tailed nature of the t test (we are testing if the absolute value
+    # of the difference in truncated hitting time exceeds a threshold)
+    return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym / 2, df=number_of_walks_ran - 1)
 
-    return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym, df=number_of_walks_ran - 1)
+
+def get_close_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData], threshold_average_truncated_hitting_time):
+    """
+    Returns those nodes from a list of nodes that have average truncated hitting time less than a threshold
+    """
+    return {node for node in nodes_random_walk_data.values() if node.average_hitting_time
+            < threshold_average_truncated_hitting_time}
 
 
 def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
@@ -25,11 +37,83 @@ def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomW
     Returns those nodes from a list of nodes that have robust enough path count data to be subsequently merged based
     on path count distribution (i.e. their third most common path has at least 10 counts).
     """
-    return {node for node in nodes_random_walk_data.values() if node.get_count_of_nth_path(n=3) >= 10}
+    return {node for node in nodes_random_walk_data.values() if node.get_count_of_nth_path(n=3) >= 15}
+
+
+def prune_nodes(single_nodes_of_type: dict[str, set[NodeClusterRandomWalkData]], pruning_value: int):
+    """
+    Given a dictionary mapping node type to single nodes, removes nodes of each type in proportion to their
+    population until the number of single nodes remaining is equal to the specified pruning_value.
+
+    For each node type, the nodes that are removed are those which have path distributions most dissimilar to
+    all other nodes of that type, as measured by their Jensen-Shannon divergence.
+    """
+    number_of_nodes_of_type = {node_type: len(nodes) for node_type, nodes in single_nodes_of_type.items()}
+    number_of_single_nodes = sum(number_of_nodes_of_type.values())
+    if pruning_value is None:
+        number_of_nodes_to_prune = 0
+    else:
+        number_of_nodes_to_prune = number_of_single_nodes + 1 - pruning_value  # +1 to account for the source node
+
+    single_nodes = set()
+    if number_of_nodes_to_prune < 1:
+        # no need to prune nodes
+        [single_nodes.update(node.node_names) for typed_single_nodes in single_nodes_of_type.values()
+         for node in typed_single_nodes]
+    else:
+        order_of_node_types_to_prune = [node_type for node_type, _ in
+                                        sorted(number_of_nodes_of_type.items(),
+                                               key=lambda item: item[1],
+                                               reverse=True)]
+        number_of_nodes_remaining_to_prune = number_of_nodes_to_prune
+        # prune nodes of each type in turn until no more node left to prune
+        for node_type in order_of_node_types_to_prune:
+            if number_of_nodes_remaining_to_prune >= 1:
+                number_of_nodes_to_prune_of_this_type = min(math.ceil(number_of_nodes_to_prune * (
+                        number_of_nodes_of_type[node_type] / number_of_single_nodes)),
+                                                            number_of_nodes_remaining_to_prune)
+
+                nodes_to_remove = get_nodes_to_remove(list(single_nodes_of_type[node_type]),
+                                                      number_of_nodes_to_prune_of_this_type)
+
+                nodes_of_type = set()
+                [nodes_of_type.update(node.node_names) for node in single_nodes_of_type[node_type]]
+                remaining_nodes_of_type = nodes_of_type.difference(nodes_to_remove)
+                single_nodes.update(remaining_nodes_of_type)
+                number_of_nodes_remaining_to_prune -= number_of_nodes_to_prune_of_this_type
+            else:
+                [single_nodes.update(node.node_names) for node in single_nodes_of_type[node_type]]
+
+    return single_nodes
+
+
+def get_nodes_to_remove(nodes: list[NodeClusterRandomWalkData], num_nodes_to_prune):
+    """
+    Given a list of nodes, identifies the num_nodes_to_prune many nodes which have the the largest Jensen-Shannon
+    divergence in path-distributions compared to the remaining nodes.
+    """
+    largest_minimal_js_divergence_of_node = defaultdict(lambda: float('inf'))
+    for i in range(len(nodes)):
+        for j in range(i + 1, len(nodes)):
+            js_divergence = compute_js_divergence_of_top_n_paths(nodes[i],
+                                                                 nodes[j],
+                                                                 z_score=None)
+            (node_i_name,) = nodes[i].node_names
+            (node_j_name,) = nodes[j].node_names
+            largest_minimal_js_divergence_of_node[node_i_name] = min(largest_minimal_js_divergence_of_node[node_i_name],
+                                                                     js_divergence)
+            largest_minimal_js_divergence_of_node[node_j_name] = min(largest_minimal_js_divergence_of_node[node_j_name],
+                                                                     js_divergence)
+
+    nodes_to_prune = heapq.nlargest(num_nodes_to_prune,
+                                    largest_minimal_js_divergence_of_node.items(), key=lambda item: item[1])
+    node_names_to_prune = [node_name for node_name, largest_minimal_js_divergence in nodes_to_prune]
+
+    return node_names_to_prune
 
 
 def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_walks: int, theta_sym: float,
-                                     config: dict):
+                                     config: dict, theta_js=None, num_top_paths=None):
     """
     Clusters nodes from a hypergraph into groups which are symmetrically related relative to a source node.
 
@@ -48,13 +132,15 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_
     distance_symmetric_single_nodes, distance_symmetric_clusters = cluster_nodes_by_truncated_hitting_times(
         nodes, threshold_hitting_time_difference=theta_sym)
 
-    single_nodes.update(node.name for node in distance_symmetric_single_nodes)
+    single_nodes.update(NodeClusterRandomWalkData([single_node]) for single_node in distance_symmetric_single_nodes)
 
     for distance_symmetric_cluster in distance_symmetric_clusters:
         path_symmetric_single_nodes, path_symmetric_clusters = cluster_nodes_by_path_distributions(
             distance_symmetric_cluster,
             number_of_walks,
-            config
+            config,
+            theta_js=theta_js,
+            num_top_paths=num_top_paths
         )
 
         single_nodes.update(path_symmetric_single_nodes)
@@ -104,7 +190,7 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
 
 
 def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_walks: int,
-                                        config: dict):
+                                        config: dict, theta_js=None, num_top_paths=None):
     """
     Clusters a list of nodes based on their empirical path distributions into path-symmetric clusters as follows
 
@@ -112,32 +198,40 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
     all path-symmetric.
     2) If the null hypothesis is violated, and the cluster is smaller than a threshold size, then cluster nodes by
     agglomerative clustering of the Jensen-Shannon divergence in path probability distributions. For larger clusters,
-    k-means clustering of dimensionality-reduced path count features is used instead.
+    Birch clustering of dimensionality-reduced path count features is used instead.
     """
     assert len(nodes) > 1, "Clustering by path distribution requires more than one node"
 
-    node_path_counts = compute_top_paths(nodes, max_number_of_paths=config['max_num_paths'])
+    if theta_js is None:
+        node_path_counts = compute_top_paths(nodes, max_number_of_paths=config['max_num_paths'])
 
-    if hypothesis_test_path_symmetric_nodes(node_path_counts,
-                                            number_of_walks=number_of_walks,
-                                            significance_level=config['theta_p']):
-        single_nodes = set()
-        clusters = [[node.name for node in nodes]]
-    else:
-        # if the number of nodes is smaller than then then the threshold size required for k-means clustering,
-        # then cluster nodes based on agglomerative clustering of js divergence instead
-        if len(nodes) <= config['clustering_method_threshold']:
-            single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
-                                                                    significance_level=config['theta_p'],
-                                                                    number_of_walks=number_of_walks,
-                                                                    max_number_of_paths=3)
-        # else cluster based k-means cluster on a PCA reduction of the path counts features
+        if hypothesis_test_path_symmetric_nodes(node_path_counts,
+                                                number_of_walks=number_of_walks,
+                                                significance_level=config['theta_p']):
+            single_nodes = set()
+            clusters = [{node.name for node in nodes}]
         else:
-            single_nodes, clusters = cluster_nodes_by_birch(nodes=nodes,
-                                                            pca_target_dimension=config['pca_dim'],
-                                                            max_number_of_paths=config['max_num_paths'],
-                                                            number_of_walks=number_of_walks,
-                                                            significance_level=config['theta_p'])
+            # if the number of nodes is smaller than then then the threshold size required for k-means clustering,
+            # then cluster nodes based on agglomerative clustering of js divergence instead
+            if len(nodes) <= config['clustering_method_threshold']:
+                single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
+                                                                        significance_level=config['theta_p'],
+                                                                        number_of_walks=number_of_walks,
+                                                                        theta_js=None,
+                                                                        num_top_paths=num_top_paths)
+            # else cluster using Birch clustering on a PCA reduction of the path counts features
+            else:
+                single_nodes, clusters = cluster_nodes_by_birch(nodes=nodes,
+                                                                pca_target_dimension=config['pca_dim'],
+                                                                max_number_of_paths=config['max_num_paths'],
+                                                                number_of_walks=number_of_walks,
+                                                                significance_level=config['theta_p'])
+    else:
+        single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
+                                                                significance_level=config['theta_p'],
+                                                                number_of_walks=number_of_walks,
+                                                                theta_js=theta_js,
+                                                                num_top_paths=num_top_paths)
 
     return single_nodes, clusters
 
@@ -176,7 +270,8 @@ def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int)
 def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
                                    significance_level: float,
                                    number_of_walks: int,
-                                   max_number_of_paths: int):
+                                   theta_js=None,
+                                   num_top_paths=None):
     """
     Performs agglomerative clustering of nodes based on the Jensen-Shannon divergence between the distributions of
     their paths.
@@ -190,7 +285,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
                                Smaller values means that a larger difference between the distribution of the node's
                                paths is tolerated before they are considered not path-symmetric.
     :param number_of_walks: the number of random walks that were run on the cluster to generate the random walk data
-    :param max_number_of_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
+    :param num_top_paths: the number of paths to consider when calculating the Jensen-Shannon divergence
                             between the distributions (we consider only the top number_of_paths most common).
     :return single_nodes, clusters: the final clustering of the nodes
     """
@@ -210,9 +305,12 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
                 js_divergence, threshold_js_divergence = \
                     compute_js_divergence_of_top_n_paths(js_clusters[i],
                                                          js_clusters[j],
-                                                         max_number_of_paths,
                                                          number_of_walks,
+                                                         number_of_top_paths=num_top_paths,
                                                          z_score=z)
+
+                if theta_js is not None:
+                    threshold_js_divergence = theta_js
 
                 if js_divergence < smallest_divergence and js_divergence < threshold_js_divergence:
                     smallest_divergence = js_divergence
@@ -232,8 +330,8 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
     clusters = []
     for js_cluster in js_clusters:
         if js_cluster.number_of_nodes() == 1:
-            (node_name,) = js_cluster.node_names
-            single_nodes.add(node_name)
+            # (node_name,) = js_cluster.node_names
+            single_nodes.add(js_cluster)
         else:
             clusters.append(js_cluster.node_names)
 
@@ -291,7 +389,7 @@ def compute_optimal_birch_clustering(node_path_counts: np.array,
 
     cluster_labels = None
     for number_of_clusters in range(2, number_of_feature_vectors):  # start from 2 since zero/one clusters is invalid
-        # clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
+        #clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
         clusterer = Birch(n_clusters=number_of_clusters, threshold=0.05)
 
         cluster_labels = clusterer.fit_predict(feature_vectors)
@@ -351,17 +449,18 @@ def group_nodes_by_clustering_labels(nodes: list[NodeRandomWalkData], cluster_la
     number_of_clusters = len(set(cluster_labels))
     original_clusters = [[] for _ in range(number_of_clusters)]
     for node_index, cluster_index in enumerate(cluster_labels):
-        original_clusters[cluster_index].append(nodes[node_index].name)
+        original_clusters[cluster_index].append(nodes[node_index])
 
+    # TODO: re-write this bit of repeated code that also appears in the JS divergence routine
     # split into single nodes and clusters
     single_nodes = set()
     clusters = []
     for cluster in original_clusters:
         if len(cluster) == 1:
-            node_name = cluster[0]
-            single_nodes.add(node_name)
+            node = cluster[0]
+            single_nodes.add(NodeClusterRandomWalkData([node]))
         else:
-            clusters.append(cluster)
+            clusters.append({node.name for node in cluster})
 
     return single_nodes, clusters
 

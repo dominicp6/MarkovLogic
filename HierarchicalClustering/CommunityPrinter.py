@@ -6,6 +6,22 @@ import itertools
 
 
 class CommunityPrinter(object):
+    """
+    Enables community objects to be saved to disk formatted in a way that can be understood by the
+    rest of the Alchemy structure learning pipeline.
+
+    Initialised with a list of communities and the original hypergraph that the communities are associated with.
+
+    Calling the write_files() method saves this communities to disk by generating three types of datafiles that
+    are required by Alchemy:
+
+    .ldb file       - For each community, contains a list of all hyperedges in a community but with nodes replaced by
+                      either node id (if it is a single node) or cluster id (if it is a member of a cluster)
+    .uldb file      - As for .ldb file but every node is replaced by its node id, regardless of whether it is a single
+                      node or a member of a cluster.
+    .srcnclust file - A file that enumerates the node id of every source node, single node and node in each node cluster
+                      in a community.
+    """
     def __init__(self, list_of_communities: list[Communities], original_hypergraph):
 
         self.list_of_communities = list_of_communities
@@ -59,6 +75,7 @@ class CommunityPrinter(object):
 
             self._write_header(file)
 
+            self.global_community_index = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
                 for community_number, community in enumerate(communities.communities.values()):
@@ -66,6 +83,7 @@ class CommunityPrinter(object):
                     ldb_atoms = self._get_atoms_of_community(community, hypergraph_of_community=communities.hypergraph,
                                                              string_type='ldb')
                     self._write_atoms_to_file(ldb_atoms, file)
+                    self.global_community_index += 1
 
             self._write_footer(file)
 
@@ -93,6 +111,7 @@ class CommunityPrinter(object):
 
             self._write_header(file)
 
+            self.global_community_index = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
                 for community_number, community in enumerate(communities.communities.values()):
@@ -100,6 +119,7 @@ class CommunityPrinter(object):
                     uldb_atoms = self._get_atoms_of_community(community, hypergraph_of_community=communities.hypergraph,
                                                               string_type='uldb')
                     self._write_atoms_to_file(uldb_atoms, file)
+                    self.global_community_index += 1
 
             self._write_footer(file)
 
@@ -124,6 +144,7 @@ class CommunityPrinter(object):
 
             self._write_header(file)
 
+            self.global_community_index = 0
             for hypergraph_number, communities in enumerate(self.list_of_communities):
                 self.hypergraph_number = hypergraph_number
                 for community_number, community in enumerate(communities.communities.values()):
@@ -134,6 +155,7 @@ class CommunityPrinter(object):
                     self._write_single_node_ids_to_file(single_node_ids, file)
                     self._write_cluster_node_ids_to_file(cluster_node_ids, file)
                     self._write_all_node_ids_to_file(single_node_ids, cluster_node_ids, file)
+                    self.global_community_index += 1
 
             self._write_footer(file)
 
@@ -141,8 +163,12 @@ class CommunityPrinter(object):
         header = '#START_GRAPH  #COMS {}\n\n'.format(self.num_of_communities)
         file.write(header)
 
-    def _write_atoms_to_file(self, atoms, file):
-        file.write('#START_DB {} #COM 1 #NUM_ATOMS {} \n'.format(self.community_number, len(atoms)))
+    def _write_atoms_to_file(self, atoms: list[str], file):
+        """
+        Writes a list of atoms strings to file. These atom strings make up the information content of the .ldb and .uldb
+        files.
+        """
+        file.write('#START_DB {} #COM 1 #NUM_ATOMS {} \n'.format(self.global_community_index, len(atoms)))
 
         for atom in atoms:
             file.write(atom)
@@ -153,7 +179,10 @@ class CommunityPrinter(object):
         file.write('#END_GRAPH\n')
 
     def _write_community_source_node_to_file(self, community: Community, file):
-        file.write("#START_DB {} #NUM_SINGLES {} #NUM_CLUSTS {} #NUM_NODES {}\n".format(self.community_number,
+        """
+        Write the id of the source node of a community to file. Called when creating the .srcnclust file.
+        """
+        file.write("#START_DB {} #NUM_SINGLES {} #NUM_CLUSTS {} #NUM_NODES {}\n".format(self.global_community_index,
                                                                                         community.number_of_single_nodes
                                                                                         , community.number_of_clusters,
                                                                                         community.number_of_nodes))
@@ -161,17 +190,27 @@ class CommunityPrinter(object):
 
     @staticmethod
     def _write_single_node_ids_to_file(node_id_list, file):
+        """
+        Writes the ids of each single node to file. Called when creating the .srcnclust file.
+        """
         for node_id in node_id_list:
             file.write(node_id + '\n')
 
     @staticmethod
     def _write_cluster_node_ids_to_file(cluster_node_ids, file):
+        """
+        Writes the node ids of every node in each cluster. Called when creating the .srcnclust file.
+        """
         for idx, node_id_list in enumerate(cluster_node_ids):
             string_of_node_ids = ' '.join(node_id_list)
             file.write('CLUST {}  {}\n'.format(idx, string_of_node_ids))
 
     @staticmethod
     def _write_all_node_ids_to_file(single_node_ids, cluster_node_ids, file):
+        """
+        Writes a list of node ids of nodes in the community to file. These node ids make up the information content
+        of the .srcnclust file.
+        """
         flattened_cluster_node_ids = list(itertools.chain(*cluster_node_ids))
         all_node_ids = single_node_ids + flattened_cluster_node_ids
         all_node_ids.sort(key=int)
@@ -198,6 +237,10 @@ class CommunityPrinter(object):
         return atoms
 
     def _get_atoms_of_node_in_community(self, node, community, hypergraph_of_community, string_type):
+        """
+        Finds all ground atoms containing a specified node, where all grounding constants are also present in
+        the community.
+        """
         atoms = set()
         non_singleton_edges = hypergraph_of_community.memberships[node]
         for edge in non_singleton_edges:
@@ -219,7 +262,14 @@ class CommunityPrinter(object):
 
         return atoms
 
-    def _get_atom_for_edge(self, edge_predicate, nodes_of_edge, string_type):
+    def _get_atom_for_edge(self, edge_predicate: str, nodes_of_edge: list[str], string_type: str):
+        """
+        Constructs and returns the ground atom string representation corresponding to a particular predicate
+        and a list of grounded nodes.
+
+        param: string_type: either 'ldb' or 'uldb', depending on whether the ground atom is part of the .ldb file
+                            or part of the .uldb file
+        """
         if type(nodes_of_edge) == list:
             atom = edge_predicate + '('
             for node in nodes_of_edge[:-1]:
@@ -233,6 +283,12 @@ class CommunityPrinter(object):
         return atom
 
     def _get_node_name(self, node, string_type):
+        """
+        Finds the appropriate string representation of a node (either NODE_+{node_id} or NODE_{cluster_id}).
+
+        param: string_type: either 'ldb' or 'uldb', in general a different string representation is required for these
+                            two different types of files.
+        """
         if string_type == 'ldb':
             return self.node_to_ldb_string[self.hypergraph_number][self.community_number][node]
 
@@ -242,6 +298,9 @@ class CommunityPrinter(object):
             raise ValueError('String types other than "ldb" or "uldb" are not supported.')
 
     def _get_node_ids(self, community):
+        """
+        Returns a list of all single node ids and cluster node ids in a community.
+        """
         single_node_ids = []
         for single_node in community.single_nodes:
             single_node_ids.append(str(self.node_to_node_id[single_node]))
