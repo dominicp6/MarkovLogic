@@ -30,10 +30,10 @@ class RandomWalker:
 
         self.fraction_of_max_walks_to_always_complete = 0.25
 
-        if walk_length is None:
-            self.length_of_walk = self._get_length_of_random_walks()
-        else:
+        if walk_length:
             self.length_of_walk = walk_length
+        else:
+            self.length_of_walk = self._get_length_of_random_walks()
 
         self.number_of_walks_for_truncated_hitting_times = \
             self._get_number_of_walks_for_truncated_hitting_times(self.length_of_walk)
@@ -121,7 +121,11 @@ class RandomWalker:
         nodes_random_walk_data = {node: NodeRandomWalkData(node, node_type) for node, node_type in
                                   self.hypergraph.nodes.items()}
 
-        if self.fixed_num_walks is None:
+        if self.fixed_num_walks:
+            [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
+             for _ in range(self.fixed_num_walks)]
+            number_of_walks = self.fixed_num_walks
+        else:
             number_of_walks = int(self.max_number_of_walks * self.fraction_of_max_walks_to_always_complete)
 
             # run a fraction of the number of walks initially estimated
@@ -138,10 +142,6 @@ class RandomWalker:
                 [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
                  for _ in range(number_of_additional_walks)]
                 number_of_walks += number_of_additional_walks
-        else:
-            [self._update_node_data_with_random_walk(source_node, nodes_random_walk_data)
-             for _ in range(self.fixed_num_walks)]
-            number_of_walks = self.fixed_num_walks
 
         return nodes_random_walk_data, number_of_walks
 
