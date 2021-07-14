@@ -4,8 +4,8 @@ from NodeRandomWalkData import NodeClusterRandomWalkData
 
 def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkData,
                                          node_cluster2: NodeClusterRandomWalkData,
-                                         number_of_top_paths: int,
-                                         number_of_walks: int,
+                                         number_of_walks=1000,
+                                         number_of_top_paths=None,
                                          z_score=None):
     """
     Computes the Jensen-Shannon divergence between the probability distributions of the top n most common
@@ -14,6 +14,9 @@ def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkDat
     If a z-score is provided, then also computes the corresponding threshold JS divergence at which the null hypothesis
     of the two node clusters being path-symmetric is rejected.
     """
+    if number_of_top_paths is None:
+        number_of_top_paths = min(node_cluster1.number_of_meaningful_paths(), node_cluster2.number_of_meaningful_paths())
+
     p = node_cluster1.get_top_n_path_probabilities(number_of_top_paths, number_of_walks=number_of_walks)
     q = node_cluster2.get_top_n_path_probabilities(number_of_top_paths, number_of_walks=number_of_walks)
 
@@ -49,10 +52,10 @@ def compute_threshold_js_divergence(number_of_walks: int,
     average_probability = list(average_path_probabilities.values())
     average_probability.sort(reverse=True)
     k = min(len(average_probability), number_of_top_paths)
-    sigma_J_squared = (13/(8*number_of_walks))*sum([average_probability[i] * (1-average_probability[i])
-                                                    for i in range(k)])
+    sigma_J_squared = (1 / (2 * number_of_walks)) * sum([average_probability[i] * (1 - average_probability[i])
+                                                         for i in range(k)])
     sigma_J = np.sqrt(sigma_J_squared)
-    mu_J = (1/(2*number_of_walks))*sum([(1-average_probability[i]) for i in range(k)])
+    mu_J = (2 / number_of_walks) * sum([(1 - average_probability[i]) for i in range(k)])
 
     theta_JS = mu_J + z_score * sigma_J
 

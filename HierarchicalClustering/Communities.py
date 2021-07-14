@@ -1,13 +1,20 @@
 from multiprocessing import Pool, cpu_count
 from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import get_commonly_encountered_nodes, cluster_nodes_by_path_similarity, compute_theta_sym
+from clustering_nodes_by_path_similarity import *
 from GraphObjects import Hypergraph
 from errors import check_argument
 
 
 class Communities(object):
 
-    def __init__(self, hypergraph: Hypergraph, config: dict):
+    def __init__(self, hypergraph: Hypergraph,
+                 config: dict,
+                 num_walks=None,
+                 walk_length=None,
+                 theta_hit=None,
+                 theta_sym=None,
+                 theta_js=None,
+                 num_top_paths=None):
 
         """
         Generates the communities associated with a hypergraph.
@@ -31,12 +38,20 @@ class Communities(object):
 
         self._check_arguments(config)
 
+        self.theta_hit = theta_hit
+        self.theta_sym = theta_sym
+        self.theta_js = theta_js
+        self.num_top_paths = num_top_paths
+
         self.hypergraph = hypergraph
-        if hypergraph.estimated_graph_diameter is None:
-            print(f"Warning: Graph diameter of the hypergraph not known. Reverting to using default length of random "
+        if hypergraph.diameter is None:
+            print(f"Warning: Graph of the hypergraph not known. Reverting to using default length of random "
                   f"walks.")
 
-        self.random_walker = RandomWalker(hypergraph=hypergraph, config=config)
+        self.random_walker = RandomWalker(hypergraph=hypergraph,
+                                          config=config,
+                                          num_walks=num_walks,
+                                          walk_length=walk_length)
 
         self.communities = {}
 
@@ -64,12 +79,11 @@ class Communities(object):
         single_nodes = {source_node}
         clusters = []
 
-        theta_sym = compute_theta_sym(config['alpha_sym'],
-                                      self.random_walker.number_of_walks_ran,
-                                      self.random_walker.length_of_walk)
+        theta_sym = self._get_theta_sym(config)
 
-        close_nodes = get_commonly_encountered_nodes(random_walk_data)
+        close_nodes = self._get_close_nodes(random_walk_data)
 
+        single_nodes_of_node_type = dict()
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
             if nodes_of_type:
@@ -77,27 +91,49 @@ class Communities(object):
                     cluster_nodes_by_path_similarity(nodes=nodes_of_type,
                                                      number_of_walks=self.random_walker.number_of_walks_ran,
                                                      theta_sym=theta_sym,
-                                                     config=config)
-
-                single_nodes.update(single_nodes_of_type)
+                                                     config=config,
+                                                     theta_js=self.theta_js,
+                                                     num_top_paths=self.num_top_paths)
+                single_nodes_of_node_type[node_type] = single_nodes_of_type
                 clusters.extend(clusters_of_type)
+
+        single_nodes_remaining_after_pruning = prune_nodes(single_nodes_of_node_type, config['pruning_value'])
+        single_nodes.update(single_nodes_remaining_after_pruning)
 
         community = Community(source_node, single_nodes, clusters)
 
         return community
 
+    def _get_close_nodes(self, random_walk_data):
+        if self.theta_hit:
+            close_nodes = get_close_nodes_based_on_truncated_hitting_time(random_walk_data, self.theta_hit)
+        else:
+            close_nodes = get_close_nodes_based_on_path_count(random_walk_data)
+
+        return close_nodes
+
+    def _get_theta_sym(self, config):
+        if self.theta_sym:
+            theta_sym = self.theta_sym
+        else:
+            theta_sym = compute_theta_sym(config['theta_p'],
+                                          self.random_walker.number_of_walks_ran,
+                                          self.random_walker.length_of_walk)
+
+        return theta_sym
+
     @staticmethod
     def _check_arguments(config):
         check_argument('epsilon', config['epsilon'], float, 0, 1)
         check_argument('max_num_paths', config['max_num_paths'], int, 0)
-        check_argument('alpha_sym', config['alpha_sym'], float, 0, 1)
         check_argument('pca_dim', config['pca_dim'], int, 2, strict_inequalities=False)
         check_argument('clustering_method_threshold', config['clustering_method_threshold'], int, 4,
                        strict_inequalities=False)
-        check_argument('k', config['k'], float, 1, strict_inequalities=False)
         check_argument('max_path_length', config['max_path_length'], int, 0)
-        check_argument('theta_p', config['theta_p'], float, 0)
+        check_argument('theta_p', config['theta_p'], float, 0, 1)
         check_argument('multiprocessing', config['multiprocessing'], bool)
+        if config['pruning_value'] is not None:
+            check_argument('pruning_value', config['pruning_value'], int, 0)
 
 
 class Community(object):
@@ -113,6 +149,9 @@ class Community(object):
         self.number_of_single_nodes = len(self.single_nodes)
         self.number_of_nodes_in_clusters = len(self.nodes_in_clusters)
         self.number_of_nodes = len(self.nodes)
+
+    def __len__(self):
+        return self.number_of_nodes
 
     def __str__(self):
         output_str = ''

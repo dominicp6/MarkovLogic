@@ -3,7 +3,7 @@ import networkx as nx
 import multiprocessing
 from itertools import combinations
 from collections import defaultdict
-from networkx.algorithms.approximation.distance_measures import diameter as estimate_diameter
+from networkx.algorithms.distance_measures import diameter as calculate_diameter
 from database import parse_line, is_empty_or_comment
 
 
@@ -15,11 +15,8 @@ class Graph(nx.Graph):
     def __init__(self):
         super().__init__()
 
-    def get_estimated_diameter(self):
-        """
-        Uses the 2-sweep algorithm to find a lower bound for the diameter of the graph in O(|V|) time.
-        """
-        return estimate_diameter(self)
+    def diameter(self):
+        return calculate_diameter(self)
 
     def convert_to_hypergraph_from_template(self, template_hypergraph):
         """
@@ -55,7 +52,7 @@ class Graph(nx.Graph):
             for predicate in singleton_edges:
                 hypergraph.add_edge(predicate=predicate, nodes=[node])
 
-        hypergraph.estimated_graph_diameter = self.get_estimated_diameter()
+        hypergraph.diameter = self.diameter()
 
         return hypergraph
 
@@ -94,7 +91,7 @@ class Hypergraph(object):
         self.is_source_node = defaultdict(bool)  # dict(node_name: bool), whether each node is a source node for
                                                  # random walks
         self.is_source_node.setdefault(False)
-        self.estimated_graph_diameter = None
+        self.diameter = None
 
         if database_file and not info_file:
             raise ValueError("Cannot generate hypergraph. Database file provided but no info file provided.")
