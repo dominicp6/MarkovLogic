@@ -1,5 +1,5 @@
 import re
-from errors import InvalidLineSyntaxError
+from HierarchicalClustering.errors import InvalidLineSyntaxError
 
 
 def parse_line(line: str, line_idx: int, file_name: str):

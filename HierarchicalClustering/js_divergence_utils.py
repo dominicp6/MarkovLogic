@@ -1,5 +1,5 @@
 import numpy as np
-from NodeRandomWalkData import NodeClusterRandomWalkData
+from HierarchicalClustering.NodeRandomWalkData import NodeClusterRandomWalkData
 
 
 def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkData,

@@ -1,7 +1,7 @@
-from graph_utils import get_second_eigenpair
-from cheeger_cut import cheeger_cut
-from GraphObjects import Graph, Hypergraph
-from errors import check_argument
+from HierarchicalClustering.graph_utils import get_second_eigenpair
+from HierarchicalClustering.cheeger_cut import cheeger_cut
+from HierarchicalClustering.GraphObjects import Graph, Hypergraph
+from HierarchicalClustering.errors import check_argument
 
 
 class HierarchicalClusterer(object):

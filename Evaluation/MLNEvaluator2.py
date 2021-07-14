@@ -6,6 +6,7 @@ import json
 import random
 from datetime import datetime
 from collections import defaultdict
+from typing import List
 
 from HierarchicalClustering.GraphObjects import Hypergraph
 from HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
@@ -226,7 +227,7 @@ class MLNEvaluator(object):
             self._write_timings_log(log_file)
             self._write_MLN_log(log_file)
 
-    def _populate_clustering_statistics_dictionary(self, hypergraph_communities: list[Communities]):
+    def _populate_clustering_statistics_dictionary(self, hypergraph_communities: List[Communities]):
         self.clustering_statistics['number_of_clusters'] = [len(hypergraph_communities)]
         self.clustering_statistics['size_of_clusters'] = \
             [hypergraph_community.hypergraph.number_of_nodes() for hypergraph_community in hypergraph_communities]

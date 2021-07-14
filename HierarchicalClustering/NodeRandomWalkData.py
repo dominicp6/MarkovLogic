@@ -1,7 +1,7 @@
 from collections import defaultdict
 import operator
 import warnings
-
+from typing import List
 
 class NodeRandomWalkData(object):
     """
@@ -69,7 +69,7 @@ class NodeClusterRandomWalkData(object):
     Data structure to store path count information for a collection of nodes.
     """
 
-    def __init__(self, nodes_random_walk_data: list[NodeRandomWalkData], minimum_path_count=15):
+    def __init__(self, nodes_random_walk_data: List[NodeRandomWalkData], minimum_path_count=15):
         super().__init__()
         assert len(set(node.node_type for node in nodes_random_walk_data)) == 1, "Cannot merge nodes of different type"
         self.node_type = nodes_random_walk_data[0].node_type

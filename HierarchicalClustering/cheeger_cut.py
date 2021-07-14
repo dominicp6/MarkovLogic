@@ -2,8 +2,8 @@ import numpy as np
 import scipy as sp
 import scipy.sparse
 import networkx as nx
-from graph_utils import create_subgraph
-from GraphObjects import Graph
+from HierarchicalClustering.graph_utils import create_subgraph
+from HierarchicalClustering.GraphObjects import Graph
 
 
 def sweep_set(adjacency_matrix, v_2, degrees):

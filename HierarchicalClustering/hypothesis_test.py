@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.stats import chi2
+from typing import List
 
 
-def test_quality_of_clusters(cluster_node_path_counts: list[np.array], number_of_walks: int, significance_level: float):
+def test_quality_of_clusters(cluster_node_path_counts: List[np.array], number_of_walks: int, significance_level: float):
     """
     Tests whether each cluster is a list of clusters passes the hypothesis test of the path count distributions
     being statistically similar.
@@ -100,5 +101,3 @@ def Q_test_if_multiple_paths(Q_max: float, node_path_counts: np.array, node_path
                 return False
 
     return True
-
-

@@ -1,6 +1,6 @@
 import networkx as nx
 from scipy.sparse.linalg import eigsh
-from GraphObjects import Graph
+from HierarchicalClustering.GraphObjects import Graph
 
 
 def get_second_eigenpair(graph: Graph):

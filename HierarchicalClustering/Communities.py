@@ -1,8 +1,9 @@
 from multiprocessing import Pool, cpu_count
-from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import *
-from GraphObjects import Hypergraph
-from errors import check_argument
+from typing import List, Set
+from HierarchicalClustering.RandomWalker import RandomWalker
+from HierarchicalClustering.clustering_nodes_by_path_similarity import *
+from HierarchicalClustering.GraphObjects import Hypergraph
+from HierarchicalClustering.errors import check_argument
 
 
 class Communities(object):
@@ -140,7 +141,7 @@ class Communities(object):
 
 class Community(object):
 
-    def __init__(self, source_node: str, single_nodes: set[str], clusters: list[set[str]]):
+    def __init__(self, source_node: str, single_nodes: Set[str], clusters: List[Set[str]]):
         self.source_node = source_node
         self.single_nodes = single_nodes
         self.clusters = clusters

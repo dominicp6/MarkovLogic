@@ -1,6 +1,6 @@
 import os
 
-from Communities import *
+from HierarchicalClustering.Communities import *
 from collections import defaultdict
 import itertools
 
@@ -22,7 +22,7 @@ class CommunityPrinter(object):
     .srcnclust file - A file that enumerates the node id of every source node, single node and node in each node cluster
                       in a community.
     """
-    def __init__(self, list_of_communities: list[Communities], original_hypergraph):
+    def __init__(self, list_of_communities: List[Communities], original_hypergraph):
 
         self.list_of_communities = list_of_communities
 
@@ -163,7 +163,7 @@ class CommunityPrinter(object):
         header = '#START_GRAPH  #COMS {}\n\n'.format(self.num_of_communities)
         file.write(header)
 
-    def _write_atoms_to_file(self, atoms: list[str], file):
+    def _write_atoms_to_file(self, atoms: List[str], file):
         """
         Writes a list of atoms strings to file. These atom strings make up the information content of the .ldb and .uldb
         files.
@@ -262,7 +262,7 @@ class CommunityPrinter(object):
 
         return atoms
 
-    def _get_atom_for_edge(self, edge_predicate: str, nodes_of_edge: list[str], string_type: str):
+    def _get_atom_for_edge(self, edge_predicate: str, nodes_of_edge: List[str], string_type: str):
         """
         Constructs and returns the ground atom string representation corresponding to a particular predicate
         and a list of grounded nodes.
@@ -316,7 +316,7 @@ class CommunityPrinter(object):
             node_ids.sort(key=int)
             cluster_node_ids.append(node_ids)
 
-        return single_node_ids, cluster_node_ids  # list[int], list[list[int]]
+        return single_node_ids, cluster_node_ids  # List[int], List[list[int]]
 
     def _get_node_to_ldb_string_map(self):
         """

@@ -1,7 +1,7 @@
 import numpy as np
-from NodeRandomWalkData import NodeRandomWalkData
-from GraphObjects import Hypergraph
-
+from HierarchicalClustering.NodeRandomWalkData import NodeRandomWalkData
+from HierarchicalClustering.GraphObjects import Hypergraph
+from typing import Dict
 
 class RandomWalker:
     """
@@ -108,7 +108,7 @@ class RandomWalker:
 
         self.number_of_walks_ran = number_of_walks
 
-        return nodes_random_walk_data  # dict[str, NodeRandomWalkData]
+        return nodes_random_walk_data  # Dict[str, NodeRandomWalkData]
 
     def _run_random_walks(self, source_node: str):
         """
@@ -146,7 +146,7 @@ class RandomWalker:
         return nodes_random_walk_data, number_of_walks
 
     def _update_node_data_with_random_walk(self, source_node: str,
-                                           nodes_random_walk_data: dict[str, NodeRandomWalkData]):
+                                           nodes_random_walk_data: Dict[str, NodeRandomWalkData]):
         """
         Runs a single random walk from the source node, updating the nodes_random_walk_data in place.
         """
@@ -167,7 +167,7 @@ class RandomWalker:
 
             current_node = next_node
 
-    def _compute_number_of_additional_walks(self, nodes_random_walk_data: dict[str, NodeRandomWalkData],
+    def _compute_number_of_additional_walks(self, nodes_random_walk_data: Dict[str, NodeRandomWalkData],
                                             number_of_completed_walks: int):
         """
         Given the path distributions obtained in nodes_random_walk_data and the number of completed random walks so far.
@@ -190,7 +190,7 @@ class RandomWalker:
         return number_of_additional_walks
 
     @staticmethod
-    def _compute_number_of_unique_paths(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
+    def _compute_number_of_unique_paths(nodes_random_walk_data: Dict[str, NodeRandomWalkData]):
         """
         Calculates the number of unique path signatures that appear anywhere in the nodes_random_walk_data.
         """

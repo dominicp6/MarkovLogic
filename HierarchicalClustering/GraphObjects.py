@@ -4,8 +4,8 @@ import multiprocessing
 from itertools import combinations
 from collections import defaultdict
 from networkx.algorithms.distance_measures import diameter as calculate_diameter
-from database import parse_line, is_empty_or_comment
-
+from HierarchicalClustering.database import parse_line, is_empty_or_comment
+from typing import List
 
 class Graph(nx.Graph):
     """
@@ -159,7 +159,7 @@ class Hypergraph(object):
 
         return predicate_argument_types
 
-    def add_edge(self, predicate: str, nodes: list[str], edge_id=None):
+    def add_edge(self, predicate: str, nodes: List[str], edge_id=None):
         if len(nodes) == 1:
             node = nodes[0]
             self.singleton_edges[node].add(predicate)

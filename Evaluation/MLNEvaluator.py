@@ -11,6 +11,7 @@ from functools import wraps
 from datetime import datetime
 from collections import defaultdict
 from tqdm import tqdm
+from typing import List
 
 from GraphObjects import Hypergraph
 from HierarchicalClusterer import HierarchicalClusterer
@@ -127,7 +128,7 @@ class MLNEvaluator(object):
 
         self.log_file_name = None
 
-    def evaluate(self, database_files: list[str], info_file: str, type_file: str, mln_name=None):
+    def evaluate(self, database_files: List[str], info_file: str, type_file: str, mln_name=None):
         """
         Structure learns a MLN for each database in a list of database files.
         Evaluates the average conditional log likelihood of each MLN using leave-one-out cross-validation.
@@ -142,7 +143,7 @@ class MLNEvaluator(object):
         self._append_CLL_evaluation_to_log_file()
         print('Done')
 
-    def evaluate_CLL_of_MLN(self, path_to_mln: str, paths_to_evidence_databases: list[str]):
+    def evaluate_CLL_of_MLN(self, path_to_mln: str, paths_to_evidence_databases: List[str]):
         """
         Evaluates the average conditional log likelihood of a single MLN given evidence databases.
         """
@@ -153,7 +154,7 @@ class MLNEvaluator(object):
 
     # STRUCTURE LEARNING FUNCTIONS ------------------------------------------------------------------------------------
 
-    def structure_learn_MLNs(self, database_files: list[str], info_file: str, type_file: str):
+    def structure_learn_MLNs(self, database_files: List[str], info_file: str, type_file: str):
         """
         Structure-learn an MLN from each database in the list of database files.
         """
@@ -293,7 +294,7 @@ class MLNEvaluator(object):
 
     # INFERENCE FUNCTIONS ---------------------------------------------------------------------------------------------
 
-    def run_inference_on_MLNs(self, database_files: list[str], info_file: str):
+    def run_inference_on_MLNs(self, database_files: List[str], info_file: str):
         query_predicates = self._get_query_predicates(info_file)
 
         for database in database_files:
@@ -310,13 +311,13 @@ class MLNEvaluator(object):
                 self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'alchemy_algorithm')
                 self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'new_algorithm')
 
-    def run_inference_on_MLN_by_method(self, mln: str, evidence_database_files: list[str], algorithm: str):
+    def run_inference_on_MLN_by_method(self, mln: str, evidence_database_files: List[str], algorithm: str):
         initial_time = time.time()
         self.run_inference_on_MLN(mln, evidence_database_files)
         final_time = time.time()
         self.time_statistics[algorithm]['performing_inference'].append(final_time - initial_time)
 
-    def run_inference_on_MLN(self, mln: str, evidence_database_files: list[str]):
+    def run_inference_on_MLN(self, mln: str, evidence_database_files: List[str]):
         """
         Runs the Alchemy inference program on a specified MLN, given evidence databases.
         """
@@ -364,7 +365,7 @@ class MLNEvaluator(object):
 
     # EVALUATION FUNCTIONS --------------------------------------------------------------------------------------------
 
-    def evaluate_formula_statistics_of_MLNs(self, database_files: list[str]):
+    def evaluate_formula_statistics_of_MLNs(self, database_files: List[str]):
         """
         Computes the average formula length and number of formulas for each MLN associated with each database file.
         """
@@ -372,7 +373,7 @@ class MLNEvaluator(object):
             self.evaluate_formula_statistics(database_files, 'alchemy_algorithm')
         self.evaluate_formula_statistics(database_files, 'new_algorithm')
 
-    def evaluate_formula_statistics(self, database_files: list[str], algorithm: str):
+    def evaluate_formula_statistics(self, database_files: List[str], algorithm: str):
         formula_lengths = []
         std_formula_lengths = []
         number_of_formulas = []
@@ -432,7 +433,7 @@ class MLNEvaluator(object):
 
         self.evaluation_statistics['average'] = average_CLL_dict
 
-    def write_log_file(self, database_files: list[str], info_file: str, type_file: str):
+    def write_log_file(self, database_files: List[str], info_file: str, type_file: str):
         current_time = datetime.now()
         timestampStr = current_time.strftime("%d-%b-%Y (%H:%M:%S.%f)")
         self.log_file_name = self.experiments_dir + '/' + timestampStr + '.log'
@@ -443,7 +444,7 @@ class MLNEvaluator(object):
             self._write_timings_log(log_file)
             self._write_MLN_log(log_file)
 
-    def _populate_clustering_statistics_dictionary(self, database_file: str, hypergraph_communities: list[Communities]):
+    def _populate_clustering_statistics_dictionary(self, database_file: str, hypergraph_communities: List[Communities]):
         self.clustering_statistics[database_file]['number_of_clusters'] = [len(hypergraph_communities)]
         self.clustering_statistics[database_file]['size_of_clusters'] = \
             [hypergraph_community.hypergraph.number_of_nodes() for hypergraph_community in hypergraph_communities]
@@ -545,7 +546,7 @@ class MLNEvaluator(object):
 
     @staticmethod
     def _create_evidence_database_with_line_removed(evidence_database: str,
-                                                    lines_of_evidence_database: list[str],
+                                                    lines_of_evidence_database: List[str],
                                                     line: str):
         literal_string = line.replace("(", "").replace(")", "").replace(",", "").rstrip()
         file_lines_without_target_literal = lines_of_evidence_database.copy()

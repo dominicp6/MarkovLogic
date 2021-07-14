@@ -1,16 +1,16 @@
 import numpy as np
 import math
 import heapq
-from NodeRandomWalkData import *
+from HierarchicalClustering.NodeRandomWalkData import *
 from sklearn.decomposition import PCA
 from sklearn.cluster import Birch
 from sklearn.cluster import KMeans
 from scipy.stats import norm, t
-from js_divergence_utils import compute_js_divergence_of_top_n_paths
+from HierarchicalClustering.js_divergence_utils import compute_js_divergence_of_top_n_paths
 
-from hypothesis_test import hypothesis_test_path_symmetric_nodes, test_quality_of_clusters
+from HierarchicalClustering.hypothesis_test import hypothesis_test_path_symmetric_nodes, test_quality_of_clusters
 import matplotlib.pyplot as plt
-
+from typing import List, Dict, Set
 
 def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
     """
@@ -24,7 +24,7 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
     return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym / 2, df=number_of_walks_ran - 1)
 
 
-def get_close_nodes_based_on_truncated_hitting_time(nodes_random_walk_data: dict[str, NodeRandomWalkData],
+def get_close_nodes_based_on_truncated_hitting_time(nodes_random_walk_data: Dict[str, NodeRandomWalkData],
                                                     theta_hit,
                                                     length_of_random_walks):
     """
@@ -34,7 +34,7 @@ def get_close_nodes_based_on_truncated_hitting_time(nodes_random_walk_data: dict
             < theta_hit*length_of_random_walks}
 
 
-def get_close_nodes_based_on_path_count(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
+def get_close_nodes_based_on_path_count(nodes_random_walk_data: Dict[str, NodeRandomWalkData]):
     """
     Returns those nodes from a list of nodes that have robust enough path count data to be subsequently merged based
     on path count distribution (i.e. their third most common path has at least 15 counts).
@@ -42,7 +42,7 @@ def get_close_nodes_based_on_path_count(nodes_random_walk_data: dict[str, NodeRa
     return {node for node in nodes_random_walk_data.values() if node.get_count_of_nth_path(n=3) >= 15}
 
 
-def prune_nodes(single_nodes_of_type: dict[str, set[NodeClusterRandomWalkData]], pruning_value: int):
+def prune_nodes(single_nodes_of_type: Dict[str, Set[NodeClusterRandomWalkData]], pruning_value: int):
     """
     Given a dictionary mapping node type to single nodes, removes nodes of each type in proportion to their
     population until the number of single nodes remaining is equal to the specified pruning_value.
@@ -89,7 +89,7 @@ def prune_nodes(single_nodes_of_type: dict[str, set[NodeClusterRandomWalkData]],
     return single_nodes
 
 
-def get_nodes_to_remove(nodes: list[NodeClusterRandomWalkData], num_nodes_to_prune):
+def get_nodes_to_remove(nodes: List[NodeClusterRandomWalkData], num_nodes_to_prune):
     """
     Given a list of nodes, identifies the num_nodes_to_prune many nodes which have the the largest Jensen-Shannon
     divergence in path-distributions compared to the remaining nodes.
@@ -114,7 +114,7 @@ def get_nodes_to_remove(nodes: list[NodeClusterRandomWalkData], num_nodes_to_pru
     return node_names_to_prune
 
 
-def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData],
+def cluster_nodes_by_path_similarity(nodes: List[NodeRandomWalkData],
                                      number_of_walks: int,
                                      theta_sym: float,
                                      config: dict,
@@ -155,7 +155,7 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData],
     return single_nodes, clusters
 
 
-def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], threshold_hitting_time_difference: float):
+def cluster_nodes_by_truncated_hitting_times(nodes: List[NodeRandomWalkData], threshold_hitting_time_difference: float):
     """
     Clusters a list of nodes from a hypergraph into groups based on the truncated hitting criterion as follows:
 
@@ -195,7 +195,7 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     return distance_symmetric_single_nodes, distance_symmetric_clusters
 
 
-def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData],
+def cluster_nodes_by_path_distributions(nodes: List[NodeRandomWalkData],
                                         number_of_walks: int,
                                         config: dict,
                                         theta_js=None,
@@ -245,14 +245,14 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData],
     return single_nodes, clusters
 
 
-def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
+def compute_top_paths(nodes: List[NodeRandomWalkData], max_number_of_paths: int):
     """
     From each node in the list, finds the most common paths and constructs a path count vector.
     Returns a path-count feature array of the nodes of size (number of paths) x (number of nodes) where the (i,j) entry
     corresponds to the number of times that the ith indexed path occurred for the jth indexed node.
     """
 
-    top_paths_of_each_node = []  # list[dict(path: path_counts)]
+    top_paths_of_each_node = []  # List[dict(path: path_counts)]
     [top_paths_of_each_node.append(node.get_top_paths(max_number_of_paths)) for node in nodes]
 
     unique_paths = set()
@@ -276,7 +276,7 @@ def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int)
     return node_path_counts
 
 
-def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
+def cluster_nodes_by_js_divergence(nodes: List[NodeRandomWalkData],
                                    significance_level: float,
                                    number_of_walks: int,
                                    theta_js=None,
@@ -347,7 +347,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
     return single_nodes, clusters
 
 
-def cluster_nodes_by_birch(nodes: list[NodeRandomWalkData], pca_target_dimension: int, max_number_of_paths: int,
+def cluster_nodes_by_birch(nodes: List[NodeRandomWalkData], pca_target_dimension: int, max_number_of_paths: int,
                            number_of_walks: int, significance_level: float):
     """
     Considers the top number_of_paths most frequent paths for each node, standardises these path distributions, then
@@ -451,7 +451,7 @@ def get_node_path_counts_of_clusters(node_path_counts: np.array, cluster_labels:
     return path_counts_for_cluster
 
 
-def group_nodes_by_clustering_labels(nodes: list[NodeRandomWalkData], cluster_labels: list[int]):
+def group_nodes_by_clustering_labels(nodes: List[NodeRandomWalkData], cluster_labels: List[int]):
     """
     Groups a list of nodes into single nodes and clusters from a list of cluster labels.
 
@@ -479,7 +479,7 @@ def group_nodes_by_clustering_labels(nodes: list[NodeRandomWalkData], cluster_la
 
 
 # TODO: remove after debugging
-def plot_clustering(principal_components: np.array, cluster_labels: list[int]):
+def plot_clustering(principal_components: np.array, cluster_labels: List[int]):
     x, y = zip(*principal_components)
     x = np.array(x)
     y = np.array(y)
