@@ -93,7 +93,7 @@ def get_nodes_to_remove(nodes: list[NodeClusterRandomWalkData], num_nodes_to_pru
     Given a list of nodes, identifies the num_nodes_to_prune many nodes which have the the largest Jensen-Shannon
     divergence in path-distributions compared to the remaining nodes.
     """
-    largest_minimal_js_divergence_of_node = defaultdict(lambda: float('inf'))
+    minimal_js_divergence_of_node = defaultdict(lambda: float('inf'))
     for i in range(len(nodes)):
         for j in range(i + 1, len(nodes)):
             js_divergence = compute_js_divergence_of_top_n_paths(nodes[i],
@@ -101,13 +101,13 @@ def get_nodes_to_remove(nodes: list[NodeClusterRandomWalkData], num_nodes_to_pru
                                                                  z_score=None)
             (node_i_name,) = nodes[i].node_names
             (node_j_name,) = nodes[j].node_names
-            largest_minimal_js_divergence_of_node[node_i_name] = min(largest_minimal_js_divergence_of_node[node_i_name],
+            minimal_js_divergence_of_node[node_i_name] = min(minimal_js_divergence_of_node[node_i_name],
                                                                      js_divergence)
-            largest_minimal_js_divergence_of_node[node_j_name] = min(largest_minimal_js_divergence_of_node[node_j_name],
+            minimal_js_divergence_of_node[node_j_name] = min(minimal_js_divergence_of_node[node_j_name],
                                                                      js_divergence)
 
     nodes_to_prune = heapq.nlargest(num_nodes_to_prune,
-                                    largest_minimal_js_divergence_of_node.items(), key=lambda item: item[1])
+                                    minimal_js_divergence_of_node.items(), key=lambda item: item[1])
     node_names_to_prune = [node_name for node_name, largest_minimal_js_divergence in nodes_to_prune]
 
     return node_names_to_prune
