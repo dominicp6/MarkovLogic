@@ -2,6 +2,8 @@ import numpy as np
 from collections import defaultdict
 from MLNEvaluator2 import MLNEvaluator
 
+database = 'imdb4.db'
+info_file = 'imdb.info'
 number_of_repeats = 2
 
 
@@ -13,7 +15,7 @@ pruning_values = [None] #, 7, 6, 5]
 theta_ps = [0.01] #[0.01, 0.05, 0.10]
 number_of_random_walks = [10000] #[1000, 10000, 20000]
 length_of_random_walks = [5] #[4, 5, 6]
-theta_hits = [0.98] #[0.95, 0.98, 1] #TODO: implement this
+theta_hits = [0.98] #[0.95, 0.98, 1]
 theta_syms = [0.1] #[0.01, 0.1, 0.2]
 theta_jss = [1] #[0.01, 0.1, 1] #TODO: fix this
 num_tops = [3] #[3, 4, 5]
@@ -69,7 +71,7 @@ def run_experiments_for_parameter(parameter_name, parameter_values, config, tabl
             for repeat_number in range(number_of_repeats):
                 config['pruning_value'] = pruning_value
                 evaluator = MLNEvaluator(config=config)
-                data = evaluator.evaluate(database='imdb4.db', info_file='imdb.info')
+                data = evaluator.evaluate(database=database, info_file=info_file)
                 for key, value in data.items():
                     data_for_all_experiments[key].append(value)
             average_data = defaultdict(lambda: [])
