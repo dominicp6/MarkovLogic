@@ -24,7 +24,7 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
     return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym / 2, df=number_of_walks_ran - 1)
 
 
-def get_close_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData], threshold_average_truncated_hitting_time):
+def get_close_nodes_based_on_truncated_hitting_time(nodes_random_walk_data: dict[str, NodeRandomWalkData], threshold_average_truncated_hitting_time):
     """
     Returns those nodes from a list of nodes that have average truncated hitting time less than a threshold
     """
@@ -32,7 +32,7 @@ def get_close_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData], thres
             < threshold_average_truncated_hitting_time}
 
 
-def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
+def get_close_nodes_based_on_path_count(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
     """
     Returns those nodes from a list of nodes that have robust enough path count data to be subsequently merged based
     on path count distribution (i.e. their third most common path has at least 10 counts).

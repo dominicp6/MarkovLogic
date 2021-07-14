@@ -1,7 +1,7 @@
 from Communities import Community
 from GraphObjects import Hypergraph
 from RandomWalker import generate_node_random_walk_data
-from clustering_nodes_by_path_similarity import get_commonly_encountered_nodes, cluster_nodes_by_js_divergence, group_nodes_by_clustering_labels, compute_principal_components, compute_standardized_path_distributions_and_number_of_unique_paths, compute_optimal_birch_clustering
+from clustering_nodes_by_path_similarity import get_close_nodes_based_on_path_count, cluster_nodes_by_js_divergence, group_nodes_by_clustering_labels, compute_principal_components, compute_standardized_path_distributions_and_number_of_unique_paths, compute_optimal_birch_clustering
 from NodeRandomWalkData import NodeRandomWalkData
 from HierarchicalClusterer import HierarchicalClusterer
 from collections import defaultdict
@@ -69,7 +69,7 @@ class TEST_Communities(object):
         single_nodes = {source_node}
         clusters = []
 
-        close_nodes = get_commonly_encountered_nodes(random_walk_data, threshold_hitting_time=config['theta_hit'])
+        close_nodes = get_close_nodes_based_on_path_count(random_walk_data, threshold_hitting_time=config['theta_hit'])
 
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]

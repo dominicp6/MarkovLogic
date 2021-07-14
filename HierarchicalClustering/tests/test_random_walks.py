@@ -8,7 +8,7 @@ from NodeRandomWalkData import NodeClusterRandomWalkData
 from js_divergence_utils import kl_divergence, js_divergence, compute_js_divergence_of_top_n_paths
 from Communities import Communities
 from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import get_close_nodes
+from clustering_nodes_by_path_similarity import get_close_nodes_based_on_truncated_hitting_time
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
 config = {  'epsilon': 0.05,
@@ -59,7 +59,7 @@ class TestRandomWalks(unittest.TestCase):
     def test_correct_node_cluster_merging(self):
         for node in H.nodes.keys():
             nodes_rw_data = RW1.generate_node_random_walk_data(source_node=node)
-            close_nodes = get_close_nodes(nodes_rw_data, threshold_average_truncated_hitting_time=5)
+            close_nodes = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data, threshold_average_truncated_hitting_time=5)
             # MERGE SOME CLUSTERS ------------------------------------------------------------------------------
             js_clusters = [NodeClusterRandomWalkData([node]) for node in close_nodes]
 
@@ -155,8 +155,8 @@ class TestRandomWalks(unittest.TestCase):
         len_of_close_nodes = []
         for node in H2.nodes.keys():
             nodes_rw_data = RW2.generate_node_random_walk_data(source_node=node)
-            close_nodes_rw_data = get_close_nodes(nodes_rw_data,
-                                                  threshold_average_truncated_hitting_time=config2['theta_hit'])
+            close_nodes_rw_data = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data,
+                                                                                  threshold_average_truncated_hitting_time=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
 
         print("Average # close nodes")
