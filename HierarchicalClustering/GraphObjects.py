@@ -3,7 +3,6 @@ import networkx as nx
 import multiprocessing
 from itertools import combinations
 from collections import defaultdict
-from networkx.algorithms.approximation.distance_measures import diameter as estimate_diameter
 from networkx.algorithms.distance_measures import diameter as calculate_diameter
 from database import parse_line, is_empty_or_comment
 
