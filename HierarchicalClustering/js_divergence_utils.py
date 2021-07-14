@@ -15,7 +15,7 @@ def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkDat
     of the two node clusters being path-symmetric is rejected.
     """
     if number_of_top_paths is None:
-        number_of_top_paths = min(node_cluster1.number_of_good_paths(), node_cluster2.number_of_good_paths())
+        number_of_top_paths = min(node_cluster1.number_of_meaningful_paths(), node_cluster2.number_of_meaningful_paths())
 
     p = node_cluster1.get_top_n_path_probabilities(number_of_top_paths, number_of_walks=number_of_walks)
     q = node_cluster2.get_top_n_path_probabilities(number_of_top_paths, number_of_walks=number_of_walks)
