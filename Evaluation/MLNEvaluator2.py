@@ -67,7 +67,7 @@ class MLNEvaluator(object):
 
         print('Done')
         return {'num_single_nodes': self.clustering_statistics['mean_number_single_nodes'],
-                'num_clusters': self.clustering_statistics['mean_number_clusters'],
+                'num_clusters': self.clustering_statistics['mean_number_node_clusters'],
                 'time_random_walks': self.time_statistics['clustering_and_RWs'],
                 'time_structure_learning': self.time_statistics['total_structure_learning'],
                 'length_of_formulas': self.mln_statistics['formula_length'],
