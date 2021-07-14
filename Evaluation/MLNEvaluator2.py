@@ -66,8 +66,8 @@ class MLNEvaluator(object):
         self.write_log_file(database, info_file)
 
         print('Done')
-        return {'num_single_nodes': self.clustering_statistics['mean_number_of_single_nodes'],
-                'num_clusters': self.clustering_statistics['mean_number_of_clusters'],
+        return {'num_single_nodes': self.clustering_statistics['mean_number_single_nodes'],
+                'num_clusters': self.clustering_statistics['mean_number_clusters'],
                 'time_random_walks': self.time_statistics['clustering_and_RWs'],
                 'time_structure_learning': self.time_statistics['total_structure_learning'],
                 'length_of_formulas': self.mln_statistics['formula_length'],
@@ -190,7 +190,7 @@ class MLNEvaluator(object):
         number_of_formulas = []
 
         fl, std_fl, nf = self.compute_average_and_std_formula_length_and_number_of_formulas(database)
-        self.mln_statistics["formula_length"] = [fl, std_fl]
+        self.mln_statistics["formula_length"] = [fl]
         self.mln_statistics["number_of_formulas"] = [nf]
         formula_lengths.append(fl)
         number_of_formulas.append(nf)
