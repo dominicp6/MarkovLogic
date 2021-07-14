@@ -51,10 +51,10 @@ def prune_nodes(single_nodes_of_type: dict[str, set[NodeClusterRandomWalkData]],
     """
     number_of_nodes_of_type = {node_type: len(nodes) for node_type, nodes in single_nodes_of_type.items()}
     number_of_single_nodes = sum(number_of_nodes_of_type.values())
-    if pruning_value is None:
-        number_of_nodes_to_prune = 0
-    else:
+    if pruning_value:
         number_of_nodes_to_prune = number_of_single_nodes + 1 - pruning_value  # +1 to account for the source node
+    else:
+        number_of_nodes_to_prune = 0
 
     single_nodes = set()
     if number_of_nodes_to_prune < 1:

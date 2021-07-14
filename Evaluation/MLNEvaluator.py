@@ -74,7 +74,7 @@ class MLNEvaluator(object):
         self.delete_generated_files = delete_generated_files
 
         self.hierarchical_clustering_suffix = '_hc'  # file suffix used when running hierarchical clustering method
-        self.standard_method_suffix = '_sm'  # file suffix used when running the standard method
+        self.alchemy_file_suffix = '_sm'  # file suffix used when running the standard method
 
         self.time_statistics = defaultdict(lambda: defaultdict(lambda: []))
 
@@ -158,15 +158,18 @@ class MLNEvaluator(object):
         Structure-learn an MLN from each database in the list of database files.
         """
         for database in database_files:
-            if not self.only_new_algorithm:
+            if self.only_alchemy:
                 self._structure_learn_using_Alchemy_algorithm(database, info_file, type_file)
-            if not self.only_alchemy:
+            elif self.only_new_algorithm:
+                self._structure_learn_using_new_algorithm(database, info_file)
+            else:
+                self._structure_learn_using_Alchemy_algorithm(database, info_file, type_file)
                 self._structure_learn_using_new_algorithm(database, info_file)
 
     def _structure_learn_using_Alchemy_algorithm(self, database: str, info_file: str, type_file: str):
         print(f'Structure Learning {database} using Alchemy Algorithm')
         print(' Random walks...')
-        save_name = database.rstrip('.db') + self.standard_method_suffix
+        save_name = database.rstrip('.db') + self.alchemy_file_suffix
         random_walks_command = f'{self.lsm_dir}/rwl/rwl {self.data_dir}/{info_file} {self.data_dir}/' \
                                f'{database} {self.data_dir}/{type_file} {self.sm_config["num_walks"]} ' \
                                f'{self.sm_config["max_length"]} 0.05 0.1 {self.sm_config["theta_hit"]} ' \
@@ -299,13 +302,15 @@ class MLNEvaluator(object):
             # evidence databases are all other databases not used to generate the MLN
             evidence_database_files = [os.path.join(self.data_dir, database_file) for database_file in database_files if
                                        database_file != database]
-            if not self.only_new_algorithm:
+            if self.only_alchemy:
                 self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'alchemy_algorithm')
-            if not self.only_alchemy:
+            elif self.only_new_algorithm:
+                self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'new_algorithm')
+            else:
+                self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'alchemy_algorithm')
                 self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'new_algorithm')
 
     def run_inference_on_MLN_by_method(self, mln: str, evidence_database_files: list[str], algorithm: str):
-        mln += self._get_file_suffix_from_method(algorithm)
         initial_time = time.time()
         self.run_inference_on_MLN(mln, evidence_database_files)
         final_time = time.time()
@@ -596,7 +601,7 @@ class MLNEvaluator(object):
 
     def _get_file_suffix_from_method(self, algorithm: str):
         if algorithm == 'alchemy_algorithm':
-            return self.standard_method_suffix
+            return self.alchemy_file_suffix
         elif algorithm == 'new_algorithm':
             return self.hierarchical_clustering_suffix
         else:
@@ -615,8 +620,8 @@ class MLNEvaluator(object):
 if __name__ == "__main__":
     evaluator = MLNEvaluator(only_new_algorithm=True, with_clustering=True, with_original_hyperparameters=False)
     # for database in ['imdb1.db','imdb4.db', 'imdb5.db']:
-    #evaluator.evaluate(database_files=['imdb3.db'],
-    #                   info_file='imdb.info', type_file='imdb.type')
+    evaluator.evaluate(database_files=['imdb1.db'],
+                       info_file='imdb.info', type_file='imdb.type')
     # evaluator.evaluate_MLNs(database_file_names=['imdb1.db', 'imdb2.db'])
     # evaluator.run_inference_on_MLN('imdb1_sm', ['./Data/imdb2.db'])
-    evaluator.evaluate_CLL_of_MLN('imdb3_hc', ['./Data/imdb2.db', './Data/imdb4.db', './Data/imdb5.db'])
+    #evaluator.evaluate_CLL_of_MLN('imdb3_hc', ['./Data/imdb2.db', './Data/imdb4.db', './Data/imdb5.db'])
