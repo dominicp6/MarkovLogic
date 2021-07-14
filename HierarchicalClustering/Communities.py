@@ -73,7 +73,7 @@ class Communities(object):
 
     def get_community(self, source_node: str, config: dict):
         random_walk_data = self.random_walker.generate_node_random_walk_data(source_node=source_node)
-
+        length_of_random_walks = self.random_walker.length_of_walk
         # remove the source node from the random_walk_data and add it to the set of single nodes
         del random_walk_data[source_node]
         single_nodes = {source_node}
@@ -81,7 +81,7 @@ class Communities(object):
 
         theta_sym = self._get_theta_sym(config)
 
-        close_nodes = self._get_close_nodes(random_walk_data)
+        close_nodes = self._get_close_nodes(random_walk_data, length_of_random_walks)
 
         single_nodes_of_node_type = dict()
         for node_type in self.hypergraph.node_types:
@@ -104,9 +104,11 @@ class Communities(object):
 
         return community
 
-    def _get_close_nodes(self, random_walk_data):
+    def _get_close_nodes(self, random_walk_data, length_of_random_walks):
         if self.theta_hit:
-            close_nodes = get_close_nodes_based_on_truncated_hitting_time(random_walk_data, self.theta_hit)
+            close_nodes = get_close_nodes_based_on_truncated_hitting_time(random_walk_data,
+                                                                          self.theta_hit,
+                                                                          length_of_random_walks)
         else:
             close_nodes = get_close_nodes_based_on_path_count(random_walk_data)
 

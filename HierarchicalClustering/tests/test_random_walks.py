@@ -59,7 +59,7 @@ class TestRandomWalks(unittest.TestCase):
     def test_correct_node_cluster_merging(self):
         for node in H.nodes.keys():
             nodes_rw_data = RW1.generate_node_random_walk_data(source_node=node)
-            close_nodes = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data, threshold_average_truncated_hitting_time=5)
+            close_nodes = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data, theta_hit=5)
             # MERGE SOME CLUSTERS ------------------------------------------------------------------------------
             js_clusters = [NodeClusterRandomWalkData([node]) for node in close_nodes]
 
@@ -156,7 +156,7 @@ class TestRandomWalks(unittest.TestCase):
         for node in H2.nodes.keys():
             nodes_rw_data = RW2.generate_node_random_walk_data(source_node=node)
             close_nodes_rw_data = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data,
-                                                                                  threshold_average_truncated_hitting_time=config2['theta_hit'])
+                                                                                  theta_hit=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
 
         print("Average # close nodes")

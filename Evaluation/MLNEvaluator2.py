@@ -7,10 +7,10 @@ import random
 from datetime import datetime
 from collections import defaultdict
 
-from GraphObjects import Hypergraph
-from HierarchicalClusterer import HierarchicalClusterer
-from Communities import Communities
-from CommunityPrinter import CommunityPrinter
+from MarkovLogicProject.HierarchicalClustering.GraphObjects import Hypergraph
+from MarkovLogicProject.HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
+from MarkovLogicProject.HierarchicalClustering.Communities import Communities
+from MarkovLogicProject.HierarchicalClustering.CommunityPrinter import CommunityPrinter
 
 
 class MLNEvaluator(object):
@@ -157,7 +157,7 @@ class MLNEvaluator(object):
                 else:
                     hypergraph_communities.append(Communities(hypergraph, config=self.config,
                                                               num_walks=self.config['num_walks'],
-                                                              walk_length=self.config['max_length'],
+                                                              walk_length=self.config['length_of_walks'],
                                                               theta_hit=self.config['theta_hit'],
                                                               theta_sym=self.config['theta_sym'],
                                                               theta_js=self.config['theta_js']))
@@ -167,7 +167,7 @@ class MLNEvaluator(object):
             else:
                 hypergraph_communities = [Communities(original_hypergraph, config=self.config,
                                                       num_walks=self.config['num_walks'],
-                                                      walk_length=self.config['max_length'],
+                                                      walk_length=self.config['length_of_walks'],
                                                       theta_hit=self.config['theta_hit'],
                                                       theta_sym=self.config['theta_sym'],
                                                       theta_js=self.config['theta_js'])]

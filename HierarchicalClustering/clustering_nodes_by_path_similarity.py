@@ -25,12 +25,13 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
 
 
 def get_close_nodes_based_on_truncated_hitting_time(nodes_random_walk_data: dict[str, NodeRandomWalkData],
-                                                    threshold_average_truncated_hitting_time):
+                                                    theta_hit,
+                                                    length_of_random_walks):
     """
     Returns those nodes from a list of nodes that have average truncated hitting time less than a threshold
     """
     return {node for node in nodes_random_walk_data.values() if node.average_hitting_time
-            < threshold_average_truncated_hitting_time}
+            < theta_hit*length_of_random_walks}
 
 
 def get_close_nodes_based_on_path_count(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
