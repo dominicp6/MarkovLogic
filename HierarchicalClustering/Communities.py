@@ -105,19 +105,20 @@ class Communities(object):
         return community
 
     def _get_close_nodes(self, random_walk_data):
-        if self.theta_hit is None:
-            close_nodes = get_close_nodes_based_on_path_count(random_walk_data)
-        else:
+        if self.theta_hit:
             close_nodes = get_close_nodes_based_on_truncated_hitting_time(random_walk_data, self.theta_hit)
+        else:
+            close_nodes = get_close_nodes_based_on_path_count(random_walk_data)
+
         return close_nodes
 
     def _get_theta_sym(self, config):
-        if self.theta_sym is None:
+        if self.theta_sym:
+            theta_sym = self.theta_sym
+        else:
             theta_sym = compute_theta_sym(config['theta_p'],
                                           self.random_walker.number_of_walks_ran,
                                           self.random_walker.length_of_walk)
-        else:
-            theta_sym = self.theta_sym
 
         return theta_sym
 
