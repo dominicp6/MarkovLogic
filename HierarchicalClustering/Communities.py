@@ -1,7 +1,6 @@
 from multiprocessing import Pool, cpu_count
 from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import get_commonly_encountered_nodes, cluster_nodes_by_path_similarity, \
-    compute_theta_sym, get_close_nodes, prune_nodes
+from clustering_nodes_by_path_similarity import *
 from GraphObjects import Hypergraph
 from errors import check_argument
 
@@ -80,19 +79,14 @@ class Communities(object):
         single_nodes = {source_node}
         clusters = []
 
-        if self.theta_sym is None:
-            theta_sym = compute_theta_sym(config['theta_p'],
-                                          self.random_walker.number_of_walks_ran,
-                                          self.random_walker.length_of_walk)
-        else:
-            theta_sym = self.theta_sym
+        theta_sym = self._get_theta_sym(config)
 
         if self.theta_hit is None:
             close_nodes = get_commonly_encountered_nodes(random_walk_data)
         else:
             close_nodes = get_close_nodes(random_walk_data, self.theta_hit)
 
-        node_type_to_single_nodes = dict()
+        single_nodes_of_node_type = dict()
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]
             if nodes_of_type:
@@ -103,15 +97,25 @@ class Communities(object):
                                                      config=config,
                                                      theta_js=self.theta_js,
                                                      num_top_paths=self.num_top_paths)
-                node_type_to_single_nodes[node_type] = single_nodes_of_type
+                single_nodes_of_node_type[node_type] = single_nodes_of_type
                 clusters.extend(clusters_of_type)
 
-        pruned_single_nodes = prune_nodes(node_type_to_single_nodes, config['pruning_value'])
-        single_nodes.update(pruned_single_nodes)
+        single_nodes_remaining_after_pruning = prune_nodes(single_nodes_of_node_type, config['pruning_value'])
+        single_nodes.update(single_nodes_remaining_after_pruning)
 
         community = Community(source_node, single_nodes, clusters)
 
         return community
+
+    def _get_theta_sym(self, config):
+        if self.theta_sym is None:
+            theta_sym = compute_theta_sym(config['theta_p'],
+                                          self.random_walker.number_of_walks_ran,
+                                          self.random_walker.length_of_walk)
+        else:
+            theta_sym = self.theta_sym
+
+        return theta_sym
 
     @staticmethod
     def _check_arguments(config):

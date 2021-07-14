@@ -18,10 +18,30 @@ from Communities import Communities
 from CommunityPrinter import CommunityPrinter
 
 
+def timeout(seconds=7, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator
+
+
 class MLNEvaluator(object):
     def __init__(self,
                  hc_config=None,
                  sm_config=None,
+                 only_alchemy=False,
                  only_new_algorithm=False,
                  with_clustering=True,
                  with_original_hyperparameters=False,
@@ -37,6 +57,7 @@ class MLNEvaluator(object):
                  seed=None,
                  ):
 
+        self.only_alchemy = only_alchemy
         self.only_new_algorithm = only_new_algorithm
         self.with_clustering = with_clustering
         self.with_original_hyperparameters = with_original_hyperparameters
@@ -65,12 +86,12 @@ class MLNEvaluator(object):
 
         self.inference_results = defaultdict(lambda: defaultdict(lambda: []))
 
+        self.mln_name = None  # custom file name for the MLN
+
         if seed is None:
             self.seed = random.randint(0, 1000)
         else:
             self.seed = seed
-
-        self.timeout_time = 5
 
         if hc_config is None:
             self.hc_config = {
@@ -82,7 +103,7 @@ class MLNEvaluator(object):
                     'epsilon': 0.05,
                     'max_num_paths': 3,
                     'pca_dim': 2,
-                    'clustering_method_threshold': 4,
+                    'clustering_method_threshold': 50,
                     'max_path_length': 5,
                     'theta_p': 0.01,
                     'pruning_value': None,
@@ -106,32 +127,13 @@ class MLNEvaluator(object):
 
         self.log_file_name = None
 
-    def timeout(self, seconds=5, error_message=os.strerror(errno.ETIME)):
-        seconds = self.timeout_time
-
-        def decorator(func):
-            def _handle_timeout(signum, frame):
-                raise TimeoutError(error_message)
-
-            def wrapper(*args, **kwargs):
-                signal.signal(signal.SIGALRM, _handle_timeout)
-                signal.alarm(seconds)
-                try:
-                    result = func(*args, **kwargs)
-                finally:
-                    signal.alarm(0)
-                return result
-
-            return wraps(func)(wrapper)
-
-        return decorator
-
-    def evaluate(self, database_files: list[str], info_file: str, type_file: str, timeout_time=5):
+    def evaluate(self, database_files: list[str], info_file: str, type_file: str, mln_name=None):
         """
         Structure learns a MLN for each database in a list of database files.
         Evaluates the average conditional log likelihood of each MLN using leave-one-out cross-validation.
         """
-        self.timeout_time = timeout_time
+        if len(database_files) == 1:
+            self.mln_name = mln_name  # if a single database, the user can specify a custom mln name
         self.structure_learn_MLNs(database_files, info_file, type_file)
         self.evaluate_formula_statistics_of_MLNs(database_files)
         self.write_log_file(database_files, info_file, type_file)
@@ -140,11 +142,10 @@ class MLNEvaluator(object):
         self._append_CLL_evaluation_to_log_file()
         print('Done')
 
-    def evaluate_CLL_of_MLN(self, path_to_mln: str, paths_to_evidence_databases: list[str], timeout_time):
+    def evaluate_CLL_of_MLN(self, path_to_mln: str, paths_to_evidence_databases: list[str]):
         """
         Evaluates the average conditional log likelihood of a single MLN given evidence databases.
         """
-        self.timeout_time = timeout_time
         self.inference_results.clear()
         self.run_inference_on_MLN(mln=path_to_mln, evidence_database_files=paths_to_evidence_databases)
         self._evaluate_CLL_of_MLNs()
@@ -159,7 +160,8 @@ class MLNEvaluator(object):
         for database in database_files:
             if not self.only_new_algorithm:
                 self._structure_learn_using_Alchemy_algorithm(database, info_file, type_file)
-            self._structure_learn_using_new_algorithm(database, info_file)
+            if not self.only_alchemy:
+                self._structure_learn_using_new_algorithm(database, info_file)
 
     def _structure_learn_using_Alchemy_algorithm(self, database: str, info_file: str, type_file: str):
         print(f'Structure Learning {database} using Alchemy Algorithm')
@@ -239,6 +241,8 @@ class MLNEvaluator(object):
         self.time_statistics[algorithm]['creating_rules'].append(time1 - time0)
 
     def _run_learn_MLN_weights(self, database_name: str, save_name: str, algorithm: str):
+        if self.mln_name is not None:
+            save_name = self.mln_name
         learn_mln_weights_command = f'{self.lsm_dir}/alchemy30/bin/learnwts -g -i {self.temp_dir}/' \
                                     f'{save_name}-rules.mln -o {self.mln_dir}/{save_name}-rules-out.mln -t ' \
                                     f'{self.data_dir}/{database_name}'
@@ -297,7 +301,8 @@ class MLNEvaluator(object):
                                        database_file != database]
             if not self.only_new_algorithm:
                 self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'alchemy_algorithm')
-            self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'new_algorithm')
+            if not self.only_alchemy:
+                self.run_inference_on_MLN_by_method(mln, evidence_database_files, 'new_algorithm')
 
     def run_inference_on_MLN_by_method(self, mln: str, evidence_database_files: list[str], algorithm: str):
         mln += self._get_file_suffix_from_method(algorithm)
@@ -610,7 +615,8 @@ class MLNEvaluator(object):
 if __name__ == "__main__":
     evaluator = MLNEvaluator(only_new_algorithm=True, with_clustering=True, with_original_hyperparameters=False)
     # for database in ['imdb1.db','imdb4.db', 'imdb5.db']:
-    evaluator.evaluate(database_files=['imdb1.db', 'imdb2.db', 'imdb3.db', 'imdb4.db', 'imdb5.db'],
-                       info_file='imdb.info', type_file='imdb.type')
+    #evaluator.evaluate(database_files=['imdb3.db'],
+    #                   info_file='imdb.info', type_file='imdb.type')
     # evaluator.evaluate_MLNs(database_file_names=['imdb1.db', 'imdb2.db'])
     # evaluator.run_inference_on_MLN('imdb1_sm', ['./Data/imdb2.db'])
+    evaluator.evaluate_CLL_of_MLN('imdb3_hc', ['./Data/imdb2.db', './Data/imdb4.db', './Data/imdb5.db'])
