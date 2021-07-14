@@ -241,7 +241,6 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData],
                                                                 number_of_walks=number_of_walks,
                                                                 significance_level=config['theta_p'])
 
-
     return single_nodes, clusters
 
 
@@ -366,6 +365,7 @@ def cluster_nodes_by_birch(nodes: list[NodeRandomWalkData], pca_target_dimension
                                paths is tolerated before they are considered not path-symmetric.
     :return: single_nodes, clusters: the final clustering of the nodes
     """
+
     node_path_counts = compute_top_paths(nodes, max_number_of_paths)
 
     clustering_labels = compute_optimal_birch_clustering(node_path_counts,
@@ -387,6 +387,7 @@ def compute_optimal_birch_clustering(node_path_counts: np.array,
     The number of clusters is incrementally increased. The optimal number of clusters is the smallest number of clusters
     such that have statistically similar path count distributions at a specified significance level.
     """
+
     standardized_path_counts = (
             (node_path_counts - np.mean(node_path_counts, axis=1)[:, None]) / np.mean(node_path_counts, axis=1)[:,
                                                                               None]).T
@@ -419,6 +420,7 @@ def compute_principal_components(feature_vectors: np.array, target_dimension: in
     :param target_dimension: the desired dimension of the dimensionality-reduced data
     :return: principal_components: the dimensionality-reduced feature vectors
     """
+
     original_dimension = feature_vectors.shape[1]
     if original_dimension > target_dimension:
         pca = PCA(n_components=target_dimension)
@@ -455,6 +457,7 @@ def group_nodes_by_clustering_labels(nodes: list[NodeRandomWalkData], cluster_la
     :param nodes: the nodes to be grouped
     :param cluster_labels: a list of integers assigning each node to a given cluster
     """
+
     number_of_clusters = len(set(cluster_labels))
     original_clusters = [[] for _ in range(number_of_clusters)]
     for node_index, cluster_index in enumerate(cluster_labels):
