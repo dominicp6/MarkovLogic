@@ -55,7 +55,7 @@ class RandomWalker:
         Calculates a suitable value for the length of the random walks based on the estimated diameter of the graph
         that generated the hypergraph.
         """
-        if self.hypergraph.diameter is not None:
+        if self.hypergraph.diameter:
             length_of_walk = self.hypergraph.diameter
         else:
             length_of_walk = self.max_path_length
