@@ -1,0 +1,11 @@
+//LEN 2  #PATHS 2
+//LEN 4  #PATHS 1
+
+//INDEX  LEN  SUP  RULE
+0 2 34 R(0,1) R(0,2) 
+    DB_IDS  0 1 2 3 4 5 6 7 8 9
+1 2 34 R(0,1) R(2,1) 
+    DB_IDS  0 1 2 3 4 5 6 7 8 9
+2 4 34 R(0,1) R(0,2) R(3,1) R(3,2) 
+    DB_IDS  0 1 2 3 4 5 6 7 8 9
+

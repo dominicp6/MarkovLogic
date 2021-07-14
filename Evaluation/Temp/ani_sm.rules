@@ -1,0 +1,8 @@
+//LEN 2  #PATHS 2
+
+//INDEX  LEN  SUP  RULE
+0 2 85 R(0,1) R(0,2) 
+    DB_IDS  0
+1 2 49 R(0,1) R(2,1) 
+    DB_IDS  1
+

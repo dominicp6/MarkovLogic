@@ -1,0 +1,41 @@
+#START_GRAPH  #COMS 3
+
+#START_DB  0  #COMS  20  #ATOMS  9  SUP_COM  0_12 0_26 0_38 0_3 0_41 0_42 0_25 0_20 0_33 0_17 0_28 0_6 0_23 0_35 0_24 0_44 0_27 0_36 0_2 0_47
+director(V0)
+actor(V1)
+actor(V2)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V2)
+gender(V1,V4)
+workedUnder(V1,V0)
+workedUnder(V5,V0)
+#END_DB
+
+#START_DB  1  #COMS  18  #ATOMS  10  SUP_COM  0_29 0_14 0_40 0_46 0_5 0_50 0_34 0_39 0_21 0_15 0_33 0_10 0_57 0_30 0_16 0_44 0_32 0_27
+director(V0)
+actor(V1)
+actor(V2)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V2)
+gender(V1,V4)
+gender(V2,V4)
+workedUnder(V1,V0)
+workedUnder(V2,V0)
+#END_DB
+
+#START_DB  2  #COMS  15  #ATOMS  10  SUP_COM  0_53 0_60 0_55 0_49 0_18 0_56 0_33 0_51 0_7 0_31 0_22 0_43 0_44 0_8 0_27
+director(V0)
+actor(V1)
+actor(V2)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V2)
+gender(V1,V4)
+gender(V2,V5)
+workedUnder(V1,V0)
+workedUnder(V2,V0)
+#END_DB
+
+#END_GRAPH

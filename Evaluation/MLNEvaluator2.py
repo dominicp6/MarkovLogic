@@ -7,10 +7,10 @@ import random
 from datetime import datetime
 from collections import defaultdict
 
-from MarkovLogicProject.HierarchicalClustering.GraphObjects import Hypergraph
-from MarkovLogicProject.HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
-from MarkovLogicProject.HierarchicalClustering.Communities import Communities
-from MarkovLogicProject.HierarchicalClustering.CommunityPrinter import CommunityPrinter
+from HierarchicalClustering.GraphObjects import Hypergraph
+from HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
+from HierarchicalClustering.Communities import Communities
+from HierarchicalClustering.CommunityPrinter import CommunityPrinter
 
 
 class MLNEvaluator(object):
