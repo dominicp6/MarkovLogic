@@ -2,7 +2,10 @@ RoughWork
 build
 __pycache__
 #*.db
-*.type
-*.info
+#*.type
+#*.info
+.ldb
+.uldb
+.srcnclust
 *.dat
 *.log
