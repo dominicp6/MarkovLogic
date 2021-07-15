@@ -4,6 +4,9 @@ import subprocess
 import time
 import json
 import random
+import signal
+import errno
+from functools import wraps
 from datetime import datetime
 from collections import defaultdict
 from typing import List
@@ -12,6 +15,25 @@ from HierarchicalClustering.GraphObjects import Hypergraph
 from HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
 from HierarchicalClustering.Communities import Communities
 from HierarchicalClustering.CommunityPrinter import CommunityPrinter
+
+
+def timeout(seconds=100, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wraps(func)(wrapper)
+
+    return decorator
 
 
 class MLNEvaluator(object):
@@ -42,11 +64,11 @@ class MLNEvaluator(object):
 
         self.file_suffix = '_new_SOTA'
 
-        self.time_statistics = defaultdict(lambda: [])
+        self.time_statistics = {}
 
         self.clustering_statistics = defaultdict(lambda: [])
 
-        self.mln_statistics = defaultdict(lambda: [])
+        self.mln_statistics = {}
 
         self.mln_name = None  # custom file name for the MLN
 
@@ -57,16 +79,21 @@ class MLNEvaluator(object):
 
         self.log_file_name = None
 
-    def evaluate(self, database: str, info_file: str):
+    def evaluate(self, database: str, info_file: str, output_log_file=False):
         """
         Structure learns a MLN for each database in a list of database files.
         Evaluates the average conditional log likelihood of each MLN using leave-one-out cross-validation.
         """
         self.structure_learn_MLN(database, info_file)
-        self.evaluate_formula_statistics_of_MLNs(database)
-        self.write_log_file(database, info_file)
+        if self.time_statistics['total_structure_learning'] != -1:
+            self.evaluate_formula_statistics_of_MLNs(database)
+        else:
+            self.mln_statistics['formula_length'] = -1
+            self.mln_statistics['number_of_formulas'] = -1
 
-        print('Done')
+        if output_log_file:
+            self.write_log_file(database, info_file)
+
         return {'num_single_nodes': self.clustering_statistics['mean_number_single_nodes'],
                 'num_clusters': self.clustering_statistics['mean_number_node_clusters'],
                 'time_random_walks': self.time_statistics['clustering_and_RWs'],
@@ -80,27 +107,25 @@ class MLNEvaluator(object):
         """
         Structure-learn an MLN from each database in the list of database files.
         """
-        print(f'Structure Learning {database} using New Algorithm')
-        print(' Random walks...')
         initial_time = time.time()
         self.generate_communities_using_hierarchical_clustering(database, info_file)
         clustering_time = time.time()
-        self.time_statistics['clustering_and_RWs'].append(clustering_time - initial_time)
+        self.time_statistics['clustering_and_RWs'] = (clustering_time - initial_time)
         save_name = database.rstrip('.db') + self.file_suffix
-        self._run_rest_of_structure_learning_pipeline(database, info_file, save_name)
+        try:
+            self._run_rest_of_structure_learning_pipeline(database, info_file, save_name)
+            complete_time = time.time()
+            self.time_statistics['total_structure_learning'] = (complete_time - initial_time)
+        except:
+            self.time_statistics['total_structure_learning'] = -1
 
-        complete_time = time.time()
-        self.time_statistics['total_structure_learning'].append(complete_time - initial_time)
         self._remove_temporary_files_produced_during_structure_learning()
 
+    @timeout()
     def _run_rest_of_structure_learning_pipeline(self, database, info_file, save_name):
-        print(' Communities...')
         self._run_get_communities(info_file, save_name)
-        print(' Paths...')
         self._run_path_finding(info_file, save_name)
-        print(' Finding formulas...')
         self._run_create_MLN_rules(database, info_file, save_name)
-        print(' Calculating weights..')
         self._run_learn_MLN_weights(database, save_name)
 
     def _run_get_communities(self, info_file, save_name):
@@ -111,7 +136,7 @@ class MLNEvaluator(object):
         time0 = time.time()
         subprocess.call(get_communities_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         time1 = time.time()
-        self.time_statistics['getting_communities'].append(time1 - time0)
+        self.time_statistics['getting_communities'] = (time1 - time0)
 
     def _run_path_finding(self, info_file, save_name):
         path_finding_command = f'{self.lsm_dir}/pfind2/pfind {self.temp_dir}/{save_name}.comb.ldb 5 0 5 -1.0 ' \
@@ -120,7 +145,7 @@ class MLNEvaluator(object):
         time0 = time.time()
         subprocess.call(path_finding_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         time1 = time.time()
-        self.time_statistics['path_finding'].append(time1 - time0)
+        self.time_statistics['path_finding'] = (time1 - time0)
 
     def _run_create_MLN_rules(self, database: str, info_file: str, save_name: str):
         create_mln_rules_command = f'{self.lsm_dir}/createrules/createrules {self.temp_dir}/{save_name}.rules 0 ' \
@@ -133,7 +158,7 @@ class MLNEvaluator(object):
         time0 = time.time()
         subprocess.call(create_mln_rules_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         time1 = time.time()
-        self.time_statistics['creating_rules'].append(time1 - time0)
+        self.time_statistics['creating_rules'] = (time1 - time0)
 
     def _run_learn_MLN_weights(self, database_name: str, save_name: str):
         learn_mln_weights_command = f'{self.lsm_dir}/alchemy30/bin/learnwts -g -i {self.temp_dir}/' \
@@ -142,7 +167,7 @@ class MLNEvaluator(object):
         time0 = time.time()
         subprocess.call(learn_mln_weights_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         time1 = time.time()
-        self.time_statistics['learning_weights'].append(time1 - time0)
+        self.time_statistics['learning_weights'] = (time1 - time0)
 
     def generate_communities_using_hierarchical_clustering(self, database: str, info_file: str):
         original_hypergraph = Hypergraph(os.path.join(self.data_dir, database), os.path.join(self.data_dir,
@@ -186,16 +211,9 @@ class MLNEvaluator(object):
         """
         Computes the average formula length and number of formulas for each MLN associated with each database file.
         """
-        formula_lengths = []
-        std_formula_lengths = []
-        number_of_formulas = []
-
         fl, std_fl, nf = self.compute_average_and_std_formula_length_and_number_of_formulas(database)
-        self.mln_statistics["formula_length"] = [fl]
-        self.mln_statistics["number_of_formulas"] = [nf]
-        formula_lengths.append(fl)
-        number_of_formulas.append(nf)
-        std_formula_lengths.append(std_fl)
+        self.mln_statistics["formula_length"] = fl
+        self.mln_statistics["number_of_formulas"] = nf
 
     def compute_average_and_std_formula_length_and_number_of_formulas(self, database):
         mln_file_name = database.rstrip('.db') + f'{self.file_suffix}-rules-out.mln'

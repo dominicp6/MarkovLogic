@@ -8,57 +8,60 @@ actor(person)
 
 //function declarations
 
-// 6.401903429  !director(v0) v !actor(v1) v !movie(v2,v0) v !movie(v2,v1) v workedUnder(v1,v0)
-6.401903429  !director(a1) v !actor(a2) v !movie(a3,a1) v !movie(a3,a2) v workedUnder(a2,a1)
+// 7.494657516  !director(v0) v !actor(v1) v !movie(v2,v0) v !movie(v2,v1) v workedUnder(v1,v0)
+7.494657516  !director(a1) v !actor(a2) v !movie(a3,a1) v !movie(a3,a2) v workedUnder(a2,a1)
 
-// 3.587245695  !movie(v0,v1) v movie(v0,v2) v !workedUnder(v2,v1)
-3.587245695  movie(a1,a2) v !movie(a1,a3) v !workedUnder(a2,a3)
+// 1.429073978  !movie(v0,v1) v movie(v0,v2) v !workedUnder(v2,v1)
+1.429073978  movie(a1,a2) v !movie(a1,a3) v !workedUnder(a2,a3)
 
-// -0.610745596  !movie(v0,v1) v !movie(v0,v2) v !movie(v0,v3) v !workedUnder(v2,v1) v !workedUnder(v3,v1)
--0.610745596  !movie(a1,a2) v !movie(a1,a3) v !movie(a1,a4) v !workedUnder(a3,a2) v !workedUnder(a4,a2)
+// -1.585714246  !movie(v0,v1) v !movie(v0,v2) v !movie(v0,v3) v !workedUnder(v2,v1) v !workedUnder(v3,v1)
+-1.585714246  !movie(a1,a2) v !movie(a1,a3) v !movie(a1,a4) v !workedUnder(a3,a2) v !workedUnder(a4,a2)
 
-// 4.783209793  director(v0) v !workedUnder(v1,v0)
-4.783209793  director(a1) v !workedUnder(a2,a1)
+// 3.367398647  director(v0) v !workedUnder(v1,v0)
+3.367398647  director(a1) v !workedUnder(a2,a1)
 
-// -1.114862684  !director(v0) v !workedUnder(v1,v0)
--1.114862684  !director(a1) v !workedUnder(a2,a1)
+// -2.68000233  !director(v0) v !workedUnder(v1,v0)
+-2.68000233  !director(a1) v !workedUnder(a2,a1)
 
-// 0.3300940076  !movie(v0,v1) v !movie(v0,v2) v !workedUnder(v1,v3) v !workedUnder(v2,v3)
-0.3300940076  !movie(a1,a2) v !movie(a1,a3) v !workedUnder(a2,a4) v !workedUnder(a3,a4)
+// 1.412464202  !movie(v0,v1) v !movie(v0,v2) v !workedUnder(v1,v3) v !workedUnder(v2,v3)
+1.412464202  !movie(a1,a2) v !movie(a1,a3) v !workedUnder(a2,a4) v !workedUnder(a3,a4)
 
-// 5.253518913  actor(v0) v !workedUnder(v0,v1)
-5.253518913  actor(a1) v !workedUnder(a1,a2)
+// 3.238685848  actor(v0) v !workedUnder(v0,v1)
+3.238685848  actor(a1) v !workedUnder(a1,a2)
 
-// -1.585171804  !actor(v0) v !workedUnder(v0,v1)
--1.585171804  !actor(a1) v !workedUnder(a1,a2)
+// -2.551289531  !actor(v0) v !workedUnder(v0,v1)
+-2.551289531  !actor(a1) v !workedUnder(a1,a2)
 
-// -0.08560320572  actor(v0) v !movie(v1,v2) v !movie(v1,v3) v !workedUnder(v3,v2) v workedUnder(v0,v2)
--0.08560320572  actor(a1) v !movie(a2,a3) v !movie(a2,a4) v workedUnder(a1,a3) v !workedUnder(a4,a3)
+// 0.3028730141  actor(v0) v !movie(v1,v2) v !movie(v1,v3) v !workedUnder(v3,v2) v workedUnder(v0,v2)
+0.3028730141  actor(a1) v !movie(a2,a3) v !movie(a2,a4) v workedUnder(a1,a3) v !workedUnder(a4,a3)
 
-// 0.770944226  !movie(v0,v1) v !movie(v0,v2) v !workedUnder(v2,v1)
-0.770944226  !movie(a1,a2) v !movie(a1,a3) v !workedUnder(a3,a2)
+// 0.1513065518  !actor(v0) v movie(v1,v0) v movie(v1,v2) v !workedUnder(v2,v3) v workedUnder(v0,v3)
+0.1513065518  !actor(a1) v movie(a2,a1) v movie(a2,a3) v workedUnder(a1,a4) v !workedUnder(a3,a4)
 
-// -0.8057055511  !director(v0) v !actor(v1) v workedUnder(v1,v0)
--0.8057055511  !director(a1) v !actor(a2) v workedUnder(a2,a1)
+// -0.08041550236  !movie(v0,v1) v !movie(v0,v2) v !workedUnder(v2,v1)
+-0.08041550236  !movie(a1,a2) v !movie(a1,a3) v !workedUnder(a3,a2)
 
-// -1.028309085  workedUnder(p0,p0)
--1.028309085  workedUnder(a1,a1)
+// -0.1509770126  !director(v0) v !actor(v1) v workedUnder(v1,v0)
+-0.1509770126  !director(a1) v !actor(a2) v workedUnder(a2,a1)
 
-// -0.181323632  gender(v0,v1)
--0.181323632  gender(a1,a2)
+// -0.831098589  workedUnder(p0,p0)
+-0.831098589  workedUnder(a1,a1)
 
-// -3.668347109  workedUnder(v0,v1)
--3.668347109  workedUnder(a1,a2)
+// -0.1802362966  gender(v0,v1)
+-0.1802362966  gender(a1,a2)
 
-// -0.5553649524  movie(v0,v1)
--0.5553649524  movie(a1,a2)
+// -0.6873963165  workedUnder(v0,v1)
+-0.6873963165  workedUnder(a1,a2)
 
-// 0.05050519931  director(v0)
-0.05050519931  director(a1)
+// -2.257216152  movie(v0,v1)
+-2.257216152  movie(a1,a2)
 
-// -2.302057018  genre(v0,v1)
--2.302057018  genre(a1,a2)
+// 0.06680759305  director(v0)
+0.06680759305  director(a1)
 
-// 1.238953311  actor(v0)
-1.238953311  actor(a1)
+// -2.281230179  genre(v0,v1)
+-2.281230179  genre(a1,a2)
+
+// 0.8362550045  actor(v0)
+0.8362550045  actor(a1)
 
