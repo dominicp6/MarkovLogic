@@ -4,8 +4,9 @@ __pycache__
 #*.db
 #*.type
 #*.info
-.ldb
-.uldb
-.srcnclust
+*.tex
+*.ldb
+*.uldb
+*.srcnclust
 *.dat
 *.log
