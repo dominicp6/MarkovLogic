@@ -1,5 +1,6 @@
 RoughWork
 build
+venv
 __pycache__
 #*.db
 *.type
