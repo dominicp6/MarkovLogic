@@ -41,7 +41,14 @@ class Communities(object):
 
         self.theta_hit = theta_hit
         self.theta_sym = theta_sym
-        self.theta_js = theta_js
+
+        # to convert from Alchemy's theta_js to our algorithm's theta_js parameter we need to normalise by the
+        # number of random walks that we run
+        if theta_js is not None and num_walks is not None:
+            self.theta_js = theta_js/num_walks
+        else:
+            self.theta_js = theta_js
+
         self.num_top_paths = num_top_paths
 
         self.hypergraph = hypergraph

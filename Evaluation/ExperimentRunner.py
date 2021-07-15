@@ -22,7 +22,7 @@ class ExperimentRunner(object):
         self.length_of_random_walks = [3, 6]
         self.theta_hits = [0.95, 1]
         self.theta_syms = [0.01, 0.2]
-        self.theta_jss = [0.00001, 0.001] 
+        self.theta_jss = [0.03, 3]
         self.num_tops = [2, 4]
 
         # Path Similarity Clustering Parameters --------------
@@ -41,7 +41,7 @@ class ExperimentRunner(object):
             'length_of_walks': 5,
             'theta_hit': 0.98,
             'theta_sym': 0.1,
-            'theta_js': 0.0001,
+            'theta_js': 1,
             'num_top': 3,
             'epsilon': 0.05,
             'theta_p': 0.01
@@ -189,4 +189,4 @@ class ExperimentRunner(object):
 
 if __name__ == "__main__":
     experiment_runner = ExperimentRunner(database='imdb4.db', info_file='imdb.info')
-    experiment_runner.run_experiments(number_of_repeats=1)
+    experiment_runner.run_experiments(number_of_repeats=3)
