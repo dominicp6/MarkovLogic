@@ -1,13 +1,14 @@
-RoughWork
-build
+build/*
 __pycache__
 #*.db
 #*.type
 #*.info
-Evaluation/Temp
+Evaluation/Temp/*
 *.tex
 *.ldb
 *.uldb
 *.srcnclust
 *.dat
 *.log
+lsmcode/*
+alchemy-2/*
