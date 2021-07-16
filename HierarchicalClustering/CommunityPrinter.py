@@ -34,10 +34,10 @@ class CommunityPrinter(object):
             self.node_to_node_id[node] = node_id
 
         assert self.num_of_communities <= original_hypergraph.number_of_nodes(), f"Incorrect hypergraph provided for " \
-                                                                                 f"original_hypergraph. More " \
+                                                                                 f"original_hypergraph? More " \
                                                                                  f"communities found (" \
                                                                                  f"{self.num_of_communities}) than " \
-                                                                                 f"the number of node in " \
+                                                                                 f"the number of nodes in " \
                                                                                  f"original_hypergraph (" \
                                                                                  f"{original_hypergraph.number_of_nodes()})."
 

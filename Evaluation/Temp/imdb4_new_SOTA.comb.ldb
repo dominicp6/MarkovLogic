@@ -1,32 +1,84 @@
-#START_GRAPH  #COMS 3
+#START_GRAPH  #COMS 8
 
-#START_DB  0  #COMS  13  #ATOMS  23  SUP_COM  0_45 0_41 0_23 0_15 0_16 0_46 0_22 0_47 0_43 0_13 0_17 0_40 0_18
+#START_DB  0  #COMS  31  #ATOMS  11  SUP_COM  0_23 0_21 0_7 0_16 0_42 0_15 0_17 0_38 0_47 0_1 0_4 0_13 0_44 0_22 0_9 0_5 0_2 0_3 0_46 0_6 0_8 0_34 0_43 0_24 0_30 0_14 0_48 0_45 0_37 0_10 0_49
 director(V0)
 actor(V1)
 actor(V2)
 actor(V3)
-actor(V4)
-actor(V5)
-actor(V6)
-movie(V7,V0)
-movie(V7,V1)
-movie(V7,V2)
-movie(V7,V3)
-movie(V7,V4)
-movie(V7,V5)
-movie(V7,V8)
-gender(V1,V9)
-gender(V2,V9)
-gender(V6,V9)
+movie(V4,V0)
+movie(V4,V1)
+movie(V4,V2)
+movie(V4,V3)
 workedUnder(V1,V0)
 workedUnder(V2,V0)
 workedUnder(V3,V0)
-workedUnder(V4,V0)
-workedUnder(V5,V0)
-workedUnder(V8,V0)
 #END_DB
 
-#START_DB  1  #COMS  11  #ATOMS  9  SUP_COM  0_8 0_1 0_0 0_9 0_7 0_2 0_3 0_11 0_4 0_5 0_10
+#START_DB  1  #COMS  26  #ATOMS  11  SUP_COM  0_23 0_21 0_7 0_16 0_42 0_15 0_17 0_33 0_31 0_1 0_4 0_13 0_44 0_22 0_9 0_2 0_3 0_46 0_6 0_26 0_8 0_43 0_24 0_14 0_45 0_35
+director(V0)
+actor(V1)
+actor(V2)
+actor(V3)
+movie(V4,V0)
+movie(V4,V1)
+movie(V4,V2)
+movie(V4,V5)
+workedUnder(V1,V0)
+workedUnder(V2,V0)
+workedUnder(V3,V0)
+#END_DB
+
+#START_DB  2  #COMS  25  #ATOMS  11  SUP_COM  0_23 0_21 0_7 0_16 0_42 0_15 0_17 0_32 0_1 0_4 0_36 0_13 0_44 0_22 0_9 0_2 0_3 0_46 0_6 0_8 0_43 0_24 0_27 0_14 0_45
+director(V0)
+actor(V1)
+actor(V2)
+actor(V3)
+movie(V4,V0)
+movie(V4,V1)
+movie(V4,V2)
+movie(V4,V3)
+workedUnder(V1,V0)
+workedUnder(V2,V0)
+workedUnder(V5,V0)
+#END_DB
+
+#START_DB  3  #COMS  18  #ATOMS  9  SUP_COM  0_23 0_21 0_16 0_42 0_15 0_17 0_47 0_13 0_44 0_22 0_46 0_43 0_24 0_40 0_14 0_48 0_45 0_49
+director(V0)
+actor(V1)
+actor(V2)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V4)
+gender(V2,V5)
+workedUnder(V1,V0)
+workedUnder(V2,V0)
+#END_DB
+
+#START_DB  4  #COMS  15  #ATOMS  9  SUP_COM  0_21 0_41 0_16 0_42 0_15 0_17 0_47 0_44 0_46 0_43 0_24 0_39 0_48 0_45 0_49
+director(V0)
+actor(V1)
+actor(V2)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V2)
+gender(V1,V4)
+workedUnder(V1,V0)
+workedUnder(V2,V0)
+#END_DB
+
+#START_DB  5  #COMS  14  #ATOMS  9  SUP_COM  0_21 0_16 0_42 0_15 0_17 0_47 0_44 0_46 0_50 0_43 0_24 0_48 0_45 0_49
+director(V0)
+actor(V1)
+actor(V2)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V2)
+gender(V2,V4)
+workedUnder(V1,V0)
+workedUnder(V5,V0)
+#END_DB
+
+#START_DB  6  #COMS  12  #ATOMS  9  SUP_COM  0_0 0_7 0_1 0_4 0_9 0_5 0_2 0_3 0_6 0_8 0_12 0_10
 director(V0)
 actor(V1)
 actor(V2)
@@ -35,34 +87,19 @@ movie(V3,V1)
 movie(V3,V2)
 genre(V0,V4)
 workedUnder(V1,V0)
-workedUnder(V2,V0)
+workedUnder(V5,V0)
 #END_DB
 
-#START_DB  2  #COMS  10  #ATOMS  24  SUP_COM  0_45 0_41 0_46 0_22 0_47 0_19 0_43 0_20 0_40 0_18
+#START_DB  7  #COMS  11  #ATOMS  9  SUP_COM  0_7 0_1 0_4 0_9 0_5 0_2 0_3 0_6 0_8 0_10 0_11
 director(V0)
 actor(V1)
 actor(V2)
-actor(V3)
-actor(V4)
-actor(V5)
-actor(V6)
-movie(V7,V0)
-movie(V7,V1)
-movie(V7,V2)
-movie(V7,V3)
-movie(V7,V4)
-movie(V7,V5)
-movie(V7,V6)
-gender(V1,V8)
-gender(V2,V8)
-gender(V3,V8)
-gender(V4,V8)
+movie(V3,V0)
+movie(V3,V1)
+movie(V3,V4)
+genre(V0,V5)
 workedUnder(V1,V0)
 workedUnder(V2,V0)
-workedUnder(V3,V0)
-workedUnder(V4,V0)
-workedUnder(V5,V0)
-workedUnder(V6,V0)
 #END_DB
 
 #END_GRAPH

@@ -45,7 +45,7 @@ class Communities(object):
         # to convert from Alchemy's theta_js to our algorithm's theta_js parameter we need to normalise by the
         # number of random walks that we run
         if theta_js is not None and num_walks is not None:
-            self.theta_js = theta_js/num_walks
+            self.theta_js = theta_js / num_walks
         else:
             self.theta_js = theta_js
 
@@ -105,10 +105,11 @@ class Communities(object):
                 single_nodes_of_node_type[node_type] = single_nodes_of_type
                 clusters.extend(clusters_of_type)
 
-        single_nodes_remaining_after_pruning = prune_nodes(single_nodes_of_node_type, config['pruning_value'])
-        single_nodes.update(single_nodes_remaining_after_pruning)
-
-        community = Community(source_node, single_nodes, clusters)
+        single_nodes_after_merging, clusters_after_merging = merge_single_nodes_into_clusters(single_nodes_of_node_type,
+                                                                                              clusters,
+                                                                                              config['pruning_value'])
+        single_nodes.update(single_nodes_after_merging)
+        community = Community(source_node, single_nodes, clusters_after_merging)
 
         return community
 
@@ -144,6 +145,8 @@ class Communities(object):
         check_argument('multiprocessing', config['multiprocessing'], bool)
         if config['pruning_value'] is not None:
             check_argument('pruning_value', config['pruning_value'], int, 0)
+        if 'clustering_type' in config:
+            assert config['clustering_type'] in ['JS', 'kmeans', 'birch']
 
 
 class Community(object):

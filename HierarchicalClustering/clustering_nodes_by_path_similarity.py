@@ -42,6 +42,112 @@ def get_close_nodes_based_on_path_count(nodes_random_walk_data: Dict[str, NodeRa
     return {node for node in nodes_random_walk_data.values() if node.get_count_of_nth_path(n=3) >= 15}
 
 
+def merge_single_nodes_into_clusters(single_nodes_of_type: Dict[str, Set[NodeClusterRandomWalkData]],
+                                     clusters: List[NodeClusterRandomWalkData],
+                                     max_number_of_single_nodes: int):
+    """
+    TODO: description
+    """
+    valid_types = {cluster.node_type for cluster in clusters}
+    number_of_single_nodes_of_type = {node_type: len(nodes) for node_type, nodes in single_nodes_of_type.items()}
+    number_of_single_nodes_of_valid_type = {node_type: num_nodes for node_type, num_nodes
+                                            in number_of_single_nodes_of_type.items()
+                                            if node_type in valid_types}
+    number_of_single_nodes = sum(number_of_single_nodes_of_type.values())
+    number_of_valid_single_nodes = sum(number_of_single_nodes_of_valid_type.values())
+    if max_number_of_single_nodes:
+        number_of_nodes_to_merge = number_of_single_nodes + 1 - max_number_of_single_nodes
+        if number_of_nodes_to_merge > number_of_valid_single_nodes:
+            print('Warning: Attempting to merge more single nodes than is '
+                  'possible in merge_single_nodes_into_clusters.')
+            number_of_nodes_to_merge = max_number_of_single_nodes
+    else:
+        number_of_nodes_to_merge = 0
+
+    single_nodes = set()
+    if number_of_nodes_to_merge < 1:
+        # single nodes are the same as those in single_nodes_of_type dict
+        [single_nodes.update(node.node_names) for typed_single_nodes in single_nodes_of_type.values()
+         for node in typed_single_nodes]
+    else:
+        single_nodes.update(get_single_nodes_that_cannot_be_merged(single_nodes_of_type, valid_types))
+        order_of_node_types_to_merge = [node_type for node_type, _ in
+                                        sorted(number_of_single_nodes_of_valid_type.items(),
+                                               key=lambda item: item[1],
+                                               reverse=True)]
+        number_of_nodes_remaining_to_merge = number_of_nodes_to_merge
+        # merge nodes of each type in turn until no more nodes left to merge
+        for node_type in order_of_node_types_to_merge:
+            if number_of_nodes_remaining_to_merge >= 1:
+                number_of_nodes_to_merge_of_this_type = min(math.ceil(number_of_nodes_to_merge * (
+                        number_of_single_nodes_of_valid_type[node_type] / number_of_valid_single_nodes)),
+                                                            number_of_nodes_remaining_to_merge)
+                nodes_of_type = single_nodes_of_type[node_type]
+
+                remaining_nodes_of_type, clusters = merge_nodes(
+                                                      list(nodes_of_type),
+                                                      clusters,
+                                                      number_of_nodes_to_merge_of_this_type)
+
+                assert len(remaining_nodes_of_type) == len(nodes_of_type) - number_of_nodes_to_merge_of_this_type
+
+                single_nodes.update(remaining_nodes_of_type)
+                number_of_nodes_remaining_to_merge -= number_of_nodes_to_merge_of_this_type
+            else:
+                [single_nodes.update(node.node_names) for node in single_nodes_of_type[node_type]]
+
+    clusters = [cluster.node_names for cluster in clusters]
+
+    return single_nodes, clusters
+
+def get_single_nodes_that_cannot_be_merged(single_nodes_of_type: Dict[str, Set[NodeClusterRandomWalkData]],
+                                           valid_types: Set):
+    invalid_nodes = set()
+    [invalid_nodes.update(node.node_names) for node_type, nodes_of_type in single_nodes_of_type.items()
+     for node in nodes_of_type if node_type not in valid_types]
+    return invalid_nodes
+
+def merge_nodes(single_nodes: List[NodeClusterRandomWalkData],
+                clusters: List[NodeClusterRandomWalkData],
+                number_of_nodes_to_merge: int):
+    """
+    TODO: description
+    """
+    assert number_of_nodes_to_merge >= 1
+    max_divergence = float('inf')
+    single_node_to_merge = None
+    cluster_to_merge_into = None
+    number_of_nodes_remaining_to_merge = number_of_nodes_to_merge
+    while True:
+        smallest_divergence = max_divergence
+        for i in range(len(single_nodes)):
+            for j in range(len(clusters)):
+                if clusters[j].node_type == single_nodes[i].node_type:
+                    js_divergence = compute_js_divergence_of_top_n_paths(single_nodes[i], clusters[j], z_score=None)
+
+                    if js_divergence < smallest_divergence:
+                        smallest_divergence = js_divergence
+                        single_node_to_merge = i
+                        cluster_to_merge_into = j
+                else:
+                    continue
+
+        assert smallest_divergence < max_divergence
+
+        clusters[cluster_to_merge_into].merge(single_nodes[single_node_to_merge])
+        del single_nodes[single_node_to_merge]
+
+        number_of_nodes_remaining_to_merge -= 1
+        if number_of_nodes_remaining_to_merge > 0:
+            continue
+        else:
+            break
+
+    single_node_names = set()
+    [single_node_names.update(node.node_names) for node in single_nodes]
+
+    return single_node_names, clusters
+
 def prune_nodes(single_nodes_of_type: Dict[str, Set[NodeClusterRandomWalkData]], pruning_value: int):
     """
     Given a dictionary mapping node type to single nodes, removes nodes of each type in proportion to their
@@ -211,7 +317,12 @@ def cluster_nodes_by_path_distributions(nodes: List[NodeRandomWalkData],
     """
     assert len(nodes) > 1, "Clustering by path distribution requires more than one node"
 
-    if theta_js:
+    try:
+        clustering_type = config['clustering_type']
+    except:
+        clustering_type = None
+
+    if theta_js or clustering_type == 'JS':
         single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
                                                                 significance_level=config['theta_p'],
                                                                 number_of_walks=number_of_walks,
@@ -224,7 +335,7 @@ def cluster_nodes_by_path_distributions(nodes: List[NodeRandomWalkData],
                                                 number_of_walks=number_of_walks,
                                                 significance_level=config['theta_p']):
             single_nodes = set()
-            clusters = [{node.name for node in nodes}]
+            clusters = [NodeClusterRandomWalkData(nodes)]
         else:
             # if the number of nodes is smaller than then then the threshold size required for k-means clustering,
             # then cluster nodes based on agglomerative clustering of js divergence instead
@@ -236,11 +347,12 @@ def cluster_nodes_by_path_distributions(nodes: List[NodeRandomWalkData],
                                                                         num_top_paths=num_top_paths)
             # else cluster using Birch clustering on a PCA reduction of the path counts features
             else:
-                single_nodes, clusters = cluster_nodes_by_birch(nodes=nodes,
-                                                                pca_target_dimension=config['pca_dim'],
-                                                                max_number_of_paths=config['max_num_paths'],
-                                                                number_of_walks=number_of_walks,
-                                                                significance_level=config['theta_p'])
+                single_nodes, clusters = cluster_nodes_by_path_count_features(nodes=nodes,
+                                                                              clustering_type = clustering_type,
+                                                                              pca_target_dimension=config['pca_dim'],
+                                                                              max_number_of_paths=config['max_num_paths'],
+                                                                              number_of_walks=number_of_walks,
+                                                                              significance_level=config['theta_p'])
 
     return single_nodes, clusters
 
@@ -339,16 +451,19 @@ def cluster_nodes_by_js_divergence(nodes: List[NodeRandomWalkData],
     clusters = []
     for js_cluster in js_clusters:
         if js_cluster.number_of_nodes() == 1:
-            # (node_name,) = js_cluster.node_names
             single_nodes.add(js_cluster)
         else:
-            clusters.append(js_cluster.node_names)
+            clusters.append(js_cluster)
 
     return single_nodes, clusters
 
 
-def cluster_nodes_by_birch(nodes: List[NodeRandomWalkData], pca_target_dimension: int, max_number_of_paths: int,
-                           number_of_walks: int, significance_level: float):
+def cluster_nodes_by_path_count_features(nodes: List[NodeRandomWalkData],
+                                         pca_target_dimension: int,
+                                         max_number_of_paths: int,
+                                         number_of_walks: int,
+                                         significance_level: float,
+                                         clustering_type: str):
     """
     Considers the top number_of_paths most frequent paths for each node, standardises these path distributions, then
     dimensionality reduces them using PCA (from a space of dimension equal to the number of distinct paths into a space
@@ -372,7 +487,8 @@ def cluster_nodes_by_birch(nodes: List[NodeRandomWalkData], pca_target_dimension
     clustering_labels = compute_optimal_birch_clustering(node_path_counts,
                                                          pca_target_dimension,
                                                          number_of_walks,
-                                                         significance_level)
+                                                         significance_level,
+                                                         clustering_type)
 
     single_nodes, clusters = group_nodes_by_clustering_labels(nodes, clustering_labels)
 
@@ -382,7 +498,8 @@ def cluster_nodes_by_birch(nodes: List[NodeRandomWalkData], pca_target_dimension
 def compute_optimal_birch_clustering(node_path_counts: np.array,
                                      pca_target_dimension: int,
                                      number_of_walks: int,
-                                     significance_level: float):
+                                     significance_level: float,
+                                     clustering_type: str):
     """
     Given an array of node path counts, clusters the nodes into an optimal number of clusters using birch clustering.
     The number of clusters is incrementally increased. The optimal number of clusters is the smallest number of clusters
@@ -400,9 +517,12 @@ def compute_optimal_birch_clustering(node_path_counts: np.array,
 
     cluster_labels = None
     for number_of_clusters in range(2, number_of_feature_vectors):  # start from 2 since zero/one clusters is invalid
-        #clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
-        clusterer = Birch(n_clusters=number_of_clusters, threshold=0.05)
-
+        if not clustering_type or clustering_type == 'kmeans':
+            clusterer = KMeans(n_clusters=number_of_clusters, max_iter=30, n_init=8)
+        elif clustering_type == 'birch':
+            clusterer = Birch(n_clusters=number_of_clusters, threshold=0.05)
+        else:
+            clusterer = None
         cluster_labels = clusterer.fit_predict(feature_vectors)
         node_path_counts_of_clusters = get_node_path_counts_of_clusters(node_path_counts, cluster_labels)
         if test_quality_of_clusters(node_path_counts_of_clusters, number_of_walks, significance_level):
@@ -473,7 +593,7 @@ def group_nodes_by_clustering_labels(nodes: List[NodeRandomWalkData], cluster_la
             node = cluster[0]
             single_nodes.add(NodeClusterRandomWalkData([node]))
         else:
-            clusters.append({node.name for node in cluster})
+            clusters.append(NodeClusterRandomWalkData(cluster))
 
     return single_nodes, clusters
 

@@ -19,7 +19,7 @@ if __name__ == "__main__":
             'max_path_length': 5,
             'theta_p': 0.01,
             'pruning_value': 10,
-            'multiprocessing': True
+            'multiprocessing': False
         }
     }
 
@@ -39,9 +39,7 @@ if __name__ == "__main__":
     # cProfile.run("Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')")
 
     hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
-    cProfile.run("hierarchical_clusterer.run_hierarchical_clustering()")
     hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
-    cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
     hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params'])
                               for hypergraph in hypergraph_clusters]
 
