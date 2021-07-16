@@ -26,10 +26,10 @@ class ExperimentRunner(object):
         self.num_tops = [2, 4]
 
         # Path Similarity Clustering Parameters --------------
-        self.clustering_types = ['JS', 'kmeans', 'birch']  # , 'kmeans', 'birch']
+        self.clustering_types = ['JS']  # , 'kmeans', 'birch']  # , 'kmeans', 'birch']
 
         # Pruning Parameter ----------------------------------
-        self.pruning_values = [None, 6]  # [None, 6]
+        self.pruning_values = [None]  # [None, 6]
 
         self.default_values = {
             'max_num_paths': 3,
@@ -49,10 +49,12 @@ class ExperimentRunner(object):
 
     def _calculate_number_of_experiments_to_run(self):
         number_of_experiments = ((len(self.min_cluster_sizes) * len(self.max_lambda2s) + 1) * \
-                                len(self.clustering_types) * (len(self.epsilons) + len(self.theta_ps) +
-                                len(self.number_of_random_walks) * len(self.length_of_random_walks) +
-                                len(self.theta_hits) + len(self.theta_syms)+ len(self.num_tops)) * \
-                                len(self.pruning_values) + 2*len(self.pruning_values))*self.number_of_repeats
+                                 len(self.clustering_types) * (len(self.epsilons) + len(self.theta_ps) +
+                                                               len(self.number_of_random_walks) * len(
+                            self.length_of_random_walks) +
+                                                               len(self.theta_hits) + len(self.theta_syms) + len(
+                            self.num_tops) + len(self.theta_jss)) * \
+                                 len(self.pruning_values) + 2 * len(self.pruning_values)) * self.number_of_repeats
 
         return number_of_experiments
 
@@ -129,20 +131,21 @@ class ExperimentRunner(object):
                                       table_file
                                       ):
         for parameter in parameter_values:
-            self.config[parameter_name] = parameter
             with open(table_file, 'a') as file:
                 file.write(f'{parameter_name}={parameter} \\\\ \n')
+            parameter_name = parameter_name.replace("\\", "")
+            self.config[parameter_name] = parameter
             self.run_experiments_for_different_pruning_values(table_file)
         self._reset_config_with_default_params()
 
     def _run_experiments_for_random_walk_hyperparameters(self, table_file):
         self._reset_config_with_default_params()
         self.config['computed_hyperparameters'] = True
-        with open(table_file, 'a') as file:
-            file.write(f'new\_hypparams = True \\\\ \n')
-        self.run_experiments_for_default_values(table_file)
-        self.run_experiments_for_parameter('epsilon', self.epsilons, table_file)
-        self.run_experiments_for_parameter('theta\\_p', self.theta_ps, table_file)
+        # with open(table_file, 'a') as file:
+        #    file.write(f'new\_hypparams = True \\\\ \n')
+        # self.run_experiments_for_default_values(table_file)
+        # self.run_experiments_for_parameter('epsilon', self.epsilons, table_file)
+        # self.run_experiments_for_parameter('theta\\_p', self.theta_ps, table_file)
         self.config['computed_hyperparameters'] = False
         with open(table_file, 'a') as file:
             file.write(f'new\_hypparams = False \\\\ \n')
@@ -189,4 +192,4 @@ class ExperimentRunner(object):
 
 if __name__ == "__main__":
     experiment_runner = ExperimentRunner(database='imdb4.db', info_file='imdb.info')
-    experiment_runner.run_experiments(number_of_repeats=3)
+    experiment_runner.run_experiments(number_of_repeats=2)
