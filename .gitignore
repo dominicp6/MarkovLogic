@@ -4,6 +4,9 @@ __pycache__
 #*.type
 #*.info
 Evaluation/Temp/*
+Evaluation/MLNs/*
+Evaluation/Experiments/*
+Evaluation/Experiments2/*
 *.tex
 *.ldb
 *.uldb
