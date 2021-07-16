@@ -141,11 +141,11 @@ class ExperimentRunner(object):
     def _run_experiments_for_random_walk_hyperparameters(self, table_file):
         self._reset_config_with_default_params()
         self.config['computed_hyperparameters'] = True
-        # with open(table_file, 'a') as file:
-        #    file.write(f'new\_hypparams = True \\\\ \n')
-        # self.run_experiments_for_default_values(table_file)
-        # self.run_experiments_for_parameter('epsilon', self.epsilons, table_file)
-        # self.run_experiments_for_parameter('theta\\_p', self.theta_ps, table_file)
+        with open(table_file, 'a') as file:
+           file.write(f'new\_hypparams = True \\\\ \n')
+        self.run_experiments_for_default_values(table_file)
+        self.run_experiments_for_parameter('epsilon', self.epsilons, table_file)
+        self.run_experiments_for_parameter('theta\\_p', self.theta_ps, table_file)
         self.config['computed_hyperparameters'] = False
         with open(table_file, 'a') as file:
             file.write(f'new\_hypparams = False \\\\ \n')
