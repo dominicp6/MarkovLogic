@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>4.2 MLN Syntax</TITLE>
+<META NAME="description" CONTENT="4.2 MLN Syntax">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="4_1First_Order_Logic.html">
+<LINK REL="up" HREF="4Syntax.html">
+<LINK REL="next" HREF="5Predicates_Functions.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html130"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html128"
+  HREF="4Syntax.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html124"
+  HREF="4_1First_Order_Logic.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html131"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Up:</B> <A NAME="tex2html129"
+  HREF="4Syntax.html">4 Syntax</A>
+<B> Previous:</B> <A NAME="tex2html125"
+  HREF="4_1First_Order_Logic.html">4.1 First-Order Logic</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00042000000000000000">
+4.2 MLN Syntax</A>
+</H2>
+
+<P>
+For convenience, Alchemy provides three additional operators: 
+<TT>*</TT>, <TT>+</TT> and <TT>!</TT>. When predicates in a formula are preceded 
+by <TT>*</TT>, Alchemy considers all possible ways in which <TT>*</TT> can be 
+replaced by <TT>!</TT>, e.g., <TT>*student(x) ^ *professor(x)</TT> is 
+expanded into four formulas: 
+
+<UL>
+<LI><TT>student(x) ^ professor(x)</TT>
+</LI>
+<LI><TT>!student(x) ^ professor(x)</TT>
+</LI>
+<LI><TT>student(x) ^ !professor(x)</TT>
+</LI>
+<LI><TT>!student(x) ^ !professor(x)</TT>
+</LI>
+</UL>
+This syntax allows you to compactly express a relational Markov 
+network in Markov logic.
+
+<P>
+The <TT>+</TT> operator makes it possible to learn ``per constant'' weights. 
+When a variable in a formula is preceded by <TT>+</TT>, a separate weight is 
+learned for each formula obtained by grounding that variable to one of 
+its values. For example, if the input formula is <TT>hasPosition(x,+y)</TT>, a 
+separate weight is learned for the three formulas:
+
+<UL>
+<LI><TT>hasPosition(x,Faculty)</TT>
+</LI>
+<LI><TT>hasPosition(y,Faculty_adjunct)</TT>
+</LI>
+<LI><TT>hasPosition(y,Faculty_emeritus)</TT>
+</LI>
+</UL>
+If multiple variables are preceded by <TT>+</TT>, a weight is learned for each 
+combination of their values. When there are multiple databases, the type 
+of the variable to which <TT>+</TT> is applied must have the same constants in 
+all the databases. This ensures that the same formulas are generated for 
+each database.
+
+<P>
+The <TT>!</TT> operator allows you to specify variables that have mutually 
+exclusive and exhaustive values. For example, if the input formula is
+<TT>hasPosition(x, y!)</TT>, this means that any person has exactly one position
+(all groundings for this person build one block).
+This constraint is enforced when performing inference and learning: it is
+guaranteed that exactly one grounding per block is true.
+Note that the <TT>!</TT> appears after a variable. <TT>!</TT> can only be used in a
+formula with exactly one non-negated predicate, and can be applied to 
+any number of the predicate's variables.
+
+<P>
+You can include comments in the <TT>.mln</TT> file with <TT>//</TT> 
+and <TT>/* */</TT> like in C++.
+
+<P>
+The characters <TT>@</TT> and <TT>$</TT> are reserved and should not be used. Due to the
+internal processing of functions, variable names should not start with <TT>funcVar</TT>
+and predicate names should not start with <TT>isReturnValueOf</TT>.
+
+<P>
+A formula in an <TT>.mln</TT> file can be preceded by a number representing the
+weight of the formula. A formula can also be terminated by a
+period (<TT>.</TT>), indicating that it is a hard formula. 
+However, a formula cannot have both a weight and a period. 
+In a formula, you can have a line break after 
+<TT>=&gt;</TT>, <TT>&lt;=&gt;</TT>, <TT>^</TT> and <TT>v</TT>.
+
+<P>
+A legal identifier is a sequence of alphanumeric characters plus the
+characters <TT>-</TT> (hyphen), <TT>_</TT> (underscore), and <TT>'</TT> (prime); 
+<TT>'</TT> cannot be the first character. Variables in formulas must begin with 
+a lowercase letter, and constants must begin with an uppercase one. 
+Constants may also be expressed as strings 
+(e.g., <TT>Alice</TT> and <TT>&quot;A Course in Logic&quot;</TT> 
+are both acceptable as constants).
+
+<P>
+Alchemy converts input formulas into CNF. This means that a conjunction of <IMG
+ WIDTH="16" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img2.png"
+ ALT="$n$">
+conjuncts in a formula results in <IMG
+ WIDTH="16" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="img2.png"
+ ALT="$n$"> formulas. In an effort to preserve the
+original formula as much as possible, Alchemy keeps all single literals in a conjunction
+together by negating the formula: the weight is negated and the formula becomes
+a disjunction of the negated literals. For instance, the formula
+
+<P>
+
+<TT>2.5 P(x) ^ Q(x) ^ (R(x) v S(x))</TT>
+
+<P>
+results in the two formulas
+
+<P>
+
+<TT>-1.25 !P(x) v !Q(x)</TT> and
+
+<P>
+
+<TT>1.25 R(x) v S(x)</TT>.
+
+<P>
+In a future version of Alchemy, the user will be able to specify which parts
+of a formula are indivisible.
+
+<P>
+Note that Alchemy does not use Skolemization to remove existential
+quantifiers when converting a formula to CNF. Instead, it replaces
+existentially quantified subformulas by disjunctions of all their
+groundings. (Skolemization is sound for resolution, but not sound in
+general.) For example, when there are only two constants <TT>Alice</TT> 
+and <TT>Bob</TT>, the formula 
+<TT>EXIST x,y advisedBy(x,y)</TT> becomes: <TT>advisedBy(Alice,Alice) v
+advisedBy(Alice,Bob) v 
+<BR>
+advisedBy(Bob,Alice) v advisedBy(Bob,Bob)</TT>.
+This may result in very large CNF formulas, and existential quantifiers
+(or negated universal quantifiers) should be used with care.
+
+<P>
+Types and constants can be declared in an <TT>.mln</TT> file with the following 
+syntax: <TT>&lt;typename&gt; = { &lt;constant1&gt;, &lt;constant2&gt;, ... }</TT>, 
+e.g., <TT>person = { Alice, Bob }</TT>.  
+You can also declare integer types, e.g., 
+<TT>ageOfStudent = { 18, ..., 22 }</TT>.
+You may have a line break between 
+constants. Each declared type must have at least one constant. 
+A constant is considered to be declared the first time it is 
+encountered in a type declaration, a formula, or a ground atom 
+(in a<TT>.db</TT> file). 
+
+<P>
+You can include other <TT>.mln</TT> files in a <TT>.mln</TT> file with the 
+<TT>"#include" </TT> keyword. For example, you can include formulas about 
+a university domain in your <TT>.mln</TT> file about a company domain with 
+<TT>#include "university.mln"</TT>.
+
+<P>
+The executables will print out error messages when they encounter syntax 
+or semantic errors. Each message will indicate the line and column number 
+of the error (lines start from 1 and columns from 0). An error may not be 
+exactly at the indicated column but near it, and an error may also be a 
+result of previous ones (much like compiler error messages). 
+
+<P>
+Predicates and functions play a large role in Alchemy and this topic 
+(including syntax) is covered extensively in the next section.
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html130"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html128"
+  HREF="4Syntax.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html124"
+  HREF="4_1First_Order_Logic.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html131"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Up:</B> <A NAME="tex2html129"
+  HREF="4Syntax.html">4 Syntax</A>
+<B> Previous:</B> <A NAME="tex2html125"
+  HREF="4_1First_Order_Logic.html">4.1 First-Order Logic</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

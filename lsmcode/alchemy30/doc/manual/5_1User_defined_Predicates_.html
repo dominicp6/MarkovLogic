@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>5.1 User-defined Predicates and Functions</TITLE>
+<META NAME="description" CONTENT="5.1 User-defined Predicates and Functions">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="5_2Internal_Functions_Predi.html">
+<LINK REL="previous" HREF="5Predicates_Functions.html">
+<LINK REL="up" HREF="5Predicates_Functions.html">
+<LINK REL="next" HREF="5_2Internal_Functions_Predi.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html153"
+  HREF="5_2Internal_Functions_Predi.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html151"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html145"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html154"
+  HREF="5_2Internal_Functions_Predi.html">5.2 Internal Functions and</A>
+<B> Up:</B> <A NAME="tex2html152"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Previous:</B> <A NAME="tex2html146"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00051000000000000000">
+5.1 User-defined Predicates and Functions</A>
+</H2>
+
+<P>
+User-defined predicates and functions is the standard way of using predicates and
+functions in MLNs. The process consists of declaration, definition and usage.
+Declaration must occur first. This is done by listing all predicates and functions
+in the <TT>.mln</TT> file with the following syntax:
+
+<P>
+
+<UL>
+<LI><B>Predicates</B>: <TT>&lt;predicatename&gt;(&lt;type1&gt;, ... , &lt;typen&gt;)</TT>
+</LI>
+<LI><B>Functions</B>: <TT>&lt;returntype&gt; &lt;functionname&gt;(&lt;type1&gt;, ... , &lt;typen&gt;)</TT>
+</LI>
+</UL>
+
+<P>
+Predicate definitions, or ground atoms, are defined in a<TT>.db</TT> (database) file.
+Each line in the file can have one or more ground atoms. Empty lines are permitted.
+False  ground atoms are specified with a preceding <TT>!</TT>
+(e.g., <TT>!advisedBy(Alice,Bob)</TT>), and unknown ones are specified with 
+a preceding <TT>?</TT> (e.g., <TT>?advisedBy(Alice,Bob)</TT>). True ground atoms are 
+specified without any preceding symbol (e.g., <TT>advisedBy(Alice,Bob)</TT>). 
+Note that if a closed-world assumption is made for a predicate, you only 
+need to specify the true ground atoms in a<TT>.db</TT> file. All other unspecified 
+ground atoms are false. (You can specify the false ground atoms too, 
+if you wish.)  Likewise, if an open world assumption is made, you only 
+need to specify the true and false ground atoms. All other unspecified 
+ground atoms are unknown. (Again, you can specify the unknown ground 
+atoms, if you wish.)
+
+<P>
+Similarly, the user supplies function definitions in a <TT>.db</TT> file.
+Each line contains exactly one definition of the form <TT>&lt;returnvalue&gt; =
+&lt;functionname&gt;(&lt;constant1&gt;, ... , &lt;constantn&gt;)</TT>, e.g., <TT>Alice = motherOf(Bob)</TT>.
+The mappings given are assumed to be the only ones present in the domain.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html153"
+  HREF="5_2Internal_Functions_Predi.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html151"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html145"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html154"
+  HREF="5_2Internal_Functions_Predi.html">5.2 Internal Functions and</A>
+<B> Up:</B> <A NAME="tex2html152"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Previous:</B> <A NAME="tex2html146"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>5.3 Linked-In Functions and Predicates</TITLE>
+<META NAME="description" CONTENT="5.3 Linked-In Functions and Predicates">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="5_2Internal_Functions_Predi.html">
+<LINK REL="up" HREF="5Predicates_Functions.html">
+<LINK REL="next" HREF="Bibliography.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html171"
+  HREF="Bibliography.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html169"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html165"
+  HREF="5_2Internal_Functions_Predi.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html172"
+  HREF="Bibliography.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html170"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Previous:</B> <A NAME="tex2html166"
+  HREF="5_2Internal_Functions_Predi.html">5.2 Internal Functions and</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00053000000000000000">
+5.3 Linked-In Functions and Predicates</A>
+</H2>
+
+<P>
+If a predicate or function is not internally implemented in Alchemy, but you wish to use it,
+then you can define this as a piece of C++ code. The file <TT>ALCHDIR/exdata/functions.cpp</TT>
+serves as a template for building linked-in functions and predicates. Here are some basic
+guidelines:
+
+<P>
+
+<UL>
+<LI>C++ functions implementing predicates must take only arguments of type <TT>string</TT>
+and return type <TT>bool</TT>.
+</LI>
+<LI>C++ functions implementing functions must take only arguments of and return type <TT>string</TT>.
+</LI>
+<LI>All functions and predicates must be between <TT>extern "C" {</TT> and <TT>}</TT>
+(see <TT>functions.cpp</TT>. Otherwise, the function names will be mangled by the C++ compiler
+and a dynamic look-up is not possible.
+</LI>
+<LI>g++ 4.0.2 and the glibc library are necessary (other versions have not been tested).
+</LI>
+</UL>
+
+<P>
+In order to use linked-in functions in an MLN, the functions have to be declared and the
+location of the C++ file has to be disclosed. The location of the file is arbitrary; however,
+it must be made available to Alchemy. Here are the steps:
+
+<P>
+
+<UL>
+<LI>Include the C++ file in your .mln file, i.e. <TT>#include "functions.cpp"</TT> (use the
+absolute path).
+</LI>
+<LI>Declare the predicate or function just as you usually would, i.e. 
+<TT>number max(number, number)</TT>.
+</LI>
+<LI>Declare an interval or enumeration of constants for the types used, i.e.
+<TT>number={1,...5}</TT>.
+</LI>
+</UL>
+
+<P>
+The name of the types is arbitrary; however, the user is responsible for ensuring they can be
+converted to integers, etc. in the function itself, if needed. When the <TT>include</TT> statement
+is encountered, the C++ file is compiled and a shared object file <TT>functions.so</TT> is put in
+the current directory. This file is used to dynamically call the linked-in functions and predicates.
+
+<P>
+
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html171"
+  HREF="Bibliography.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html169"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html165"
+  HREF="5_2Internal_Functions_Predi.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html172"
+  HREF="Bibliography.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html170"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Previous:</B> <A NAME="tex2html166"
+  HREF="5_2Internal_Functions_Predi.html">5.2 Internal Functions and</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

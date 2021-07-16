@@ -1,0 +1,9 @@
+//Relations : One declaration per line, no line between declarations
+//            May specify cw/ow and beta value (default is cw and global beta)
+//            NOTE: For now, all relations are closed world and have global beta
+director(person)
+actor(person)
+movie(picture,person)
+gender(person,sex)
+genre(person,cat)
+workedUnder(person,person)

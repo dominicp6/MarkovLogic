@@ -1,0 +1,28 @@
+rwl finds motifs present in a database 
+
+PARAMS
+declFile   : file containing predicate declarations, e.g.,             
+             //Relations : One declaration per line, no line between declarations
+             //            May specify cw/ow and beta value (default is cw and global beta)
+             //            NOTE: For now, all relations are closed world & have global beta
+             Father(person,person)
+             Son(person,person)
+             Hunts(person,animal)
+dbFile    : database file, e.g., myDB1.db
+typeFile   : file specifying types (one per line), e.g.,
+             person
+             animal
+numSamples : number of random walks to run (see formula on slide)
+maxLen     : max length of random walk
+delta      : parameter to estimate number of samples (see formula on slide). 
+             If numSamples is not sufficient, it will be recomputed using delta
+             and eps.
+eps        : epsilon. ditto 
+timeThresh : theta_hit parameter mentioned in paper
+mergeThr   : theta_sym parameter mentioned in paper
+jsThresh   : theta_js  parameter mentioned in paper
+jsTopN     : N_top     parameter mentioned in paper
+seed       : seed for random number generator
+outFile    : file containing motifs, e.g., myMotif1.ldb
+unmergedOutFiles : file containing ground hypergraphs supporting motifs, e.g., myHGraph1.uldb
+outSrcAndClustsFiles : file containing nodes present in ground hypergraphs, e.g., mySrcClust1.srcnclusts 

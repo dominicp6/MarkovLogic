@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>1 Introduction</TITLE>
+<META NAME="description" CONTENT="1 Introduction">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="2Installation.html">
+<LINK REL="previous" HREF="manual.html">
+<LINK REL="up" HREF="manual.html">
+<LINK REL="next" HREF="2Installation.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html28"
+  HREF="2Installation.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html26"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html20"
+  HREF="manual.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html29"
+  HREF="2Installation.html">2 Installation</A>
+<B> Up:</B> <A NAME="tex2html27"
+  HREF="manual.html">The Alchemy System for</A>
+<B> Previous:</B> <A NAME="tex2html21"
+  HREF="manual.html">The Alchemy System for</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00010000000000000000"></A>
+<A NAME="intro"></A>
+<BR>
+1 Introduction
+</H1>
+
+<P>
+Welcome to the Alchemy system! This user's manual is designed for end users
+wishing to perform learning and inference on Markov logic networks. It consists
+of the following sections:
+
+<P>
+
+<OL>
+<LI>Introduction
+</LI>
+<LI>Installation
+</LI>
+<LI>Quick Start
+</LI>
+<LI>Syntax
+</LI>
+<LI>Predicates and Functions
+</LI>
+</OL>
+
+<P>
+The Alchemy package provides a series of algorithms for 
+statistical relational learning and probabilistic logic inference, 
+based on the Markov logic representation. If you are 
+not already familiar with Markov logic, we recommend that you read 
+the papers <I>Markov Logic Networks</I>&nbsp;[<A
+ HREF="Bibliography.html#richardson_SPMamp_domingos05">7</A>], 
+<I>Discriminative Training of Markov Logic Networks</I>&nbsp;[<A
+ HREF="Bibliography.html#singla_SPMamp_domingos05">9</A>], 
+<I>Learning the Structure of Markov Logic Networks</I>&nbsp;[<A
+ HREF="Bibliography.html#kok_SPMamp_domingos05">3</A>],
+<I>Memory-Efficient Inference in Relational Domains</I>&nbsp;[<A
+ HREF="Bibliography.html#singla_SPMamp_domingos06">10</A>]
+and <I>Sound and Efficient Inference with Probabilistic and Deterministic
+Dependencies</I>&nbsp;[<A
+ HREF="Bibliography.html#poon_SPMamp_domingos06">6</A>]
+(mln.pdf, dtmln.pdf, lsmln.pdf, lazysat.pdf and mcsat.pdf in the <TT>papers/</TT> directory) 
+before reading this manual.
+
+<P>
+We welcome your feedback on any aspect of the Alchemy package. Please 
+email us at <TT><the system name>@cs.washington.edu</TT> to let us know what you find 
+easy or hard to use, what results you have obtained with Alchemy, the 
+features you wish to have but are not currently provided, and any bugs 
+that you encounter.
+
+<P>
+Please cite Kok et al. (2005) [<A
+ HREF="Bibliography.html#kok_SPMamp_al05">4</A>] if you use the Alchemy system.
+
+<P>
+Please be aware that this is a beta release. Some aspects of the
+documentation may not be as clear, and some aspects of its usage may 
+not be as user-friendly, as you would like. We have tested the code but 
+some bugs may inadvertently still remain.
+
+<P>
+This beta release includes:
+
+<UL>
+<LI>Discriminative weight learning (inlcuding memory efficient)
+</LI>
+<LI>Generative weight learning
+</LI>
+<LI>Structure learning
+</LI>
+<LI>MAP/MPE inference (including memory efficient)
+</LI>
+<LI>MCMC inference (including memory efficient)
+
+<UL>
+<LI>Gibbs sampling
+</LI>
+<LI>MC-SAT
+</LI>
+<LI>Simulated Tempering
+</LI>
+</UL>
+</LI>
+<LI>Support for native and linked-in functions
+</LI>
+<LI>Block inference and learning over variables with mutually exclusive
+      and exhaustive values
+</LI>
+<LI>EM (to handle ground atoms with unknown truth values during learning)
+</LI>
+</UL>
+
+<P>
+In the next release we plan to include:
+
+<UL>
+<LI>Specification of probabilities instead of weights for formulas in an MLN,
+      and of probabilities for ground atoms in a database
+</LI>
+<LI>Specification of indivisible formulas (i.e. formulas that should not be 
+      broken up into separate clauses)
+</LI>
+<LI>More extensive documentation
+</LI>
+</UL>
+
+<P>
+Alchemy uses: 
+
+<UL>
+<LI>C++ code from the MaxWalkSat package of Kautz et al. (1997) [<A
+ HREF="Bibliography.html#kautz_SPMamp_al97b">2</A>].
+</LI>
+<LI>C++ code from the SampleSat algorithm of Wei et al. (2004) [<A
+ HREF="Bibliography.html#wei_SPMamp_al04">11</A>].
+</LI>
+<LI>A port from Fortran to C++ of the L-BFGS-B package of Zhu et al. (1997)
+      [<A
+ HREF="Bibliography.html#zhu_SPMamp_al97">12</A>].
+</LI>
+<LI>A port from Lisp to C++ of the CNF conversion code of 
+      Russell and Norvig (2002)&nbsp;[<A
+ HREF="Bibliography.html#russell_SPMamp_norvig02">8</A>].
+</LI>
+<LI>The C++ code to compute the inverse cumulative standard normal 
+      distribution of Acklam (2003) [<A
+ HREF="Bibliography.html#pjacklam03">1</A>]. 
+</LI>
+<LI>The C++ command line parsing code due to Jeff Bilmes (1992). 
+</LI>
+</UL>
+
+<P>
+The development of Alchemy was partly funded by DARPA grant
+FA8750-05-2-0283 (managed by AFRL), DARPA contract NBCH-D030010
+(subcontracts 02-000225 and 55-000793), NSF grant IIS-0534881,
+ONR grants N00014-02-1-0408 and N00014-05-1-0313, a Sloan Research
+Fellowship, and an NSF CAREER Award (both of these to Pedro Domingos).
+The views and conclusions contained in this document are those of
+the authors and should not be interpreted as necessarily representing
+the official policies, either expressed or implied, of DARPA, NSF, ONR,
+or the United States Government.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html28"
+  HREF="2Installation.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html26"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html20"
+  HREF="manual.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html29"
+  HREF="2Installation.html">2 Installation</A>
+<B> Up:</B> <A NAME="tex2html27"
+  HREF="manual.html">The Alchemy System for</A>
+<B> Previous:</B> <A NAME="tex2html21"
+  HREF="manual.html">The Alchemy System for</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

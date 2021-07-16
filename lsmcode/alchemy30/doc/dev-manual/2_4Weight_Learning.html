@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.4 Weight Learning</TITLE>
+<META NAME="description" CONTENT="2.4 Weight Learning">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="2_5Structure_Learning.html">
+<LINK REL="previous" HREF="2_3Logic.html">
+<LINK REL="up" HREF="2Notes_on_Code_Design.html">
+<LINK REL="next" HREF="2_5Structure_Learning.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html82"
+  HREF="2_5Structure_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html80"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html74"
+  HREF="2_3Logic.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html83"
+  HREF="2_5Structure_Learning.html">2.5 Structure Learning</A>
+<B> Up:</B> <A NAME="tex2html81"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html75"
+  HREF="2_3Logic.html">2.3 Logic</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00024000000000000000"></A>
+<A NAME="learnwtsdir"></A>
+<BR>
+2.4 Weight Learning
+</H2>
+The <TT>learnwts</TT> directory contains code for learning the weights of 
+formulas. The mainline is in <TT>learnwts.cpp</TT>. Table&nbsp;<A HREF="#tab:cllearnwts">1</A> shows
+the options available when calling learnwts.
+
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>&lt;-i &lt;string&#187;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Comma-separated input .mln files. (With the -multipleDatabases option, the second file to the last one are used to contain constants from different databases, and they correspond to the .db files specified with the -t option.)</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-cw &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Specified non-evidence atoms (comma-separated with no space) are closed world, otherwise, all non-evidence atoms are open world. Atoms appearing here cannot be query atoms and cannot appear in the -o option.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-ow &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Specified evidence atoms (comma-separated with no space) are open world, while other evidence atoms are closed-world. Atoms appearing here cannot appear in the -c option.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-infer &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Specified inference parameters when using discriminative learning. The arguments are to be encapsulated in "" and the syntax is identical to the infer command (run infer with no commands to see this). If not specified, MaxWalkSat with default parameters is used.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-d [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Discriminative weight learning.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-g [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Generative weight learning.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>&lt;-o &lt;string&#187;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Output .mln file containing formulas with learned weights.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>&lt;-t &lt;string&#187;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Comma-separated .db files containing the training database (of true/false ground atoms), including function definitions, e.g. ai.db,graphics.db,languages.db.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-ne &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>First-order non-evidence predicates (comma-separated with no space),  e.g., cancer,smokes,friends. For discriminative learning, at least one non-evidence predicate must be specified. For generative learning, the specified predicates are included in the (weighted) pseudo-log-likelihood computation; if none are specified, all are included.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-noAddUnitClauses [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>If specified, unit clauses are not included in the .mln file; otherwise they are included.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-multipleDatabases [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>If specified, each .db file belongs to a separate database; otherwise all .db files belong to the same database.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-withEM [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>If set, EM is used to fill in missing truth values; otherwise missing truth values are set to false.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-dNumIter &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[200] (For discriminative learning only.) Number of iterations to run voted perceptron.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-dLearningRate &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[0.001] (For discriminative learning only) Learning rate for the gradient descent in voted perceptron algorithm.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-dMomentum &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[0.0] (For discriminative learning only) Momentum term for the gradient descent in voted perceptron algorithm.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+</DIV>
+<BR>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="202"></A>
+<TABLE>
+<CAPTION><STRONG>Table 1:</STRONG>
+Command line options for learnwts</CAPTION>
+<TR><TD><TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-queryEvidence [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>If this flag is set, then all the groundings of query preds not in db are assumed false evidence.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-dRescale [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>(For discriminative learning only.) Rescale the gradient by the number of true groundings per weight.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-dZeroInit [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>(For discriminative learning only.) Initialize clause weights to zero instead of their log odds.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-gMaxIter &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[10000] (For generative learning only.) Max number of iterations to run L-BFGS-B, the optimization algorithm for generative learning.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-gConvThresh &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1e-5] (For generative learning only.) Fractional change in pseudo-log-likelihood at which L-BFGS-B terminates.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-gNoEqualPredWt [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>(For generative learning only.) If specified, the predicates are not weighted equally in the pseudo-log-likelihood computation; otherwise they are.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-noPrior [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>No Gaussian priors on formula weights.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-priorMean &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[0] Means of Gaussian priors on formula weights. By default, for each formula, it is the weight given in the .mln input file, or fraction thereof if the formula turns into multiple clauses. This mean applies if no weight is given in the .mln file.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-priorStdDev &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1 for discriminative learning. 100 for generative learning] Standard deviations of Gaussian priors on clause weights.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+<A NAME="tab:cllearnwts"></A></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+
+<P>
+If you do not want to print the 
+clauses as their number of true groundings are being counted during 
+generative learning, you can set the variable 
+<TT>PRINT_CLAUSE_DURING_COUNT</TT> to false at the top of <TT>learnwts.cpp</TT>.
+<TT>learnwts.h</TT> contains functions used in <TT>learnwts.cpp</TT> that can 
+be shared with other modules.
+<TT>PseudoLogLikelihood</TT> computes the (weighted) pseudo-log-likelihood 
+given the constants in one or more <TT>Domain</TT>s, and clauses in an 
+<TT>MLN</TT>. <TT>LBFGSB</TT> is 
+an optimization routine that finds the optimal weights, i.e., the 
+weights that give the highest (weighted) pseudo-log-likelihood. 
+<TT>VotedPerceptron</TT> contains the algorithm for discriminative learning.
+<TT>IndexTranslator</TT> is used to translate between clause weights and the
+weights that are optimized. It is required when the CNF of a formula is
+different across multiple databases, e.g., when the formula has
+existentially quantified variables, or variables with mutually 
+exclusive and exhaustive values.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html82"
+  HREF="2_5Structure_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html80"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html74"
+  HREF="2_3Logic.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html83"
+  HREF="2_5Structure_Learning.html">2.5 Structure Learning</A>
+<B> Up:</B> <A NAME="tex2html81"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html75"
+  HREF="2_3Logic.html">2.3 Logic</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

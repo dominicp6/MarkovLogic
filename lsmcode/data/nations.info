@@ -1,0 +1,2 @@
+R(country, property)
+RR(bilateralproperty, country, country)

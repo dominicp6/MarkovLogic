@@ -1,0 +1,17 @@
+//predicate declarations
+director(person)
+actor(person)
+movie(picture,person)
+gender(person,sex)
+genre(person,cat)
+workedUnder(person,person)
+
+!actor(v0) v !actor(v1) v !movie(v2,v1) v movie(v2,v3) v workedUnder(v0,v3)
+
+workedUnder(p0,p0)
+gender(v0,v1)
+workedUnder(v0,v1)
+movie(v0,v1)
+director(v0)
+genre(v0,v1)
+actor(v0)

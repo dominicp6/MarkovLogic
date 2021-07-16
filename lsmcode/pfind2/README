@@ -1,0 +1,10 @@
+pfind performs relational pathfinding
+
+PARAMS
+ldbFile    = file containing motif (output of getcom), e.g., myMotifs.comb.ldb
+maxLen     = max length of clause to be found
+maxFreeVar = max number of variables that appear only once in a clause
+maxVar     = max number of variables in a clause
+hrLimit    = time limit on running pfind (in hours). Negative value means no limit
+declFile   = file specifying predicate declaration (same as rwl)
+outFile    = output file containing rules, e.g., myRules.rules

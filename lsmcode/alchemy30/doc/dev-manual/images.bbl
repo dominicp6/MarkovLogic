@@ -1,0 +1,10 @@
+\begin{thebibliography}{1}
+
+\bibitem{kok&al05}
+S.~Kok, P.~Singla, M.~Richardson, and P.~Domingos.
+\newblock The {A}lchemy system for statistical relational {A}{I}.
+\newblock Technical report, Department of Computer Science and Engineering,
+  University of Washington, Seattle, WA, 2005.
+\newblock http://www.cs.washington.edu/ai/alchemy/.
+
+\end{thebibliography}

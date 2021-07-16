@@ -1,0 +1,35 @@
+createrules creates clauses and retains those with high enough pseudo-loglikelihood (with respect to their sub-clauses)
+
+PARAMS
+candFile        = file containing rules (output of pfind), e.g., myRules.rules
+minSup          = minimum number of motifs supporting a rule in order for it to be considered
+dbFiles         = comma-separated databases, e.g., myDB1.db,myDB2.db
+combLDBFile     = comma-separated files containing motifs, e.g., myMotifs1.comb.ldb,myMotifs2.comb.ldb (same number as dbFiles)
+unmergeLDBFiles = comma-separated files containing ground hypergraph supporting motifs, e.g., myHGraph1.uldb,myHGraph2.uldb
+                  (same number as dbFiles)
+declFile        = file containing predicate declaration (same as for rwl)
+learnWtsExec    = path to alchemy's learnwt executable
+tmpDir          = temporary directory for createrules to write working files (parallel runs should have different tmpDirs)
+fractAtoms      = fraction of atoms to sample from dbFiles
+lenPenalty      = penalty on pseudo-loglikelihood per atom (pi parameter mentioned in paper)
+quickLenPenalty = penalty per atom when using heuristic (see paper)
+numFlips        = number of atoms to flip in creating clauses
+maxLen          = maximum length of clauses
+minAtoms        = minimum atoms to sample when using heuristic
+maxAtoms        = maximum atoms to sample when using heuristic
+numQuickPruneDBs= set to the number of databases in dbFiles
+outMLN          = output MLN containing rules
+seed            = seed for random number generator
+trivialBinFile  = file containing binary clauses that are always true/false (one per line), e.g.,
+                  !SameTitle(0,1) v SameTitle(1,0)
+                  !SameAuthor(0,1) v SameAuthor(1,0)
+                  If this file is not specified (use a -), then the clauses will be discovered automatically.
+symRelFile      = file containing symmetric predicates, e.g.,
+                  SameTitle
+                  SameAuthor
+                  If this file is not specified (use a -), then the predicates will be discovered automatically.
+cfAllSub        = set to true
+cora            = set to false
+                  When this is set to true, alchemy's learnwts only optimizes the SameX's predicates for the Cora dataset.
+                  See cora_ in mlncreator.h for how this is used.               
+noQuickPrune    = set to false

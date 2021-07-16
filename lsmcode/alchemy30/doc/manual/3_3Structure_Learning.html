@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>3.3 Structure Learning</TITLE>
+<META NAME="description" CONTENT="3.3 Structure Learning">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="3_4Inference.html">
+<LINK REL="previous" HREF="3_2Weight_Learning.html">
+<LINK REL="up" HREF="3Quick_Start.html">
+<LINK REL="next" HREF="3_4Inference.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html83"
+  HREF="3_4Inference.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html81"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html75"
+  HREF="3_2Weight_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html84"
+  HREF="3_4Inference.html">3.4 Inference</A>
+<B> Up:</B> <A NAME="tex2html82"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html76"
+  HREF="3_2Weight_Learning.html">3.2 Weight Learning</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00033000000000000000">
+3.3 Structure Learning</A>
+</H2>
+To learn the structure (clauses and weights) of an MLN generatively, 
+you use the <TT>learnstruct</TT> executable, e.g., 
+<TT>ALCHDIR/bin/learnstruct -i univ-empty.mln -o univ-empty-out.mln 
+-t univ-train.db -penalty 0.5</TT>. <TT>learnstruct</TT> uses beam search to find
+new clauses to add to an MLN. It can start from both empty and non-empty 
+MLNs. When it starts from a non-empty MLN, it does not modify clauses 
+that are derived from existentially quantified formulas or those 
+containing variables with mutually exclusive and exhaustive values. 
+Its options are similar to those of <TT>learnwts</TT>. In addition, it has 
+options for controlling techniques that speed up the search. You can also
+restrict the types of clauses created during structure learning 
+(see the developer's manual).
+Type <TT>ALCHDIR/bin/learnstruct</TT> without any parameters to view all options.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

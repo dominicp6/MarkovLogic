@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>3.2 Weight Learning</TITLE>
+<META NAME="description" CONTENT="3.2 Weight Learning">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="3_3Structure_Learning.html">
+<LINK REL="previous" HREF="3_1Input_Files.html">
+<LINK REL="up" HREF="3Quick_Start.html">
+<LINK REL="next" HREF="3_3Structure_Learning.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html73"
+  HREF="3_3Structure_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html71"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html65"
+  HREF="3_1Input_Files.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html74"
+  HREF="3_3Structure_Learning.html">3.3 Structure Learning</A>
+<B> Up:</B> <A NAME="tex2html72"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html66"
+  HREF="3_1Input_Files.html">3.1 Input Files</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00032000000000000000">
+3.2 Weight Learning</A>
+</H2>
+To learn the weights of formulas, run the <TT>learnwts</TT> executable, e.g.,
+<TT>ALCHDIR/bin/learnwts -g -i univ.mln -o univ-out.mln -t univ-train.db</TT>.
+<TT>-g</TT> specifies that generative learning is to be used. Alternatively, 
+you can use <TT>-d</TT> for discriminative learning, e.g., 
+<TT>ALCHDIR/bin/learnwts -d -i univ.mln -o univ-out.mln -t univ-train.db 
+-ne advisedBy,student,professor</TT>.
+<TT>-i</TT> and <TT>-o</TT> specify the input and 
+output <TT>.mln</TT> files as <TT>univ.mln</TT> and <TT>univ-out.mln</TT> respectively.
+
+<P>
+<TT>-t</TT> specifies the <TT>.db</TT> file that is to be used by weight learning. 
+You can specify more than one <TT>.db</TT> file after <TT>-t</TT> in a comma 
+separated list (e.g., <TT>-t univ1.db,univ2.db</TT>). The universe of 
+constants are those that appear in the <TT>.db</TT> files. By default, all the 
+constants are assumed to belong to one database. If this is not the 
+case, you can use the option <TT>-multipleDatabases</TT> to specify that the 
+constants in each <TT>.db</TT> file belong to a separate database, 
+and should not be mixed with those in other <TT>.db</TT> files 
+(e.g, <TT>-t ai.db,graphics.db,systems.db -multipleDatabases</TT>).
+
+<P>
+In the current version of Alchemy <TT>.db</TT> files that are used for learning 
+can only contain true or false atoms (no unknowns). If there are 
+constants that do not appear in the <TT>.db</TT> files, you can specify one 
+or more <TT>.mln</TT> files containing the missing constants, and append them 
+after the input <TT>.mln</TT> file, e.g., <TT>-i univ.mln,univ-train.mln</TT>. 
+(You may wish to specify the extra <TT>.mln</TT> files when there are constants 
+that only appear in false ground atoms of a closed-world predicate, 
+or only in unknown ground atoms of an open world predicate. Such ground 
+atoms need not be defined in <TT>.db</TT> files.) By default, unit clauses for 
+all predicates are added to the MLN during weight learning. (You can 
+change this with the <TT>-noAddUnitClauses</TT> option.) 
+
+<P>
+The <TT>-ne</TT> option is used to specify non-evidence predicates. 
+For discriminative learning, at least one non-evidence predicate must 
+be specified. For generative learning, the specified predicates are 
+included in the (weighted) pseudo-log-likelihood computation; 
+if none are specified, all are included.
+
+<P>
+During weight learning, each formula is converted to conjunctive 
+normal form (CNF), and a weight is learned for each of its clauses.
+If a formula is preceded by a weight in the input <TT>.mln</TT> file, 
+the weight is divided equally among the formula's clauses. 
+The weight of a clause is used as the mean of a Gaussian prior 
+for the learned weight. If a formula is terminated by a period 
+(i.e., the formula is a hard one), each of the clauses in 
+its CNF is given a prior weight that is twice the maximum of the soft 
+clause weights. If neither a weight nor a period is specified, a default 
+prior weight is used for each of the formula's clauses; you can specify 
+a default with the <TT>-priorMean</TT> option. 
+If a unit formula contains variables that are followed by the <TT>!</TT> 
+operator, the code automatically creates formulas stating that the 
+variables have mutually exclusive and exhaustive values 
+(see Section&nbsp;<A HREF="4Syntax.html#syntax">4</A>). 
+The default prior weight for each clause in the CNF of those formulas 
+is 1.5 times the maximum of the soft clause weights. 
+(See the developer's manual on how to change the default prior weights.) 
+
+<P>
+When multiple databases are used, the CNF of a formula with existentially 
+quantified variables or variables with mutually exclusive and exhaustive 
+values may be different across the databases. This occurs because we have 
+to ground the variables to constants that are different across the 
+databases. When this happens, we learn a weight for the formula rather 
+than for each clause in its CNF.
+
+<P>
+You can view all the options by typing <TT>ALCHDIR/bin/learnwts</TT> without 
+any parameters. After weight learning, the output <TT>.mln</TT> file contains the 
+weights of the original formulas (commented out), as well as those of 
+its derived clauses. 
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html73"
+  HREF="3_3Structure_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html71"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html65"
+  HREF="3_1Input_Files.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html74"
+  HREF="3_3Structure_Learning.html">3.3 Structure Learning</A>
+<B> Up:</B> <A NAME="tex2html72"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html66"
+  HREF="3_1Input_Files.html">3.1 Input Files</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

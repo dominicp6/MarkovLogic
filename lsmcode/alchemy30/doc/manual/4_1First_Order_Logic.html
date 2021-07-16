@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>4.1 First-Order Logic</TITLE>
+<META NAME="description" CONTENT="4.1 First-Order Logic">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="4_2MLN_Syntax.html">
+<LINK REL="previous" HREF="4Syntax.html">
+<LINK REL="up" HREF="4Syntax.html">
+<LINK REL="next" HREF="4_2MLN_Syntax.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html122"
+  HREF="4_2MLN_Syntax.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html120"
+  HREF="4Syntax.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html114"
+  HREF="4Syntax.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html123"
+  HREF="4_2MLN_Syntax.html">4.2 MLN Syntax</A>
+<B> Up:</B> <A NAME="tex2html121"
+  HREF="4Syntax.html">4 Syntax</A>
+<B> Previous:</B> <A NAME="tex2html115"
+  HREF="4Syntax.html">4 Syntax</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00041000000000000000">
+4.1 First-Order Logic</A>
+</H2>
+
+<P>
+You can express an arbitrary first-order formula in an <TT>.mln</TT> file. 
+The syntax for logical connectives 
+is as follows: <TT>!</TT> (not), <TT>^</TT> (and), <TT>v</TT> (or), 
+<TT>=&gt;</TT> (implies), <TT>&lt;=&gt;</TT> (if and only if), 
+<TT>FORALL/forall/Forall</TT> (universal quantification), and 
+<TT>EXIST/exist/Exist</TT> (existential quantification). Operator precedence 
+is as follows: not <IMG
+ WIDTH="19" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img1.png"
+ ALT="$&gt;$"> and <IMG
+ WIDTH="19" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img1.png"
+ ALT="$&gt;$"> or <IMG
+ WIDTH="19" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img1.png"
+ ALT="$&gt;$"> implies <IMG
+ WIDTH="19" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img1.png"
+ ALT="$&gt;$"> if and only if <IMG
+ WIDTH="19" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img1.png"
+ ALT="$&gt;$"> 
+forall = exists. Operators with the same precedence are evaluated left 
+to right. You can use parentheses to enforce a different precedence, or 
+to make precedence explicit (e.g., <TT>(A=&gt;B)=&gt;C</TT> as opposed to 
+<TT>A=&gt;(B=&gt;C)</TT>). Universal quantifiers at the outermost level can be omitted, 
+i.e., free variables are interpreted as universally quantified at
+the outermost level. Quantifiers can be applied to more than one variable
+at once (e.g., <TT>forall x,y</TT>). The infix equality sign 
+(e.g., <TT>x = y</TT>) can be used as a shorthand for the equality 
+predicate (e.g., <TT>equals(x,y)</TT>).
+
+<P>
+<BR><HR>
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,8 @@
+interaction(protein, protein)
+complex(protein, complex)
+enzyme(protein, enzyme)
+function(protein, function)
+location(protein, location)
+protein_class(protein, class)
+phenotype(protein, phenotype)
+

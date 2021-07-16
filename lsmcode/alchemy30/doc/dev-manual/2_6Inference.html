@@ -1,0 +1,323 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.6 Inference</TITLE>
+<META NAME="description" CONTENT="2.6 Inference">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="2_5Structure_Learning.html">
+<LINK REL="up" HREF="2Notes_on_Code_Design.html">
+<LINK REL="next" HREF="2_6_1Implementing_New_Infer.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html100"
+  HREF="2_6_1Implementing_New_Infer.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html98"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html94"
+  HREF="2_5Structure_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html101"
+  HREF="2_6_1Implementing_New_Infer.html">2.6.1 Implementing a New</A>
+<B> Up:</B> <A NAME="tex2html99"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html95"
+  HREF="2_5Structure_Learning.html">2.5 Structure Learning</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00026000000000000000"></A>
+<A NAME="inferdir"></A>
+<BR>
+2.6 Inference
+</H2>
+The <TT>infer/</TT> directory contains code for performing inference. 
+The mainline is in <TT>infer.cpp</TT>. Table&nbsp;<A HREF="#tab:clinfer">3</A> shows the options
+available when calling infer.
+
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>&lt;-i &lt;string&#187;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Comma-separated input .mln files.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-cw &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Specified non-evidence atoms (comma-separated with no space) are closed world, otherwise, all non-evidence atoms are open world. Atoms appearing here cannot be query atoms and cannot appear in the -o option.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-ow &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Specified evidence atoms (comma-separated with no space) are open world, while other evidence atoms are closed-world. Atoms appearing here cannot appear in the -c option.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-m [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Run MAP inference and return only positive query atoms.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-a [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Run MAP inference and show 0/1 results for all query atoms.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-p [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Run inference using MCMC (Gibbs sampling) and return probabilities for all query atoms.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-ms [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Run inference using MC-SAT and return probabilities for all query atoms</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-simtp [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Run inference using simulated tempering and return probabilities for all query atoms</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-seed &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[random] Seed used to initialize the randomizer in the inference algorithm. If not set, seed is initialized from the current date and time.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-lazy [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[false] Run lazy version of inference if this flag is set.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-lazyNoApprox [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[false] Lazy version of inference will not approximate by deactivating atoms to save memory. This flag is ignored if -lazy is not set.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-memLimit &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[-1] Maximum limit in kbytes which should be used for inference. -1 means main memory available on system is used.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-mwsMaxSteps &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1000000] (MaxWalkSat) The max number of steps taken.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-tries &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1] (MaxWalkSat) The max number of attempts taken to find a solution.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-targetWt &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[the best possible] (MaxWalkSat) MaxWalkSat tries to find a solution with weight &lt;= specified weight.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-hard [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[false] (MaxWalkSat) MaxWalkSat never breaks a hard clause in order to satisfy a soft one.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-heuristic &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1] (MaxWalkSat) Heuristic used in MaxWalkSat (0 = RANDOM, 1 = BEST, 2 = TABU, 3 = SAMPLESAT).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-tabuLength &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[5] (MaxWalkSat) Minimum number of flips between flipping the same atom when using the tabu heuristic in MaxWalkSat.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+</DIV>
+<BR>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-lazyLowState [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[false] (MaxWalkSat) If false, the naive way of saving low states (each time a low state is found, the whole state is saved) is used; otherwise, a list of variables flipped since the last low state is kept and the low state is reconstructed. This can be much faster for very large data sets.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-burnMinSteps &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[100] (MCMC) Minimun number of burn in steps (-1: no minimum).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-burnMaxSteps &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[100] (MCMC) Maximum number of burn-in steps (-1: no maximum).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-minSteps &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[-1] (MCMC) Minimum number of Gibbs sampling steps.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-maxSteps &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1000] (MCMC) Maximum number of Gibbs sampling steps.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-maxSeconds &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[-1] (MCMC) Max number of seconds to run MCMC (-1: no maximum).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-subInterval &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[2] (Simulated Tempering) Selection interval between swap attempts</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-numRuns &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[3] (Simulated Tempering) Number of simulated tempering runs</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-numSwap &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[10] (Simulated Tempering) Number of swapping chains</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-numStepsEveryMCSat &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1] (MC-SAT) Number of total steps (mcsat + gibbs) for every mcsat step</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-numSolutions &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[10] (MC-SAT) Return nth SAT solution in SampleSat</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-saRatio &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[50] (MC-SAT) Ratio of sim. annealing steps mixed with WalkSAT in MC-SAT</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-saTemperature &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[10] (MC-SAT) Temperature (/100) for sim. annealing step in SampleSat</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-lateSa [bool]]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[false] Run simulated annealing from the start in SampleSat</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-numChains &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[10] (Gibbs) Number of MCMC chains for Gibbs sampling (there must be at least 2).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-delta &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[0.05] (Gibbs) During Gibbs sampling, probabilty that epsilon error is exceeded is less than this value.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-epsilonError &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[0.01] (Gibbs) Fractional error from true probability.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-fracConverged &lt;double&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[0.95] (Gibbs) Fraction of ground atoms with probabilities that have converged.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-walksatType &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[1] (Gibbs) Use Max Walksat to initialize ground atoms' truth values in Gibbs sampling (1: use Max Walksat, 0: random initialization).</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-samplesPerTest &lt;integer&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>[100] Perform convergence test once after this many number of samples per chain.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>&lt;-e &lt;string&#187;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Comma-separated .db files containing known ground atoms (evidence), including function definitions.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>&lt;-r &lt;string&#187;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>The probability estimates are written to this file.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+</DIV>
+<BR>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="342"></A>
+<TABLE>
+<CAPTION><STRONG>Table 3:</STRONG>
+Command line options for infer</CAPTION>
+<TR><TD><TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-q &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>Query atoms (comma-separated with no space)  ,e.g., cancer,smokes(x),friends(Stan,x). Query atoms are always open world.</TD>
+</TR>
+<TR><TD ALIGN="LEFT" VALIGN="TOP" WIDTH=156><TT>[-f &lt;string&gt;]</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=298>A .db file containing ground query atoms, which are are always open world.</TD>
+</TR>
+</TABLE>
+
+<P>
+
+<A NAME="tab:clinfer"></A></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+<DIV ALIGN="CENTER">
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+</DIV>
+
+<P>
+<TT>infer.h</TT> contains functions used in 
+<TT>infer.cpp</TT> that can be shared with other modules. 
+<TT>GroundPredicate</TT> and <TT>GroundClause</TT> are the counterparts of 
+<TT>Predicate</TT> and <TT>Clause</TT> in <TT>logic/</TT>. We
+created separate classes for inference in order to save space since 
+most of the instance variables in <TT>Predicate</TT> and <TT>Clause</TT>
+are not needed during inference, and inference requires us to ground the 
+MLN to create a Markov random field that may take up a lot of memory.  
+<TT>MRF</TT> represents the Markov random field and contains the code for 
+Gibbs sampling. <TT>GelmanConvergenceTest</TT> is used to determine 
+convergence during burn-in, and <TT>ConvergenceTest</TT> is used to 
+determine convergence during Gibbs sampling. 
+
+<P>
+All inference algorithms in Alchemy are implemented as subclasses of the
+abstract class <TT>Inference</TT>. Currently, the class hierarchy contains
+two large classes of inference algorithms: SAT-solvers and MCMC algorithms.
+These two classes hold the parameters which are common among all flavors
+of SAT-solvers and MCMC algorithms, respectively. <TT>SAT</TT> and <TT>MCMC</TT>
+are also implemented as abstract classes as they should only serve as
+superclasses for various implementations.
+
+<P>
+<BR>
+<BR>
+<IMG
+ WIDTH="678" HEIGHT="139" ALIGN="BOTTOM" BORDER="0"
+ SRC="img1.png"
+ ALT="\includegraphics[width=15cm]{classInference.eps}">
+<BR>
+<BR>
+
+<P>
+All inference algorithms are based on a <TT>VariableState</TT> (see dir
+/src/logic/) which encodes the state of the propositional variables
+and clauses. There are two different methods to build the state: lazily
+and eagerly. An eager state builds a Markov random field based on the
+queries, the MLN and the domain of constants. Inference is then run on
+the clauses and variables in the MRF. A lazy state makes the assumption
+of all variables being false in the beginning and activates variables
+and clauses as needed by the inference algorithm. In sparse domains,
+this can lead to large savings in memory usage. The laziness or eagerness
+of a state is encapsulated in the class <TT>VariableState</TT> and is set
+with the constructor.
+
+<P>
+In addition, all inference algorithms can be instantiated with a seed for
+the random number generator, if needed. If the algorithm contains no
+randomness, this is ignored. The ability to set the seed is useful when
+debugging and comparing different parameter settings of an algorithm.
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html102"
+  HREF="2_6_1Implementing_New_Infer.html">2.6.1 Implementing a New Inference Algorithm</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html100"
+  HREF="2_6_1Implementing_New_Infer.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html98"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html94"
+  HREF="2_5Structure_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html101"
+  HREF="2_6_1Implementing_New_Infer.html">2.6.1 Implementing a New</A>
+<B> Up:</B> <A NAME="tex2html99"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html95"
+  HREF="2_5Structure_Learning.html">2.5 Structure Learning</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,9 @@
+Friends(person, person)
+Smokes(person)
+Cancer(person)
+
+
+Friends(p0,p0)
+Cancer(v0)
+Friends(v0,v1)
+Smokes(v0)

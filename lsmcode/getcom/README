@@ -1,0 +1,18 @@
+getcom estimates the support of motifs, and merges them
+
+PARAMS
+
+ldbFiles       : comma-separated files containing motifs (output of rwl),
+                 e.g., myMotif1.ldb,myMotif2.ldb
+uldbFiles      : comma-separated files containing ground hypergraph supporting motifs
+                 (output of rwl), e.g., myHGraph1.uldb,myHGraph2.uldb
+srcClustsFiles : comma-separated files containing info about motifs (output of rwl),
+                 e.g., mySrcClust1.srcnclusts,mySrcClust2.srcnclusts
+declFile       : file containing predicate declaration (same as for rwl)
+minSup         : minimum number of ground hypergraphs supporting a motif in order for
+                 it to be retained
+outFile        : file containing final motifs, e.g., myMotifs.comb.ldb
+learnWtsExec   : path to alchemy's learnwts executable
+mergePaths     : set to true
+seed           : seed for random number generator
+

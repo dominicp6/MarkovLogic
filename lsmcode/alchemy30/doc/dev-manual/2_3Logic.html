@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.3 Logic</TITLE>
+<META NAME="description" CONTENT="2.3 Logic">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="2_4Weight_Learning.html">
+<LINK REL="previous" HREF="2_2Parser.html">
+<LINK REL="up" HREF="2Notes_on_Code_Design.html">
+<LINK REL="next" HREF="2_4Weight_Learning.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html72"
+  HREF="2_4Weight_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html70"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html64"
+  HREF="2_2Parser.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html73"
+  HREF="2_4Weight_Learning.html">2.4 Weight Learning</A>
+<B> Up:</B> <A NAME="tex2html71"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html65"
+  HREF="2_2Parser.html">2.2 Parser</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00023000000000000000"></A>
+<A NAME="logicdir"></A>
+<BR>
+2.3 Logic
+</H2>
+The <TT>logic/</TT> directory contains classes related to first-order logic.
+<TT>PredicateTemplate</TT> represents a predicate declaration, while a 
+<TT>Predicate</TT> is its definition. Likewise for <TT>FunctionTemplate</TT> 
+and <TT>Function</TT>. Observe that the code for <TT>Predicate</TT> 
+and <TT>Function</TT> is similar, and we could have made one the superclass 
+of the other. However, we avoided polymorphism 
+for the sake of inlining their functions. A <TT>Term</TT> represents a constant, 
+a variable or a function. A <TT>Predicate</TT> contains one or more <TT>Terms</TT>. 
+<TT>Clause</TT> is an array of <TT>Predicate</TT>s, and contains the important 
+functions for counting the number of true groundings of a clause, 
+and for finding unknown ground clauses. 
+<TT>ClauseFactory</TT> creates clauses for structure 
+learning. It includes a function <TT>validClause()</TT> in which you can specify 
+rules to restrict the kinds of clauses created. <TT>ClauseSampler</TT> contains
+an algorithm that estimates the number of true groundings of a clause by
+sampling the clause's groundings. It uses <TT>TrueFalseGroundingsStore</TT> to 
+store groundings of predicates. <TT>MLN</TT> represents 
+a <TT>Markov Logic Network</TT> with a set of <TT>Clauses</TT>. 
+<TT>clausehelper.h</TT> and <TT>mlnhelper.h</TT> contains 
+the auxiliary data structures used by <TT>Clause</TT> and <TT>MLN</TT> respectively.
+<TT>Database</TT> provides the truth values of ground <TT>Predicate</TT>s 
+(ground atoms), and keeps the truth values of all ground atoms in memory. 
+<TT>GroundPreds</TT> is a data structure for holding ground <TT>Predicate</TT>s, 
+and is mainly used for testing purposes. A <TT>Domain </TT>contains the 
+declared types, constants, predicates, and functions, and provides information 
+about them (e.g., the number of constants of a type). It also holds a pointer 
+to a <TT>Database</TT>. The class <TT>VariableState</TT> represents the state of
+all predicates and clauses while performing learning or inference. Besides
+holding all ground predicates and clauses generated from its <TT>MLN</TT> and
+<TT>domain</TT>, it contains many data structures and indices which allow fast
+access to information about the state. It encapsulates the eagerness or
+laziness of the state (i.e. if all ground clauses are built upfront or just
+when needed). This allows us to implement inference and learning algorithms
+based on this state without worrying about the differences in a lazy and an
+eager implementation.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html72"
+  HREF="2_4Weight_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html70"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html64"
+  HREF="2_2Parser.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html73"
+  HREF="2_4Weight_Learning.html">2.4 Weight Learning</A>
+<B> Up:</B> <A NAME="tex2html71"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html65"
+  HREF="2_2Parser.html">2.2 Parser</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,46 @@
+//predicate declarations
+hasPosition(person,position)
+advisedBy(person,person)
+professor(person)
+publication(title,person)
+inPhase(person,phase)
+student(person)
+
+// -5.46866  professor(p) <=> !student(p)
+-5.469  professor(a1) v student(a1)
+0.000338567  !professor(a1) v !student(a1)
+
+// 5.46946  advisedBy(s,p) => student(s) ^ professor(p)
+2.73473  student(a1) v !advisedBy(a1,a2)
+2.73473  professor(a1) v !advisedBy(a2,a1)
+
+// 3.9227  inPhase(s,ph) => student(s)
+3.9227  student(a1) v !inPhase(a1,a2)
+
+// 3.92288  hasPosition(p,pos) => professor(p)
+3.92288  professor(a1) v !hasPosition(a1,a2)
+
+// 0.00214815  advisedBy(s,p) ^ hasPosition(p,q) => inPhase(s,r)
+0.00214815  !advisedBy(a1,a2) v inPhase(a1,a3) v !hasPosition(a2,a4)
+
+// 0.00247504  publication(t,p) ^ publication(t,s) ^ professor(p) ^ student(s) ^ !(s = p) => advisedBy(s,p)
+0.00247504  !professor(a2) v !student(a1) v advisedBy(a1,a2) v !publication(a3,a1) v !publication(a3,a2) v a1 = a2
+
+// -2.73467  professor(a1)
+-2.73467  professor(a1)
+
+// -2.73467  student(a1)
+-2.73467  student(a1)
+
+// -2.73443  advisedBy(a1,a2)
+-2.73443  advisedBy(a1,a2)
+
+// -3.92098  inPhase(a1,a2)
+-3.92098  inPhase(a1,a2)
+
+// -3.92087  hasPosition(a1,a2)
+-3.92087  hasPosition(a1,a2)
+
+// -7.23126  publication(a1,a2)
+-7.23126  publication(a1,a2)
+

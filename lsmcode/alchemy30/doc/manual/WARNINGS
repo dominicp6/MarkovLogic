@@ -1,0 +1,6 @@
+
+manual.tex is newer than manual.aux: Please rerun latex.
+
+? brace missing for \setlength
+
+manual.tex is newer than manual.bbl: Please rerun latex and bibtex.

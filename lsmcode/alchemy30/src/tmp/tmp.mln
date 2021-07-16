@@ -1,0 +1,12 @@
+A(xtype)
+B(xtype)
+C(xtype)
+
+!A(x) v !B(x) v !C(x)
+A(x) v !B(x) v !C(x)
+!A(x) v B(x) v !C(x)
+!A(x) v !B(x) v C(x)
+!A(x) v B(x) v C(x)
+A(x) v !B(x) v C(x)
+A(x) v B(x) v !C(x)
+A(x) v B(x) v C(x)

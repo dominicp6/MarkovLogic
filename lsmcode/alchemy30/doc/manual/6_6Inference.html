@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>6.6 Inference</TITLE>
+<META NAME="description" CONTENT="6.6 Inference">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="6_5Structure_Learning.html">
+<LINK REL="up" HREF="6Notes_on_Code_Design.html">
+<LINK REL="next" HREF="Bibliography.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html252"
+  HREF="Bibliography.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html250"
+  HREF="6Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html246"
+  HREF="6_5Structure_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html253"
+  HREF="Bibliography.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html251"
+  HREF="6Notes_on_Code_Design.html">6 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html247"
+  HREF="6_5Structure_Learning.html">6.5 Structure Learning</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00066000000000000000"></A>
+<A NAME="inferdir"></A>
+<BR>
+6.6 Inference
+</H2>
+The <TT>infer/</TT> directory contains code for performing inference. 
+The mainline is in <TT>infer.cpp</TT>. <TT>infer.h</TT> contains functions used in 
+<TT>infer.cpp</TT> that can be shared with other modules. 
+<TT>GroundPredicate</TT> and <TT>GroundClause</TT> are the counterparts of 
+<TT>Predicate</TT> and <TT>Clause</TT> in <TT>logic/</TT>. We
+created separate classes for inference in order to save space since 
+most of the instance variables in <TT>Predicate</TT> and <TT>Clause</TT>
+are not needed during inference, and inference requires us to ground the 
+MLN to create a Markov random field that may take up a lot of memory.  
+<TT>MRF</TT> represents the Markov random field and contains the code for 
+Gibbs sampling. <TT>GelmanConvergenceTest</TT> is used to determine 
+convergence during burn-in, and <TT>ConvergenceTest</TT> is used to 
+determine convergence during Gibbs sampling. 
+<TT>MRF</TT> also performs MAP inference by calling an external 
+executable <TT>maxwalksat</TT>. <TT>maxwalksat.h</TT> contains a wrapper class 
+for that executable. <TT>mwsloc.pl</TT> is a perl script that writes 
+in <TT>maxwalksat.cpp</TT> the location of the <TT>maxwalksat</TT> executable.
+Memory efficient MAP inference is performed in the class LazyWalkSat
+(<TT>lazywalksat.h</TT>/<TT>lazywalksat.cpp</TT>), based on the MaxWalkSat
+package of Kautz et al. (1997)&nbsp;[<A
+ HREF="Bibliography.html#kautz_SPMamp_al97b">2</A>]. This class uses
+<TT>lwinfo.h</TT> as its interface to the database and <TT>lwutil.h</TT> for
+various utilities.
+
+<P>
+
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html252"
+  HREF="Bibliography.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html250"
+  HREF="6Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html246"
+  HREF="6_5Structure_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html253"
+  HREF="Bibliography.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html251"
+  HREF="6Notes_on_Code_Design.html">6 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html247"
+  HREF="6_5Structure_Learning.html">6.5 Structure Learning</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2006-06-26
+</ADDRESS>
+</BODY>
+</HTML>

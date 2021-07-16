@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>3.4 Inference</TITLE>
+<META NAME="description" CONTENT="3.4 Inference">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="3_3Structure_Learning.html">
+<LINK REL="up" HREF="3Quick_Start.html">
+<LINK REL="next" HREF="3_4_1Memory_efficient_infer.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html91"
+  HREF="3_4_1Memory_efficient_infer.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html89"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html85"
+  HREF="3_3Structure_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html92"
+  HREF="3_4_1Memory_efficient_infer.html">3.4.1 Memory-efficient inference</A>
+<B> Up:</B> <A NAME="tex2html90"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html86"
+  HREF="3_3Structure_Learning.html">3.3 Structure Learning</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00034000000000000000">
+3.4 Inference</A>
+</H2>
+To perform inference, run the <TT>infer</TT> executable, 
+e.g., <TT>ALCHDIR/bin/infer -i univ-out.mln -e univ-test.db
+-r univ.results -q advisedBy,student,professor -c -p -mcmcMaxSteps 20000</TT>. 
+
+<P>
+<TT>-i</TT> specifies the input <TT>.mln</TT> file. In that file all formulas 
+must be preceded by a weight or terminated by a period (but not both).
+An exception is a unit formula with variables followed by the <TT>!</TT> 
+operator. Such a unit formula can be preceded by a weight, or terminated 
+by a period, or neither. (For such a unit formula,  the code automatically 
+creates formulas stating that the variables have mutually exclusive and 
+exhaustive values. See Section&nbsp;<A HREF="4Syntax.html#syntax">4</A>.)
+Each formula in the input <TT>.mln</TT> file is converted to CNF. 
+If a weight precedes the formula, it is divided equally among 
+its CNF clauses.  
+If the formula is terminated by a period (i.e., the formula is hard), 
+each of its CNF clauses is given a default weight that is twice the maximum 
+soft clause weight.
+If neither weight nor period is specified for a unit formula with  
+variables followed by <TT>!</TT>, each of its CNF clauses is given 
+a default weight that is 1.5 times the maximum soft clause weight.
+(See the developer's manual on how to change the default weights.)
+
+<P>
+<TT>-e</TT> specifies the evidence <TT>.db</TT> file; a comma-separated list 
+can be used to specify more than one <TT>.db</TT> file. 
+<TT>-r</TT> specifies the output file which contains the inference results. 
+
+<P>
+<TT>-q</TT> specifies the query predicates. 
+You can specify more than one query predicate, and restrict the query to 
+particular groundings, e.g., <TT>-q advisedBy(x,Ida),advisedBy(Ida,Geri)</TT>. 
+(Depending on the shell you are using, you may have to enclose the query 
+predicates in quotes because of the presence of parentheses.) You can 
+also use the <TT>-f</TT> option to specify a file 
+(same format as a <TT>.db</TT> file without false and unknown atoms) 
+containing the query ground atoms you are interested in. 
+(You may use both <TT>-q</TT> and <TT>-f</TT> together.)
+
+<P>
+An evidence predicate is defined as a predicate of which the .db evidence
+file contains at least one grounding; all evidence predicates are
+closed-world by default. All non-evidence predicates are open-world by
+default. The user may specify that some evidence predicates are open-world
+by listing them with the -o option. Also, the user may specify that some
+non-evidence predicates are closed-world by listing them with the -c option.
+This effectively turns them into evidence predicates with all false groundings.
+If a ground atom is listed as a query atom on the command line or in
+the query file, or is specified as unknown in the evidence file,
+this overrides any closed-world defaults or options. If a
+first-order predicate is listed as a query predicate and the
+evidence file contains at least one of its groundings, the predicate
+is open-world. In other words, the openness of query predicates
+overrides the closedness of evidence ones. If a predicate is
+simultaneously listed as a query predicate and as closed-world with
+the -c option, or appears in both -c and -o lists, an error message
+is returned to the user. If a predicate is closed-world and some of
+its atoms are query atoms, the predicate is treated as closed-world
+except for the query atoms. If the user specifies an evidence
+predicate as closed with the -c option or a non-evidence one as open
+with -o, a warning message is returned, as these are the defaults.
+Type <TT>ALCHDIR/bin/infer</TT> without any parameters to see all
+available options.
+
+<P>
+Alchemy supports two basic types of inference:&nbsp;MCMC and MAP/MPE. The current
+implementation contains three MCMC algorithms: Gibbs sampling (option <TT>-p</TT>),
+MC-SAT&nbsp;[<A
+ HREF="Bibliography.html#poon_SPMamp_domingos06">6</A>] (option <TT>-ms</TT>) and simulated
+tempering&nbsp;[<A
+ HREF="Bibliography.html#marinari_SPMamp_parisi92">5</A>] (option <TT>-simtp</TT>). When MCMC inference is run,
+the probabilities that the query atoms are true are written to the
+output file specified. <TT>-mcmcMaxSteps</TT> is used to specify the maximum
+number of steps in the MCMC algorithm. 
+
+<P>
+To use MAP inference instead, specify either the 
+<TT>-m</TT> or <TT>-a</TT> option. The former only returns the true ground atoms, 
+while the latter returns both true and false ones. For MAP inference, 
+the output file also contains the weight assigned to a hard ground 
+clause, fraction of hard ground clauses that are satisfied, the sum 
+of their weights, and the sum of the weights of satisfied soft ground 
+clauses. During MAP inference, each hard clause (derived from a hard 
+formula with a terminating period) is given a weight that is the sum 
+of the soft clause weights plus 10.
+
+<P>
+The MAP inference engine used in Alchemy attempts to satisfy clauses with
+positive weights (just as in the original MaxWalkSat algorithm) and keep
+clauses with negative weights unsatisfied. As an extension to the MaxWalkSat
+algorithm, when a clause with a negative weight is chosen to fix, one true
+atom in that clause is chosen at random to be set to false.
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html93"
+  HREF="3_4_1Memory_efficient_infer.html">3.4.1 Memory-efficient inference</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html91"
+  HREF="3_4_1Memory_efficient_infer.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html89"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html85"
+  HREF="3_3Structure_Learning.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html92"
+  HREF="3_4_1Memory_efficient_infer.html">3.4.1 Memory-efficient inference</A>
+<B> Up:</B> <A NAME="tex2html90"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html86"
+  HREF="3_3Structure_Learning.html">3.3 Structure Learning</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

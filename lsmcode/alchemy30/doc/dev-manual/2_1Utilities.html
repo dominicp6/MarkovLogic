@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.1 Utilities</TITLE>
+<META NAME="description" CONTENT="2.1 Utilities">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="2_2Parser.html">
+<LINK REL="previous" HREF="2Notes_on_Code_Design.html">
+<LINK REL="up" HREF="2Notes_on_Code_Design.html">
+<LINK REL="next" HREF="2_2Parser.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html52"
+  HREF="2_2Parser.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html50"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html44"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html53"
+  HREF="2_2Parser.html">2.2 Parser</A>
+<B> Up:</B> <A NAME="tex2html51"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html45"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00021000000000000000"></A>
+<A NAME="utildir"></A>
+<BR>
+2.1 Utilities
+</H2>
+The <TT>util</TT> directory contains &quot;utility&quot; classes. 
+<TT>Argument</TT> is a class used to 
+parse command line arguments. <TT>Array</TT> is a template class representing 
+an array, and is used widely in the code. <TT>HashArray</TT> is similar to an 
+<TT>Array</TT> except that it is backed up by a map so that its elements are 
+unique. <TT>HashList</TT> is similar to a <TT>HashArray</TT> except that it is a list 
+implementation. In <TT>hashint.h</TT> and <TT>hashstring.h</TT> are the 
+definitions of <TT>HashArrays</TT> containing <TT>int</TT>s and <TT>string</TT>s. 
+<TT>ArraysAccessor</TT> allows you to iterate through all combinations of 
+items in several arrays. Both <TT>DualMap</TT> and <TT>ConstDualMap</TT> map 
+<TT>int</TT>s to <TT>string</TT>s and vice versa. 
+They are mainly used by <TT>Domain</TT> in <TT>logic/</TT> to hold predicates, 
+types etc. <TT>StrInt</TT> is a data structure used by <TT>DualMap</TT> and 
+<TT>ConstDualMap</TT>. 
+<TT>MeanVariance</TT> is used to compute the mean and variance of a set of 
+numbers. <TT>MultDArray</TT> represents a multi-dimensional array. 
+<TT>PowerSet</TT> generates the powerset of <TT>{0...n}</TT> 
+except the null set. <TT>Timer</TT> measures user time in seconds, and 
+contains a function to print time. <TT>util.h</TT> is used to contain commonly 
+used functions that can be shared across modules. <TT>Random</TT> is a random 
+number generator.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html52"
+  HREF="2_2Parser.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html50"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html44"
+  HREF="2Notes_on_Code_Design.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html53"
+  HREF="2_2Parser.html">2.2 Parser</A>
+<B> Up:</B> <A NAME="tex2html51"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<B> Previous:</B> <A NAME="tex2html45"
+  HREF="2Notes_on_Code_Design.html">2 Notes on Code</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

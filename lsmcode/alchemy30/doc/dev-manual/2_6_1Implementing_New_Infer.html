@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2.6.1 Implementing a New Inference Algorithm</TITLE>
+<META NAME="description" CONTENT="2.6.1 Implementing a New Inference Algorithm">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="2_6Inference.html">
+<LINK REL="up" HREF="2_6Inference.html">
+<LINK REL="next" HREF="Bibliography.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html109"
+  HREF="Bibliography.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html107"
+  HREF="2_6Inference.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html103"
+  HREF="2_6Inference.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html110"
+  HREF="Bibliography.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html108"
+  HREF="2_6Inference.html">2.6 Inference</A>
+<B> Previous:</B> <A NAME="tex2html104"
+  HREF="2_6Inference.html">2.6 Inference</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00026100000000000000">
+2.6.1 Implementing a New Inference Algorithm</A>
+</H3>
+
+<P>
+Any new inference algorithm in Alchemy must fit into the existing class
+hierarchy (i.e. it must be a subclass of <TT>Inference</TT>). Therefore, it
+must implement the methods <TT>init()</TT>, <TT>infer()</TT>, <TT>printProbabilities</TT>,
+<TT>printTruePreds()</TT> and <TT>getProbability()</TT>, although it
+could be that no initialization is required (see, for example, <TT>UnitPropagation</TT>).
+The constructor of the new class should call the constructor of <TT>Inference</TT>
+so that the state and seed are initialized.
+
+<P>
+Every inference algorithm is called in the same manner in infer/infer.cpp.
+A <TT>VariableState</TT> is initialized and the pointer <TT>inference</TT> is set
+to the inference algorithm as specified on the command line. If a new
+inference algorithm is added, this should be extended (along with the
+command line options) to accomodate the new algorithm, i.e.:
+<TT>inference = new NewAlgorithm(state, seed, params);</TT> where <TT>params</TT>
+is a <TT>struct</TT> to hold the parameters specific to the new algorithm.
+Finally, <TT>init()</TT> and <TT>infer()</TT> are called which perform the
+inference and the probabilities (or best state) of the ground atoms are
+output to file by calling <TT>printProbabilities()</TT>. Of course, the
+header file of the new algorithm must be included in infer.cpp. The
+laziness or eagerness of the inference algorithm should be encapsulated
+in <TT>VariableState</TT>.
+
+<P>
+
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html109"
+  HREF="Bibliography.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html107"
+  HREF="2_6Inference.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html103"
+  HREF="2_6Inference.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html110"
+  HREF="Bibliography.html">Bibliography</A>
+<B> Up:</B> <A NAME="tex2html108"
+  HREF="2_6Inference.html">2.6 Inference</A>
+<B> Previous:</B> <A NAME="tex2html104"
+  HREF="2_6Inference.html">2.6 Inference</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

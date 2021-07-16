@@ -1,0 +1,208 @@
+Nov 8, 2007
+-----------
+* By default, convergence is not tested in Gibbs.
+* One chain of Gibbs is allowed.
+* By default, hard clauses can not be broken by MaxWalkSat
+
+Oct 25, 2007
+----------
+* Lazy learning with MC-SAT implemented
+* Memory-based stopping of activation in a lazy state
+* Propositional Alchemy implemented
+* Domain-based false evidence index implemented
+* Bug in constant naming with multiple DBs fixed
+* Bug in use of inverted index in MRF creation fixed
+* Output added to MaxWalkSat
+
+Aug 29, 2007
+-----------
+* Bug in flipping atoms in blocks fixed
+* Various user parameters in learnwts renamed
+* Fixed random number used for seed, if not specified
+* Bug in handling zero-weighted clauses in variablestate fixed
+* Unit clauses normalized to be all positive during inference
+* Bug in handling of external constants across multiple DBs fixed
+* Bug in weight learning on blocks fixed
+* Stopping criterion for second-order discriminative learning added
+
+Aug 3, 2007
+-----------
+* Inverted index implemented on neg. weighted clauses
+* Conjugate Gradient, Newton's method, and per-weight learning rates
+implemented
+
+July 22, 2007
+-------------
+* Mutually exclusive and exhaustive variables now declared in the
+predicate declaration, not in unit clauses
+* Functions with infix operator no longer restricted to parentheses
+* != syntax allowed to express "not equal"
+* Memory leak in structure learning fixed
+* Bug in counting number of true groundings fixed
+
+June 20, 2007
+-------------
+* Tutorial included
+* Bug fixes and optimization of lazy MC-SAT
+* Improvement of inverted index (also used for eager grounding)
+* Memory-efficient blocking scheme implemented
+* Bug fix in MaxWalkSat
+
+Jan 16, 2007
+-------------
+
+* Improvement of speed of Lazy MC-SAT algorithm
+* Improvement of modularity of the state of variables and inference
+algorithms
+* Plug-n-play inference in VotedPerceptron implemented 
+* EM algorithm for weight learning implemented
+* Developer's manual started
+* Auto-generated API included
+* MWS can reconstruct low state at the end of inference instead of 
+saving it each time
+* Memory-efficient version of GroundClause and GroundPredicate
+* Memory leaks in VotedPerceptron fixed
+* Command line arguments for infer and learnwts unified
+
+July 7, 2006
+-------------
+* Bug fix in infer/mrf.h (method prepareMaxWalksatData)
+
+July 5, 2006
+-------------
+* Bug fix in learnwts/pseudologlikelihood.h (wrong indices in removeCounts)
+
+June 26, 2006
+-------------
+* MC-SAT algorithm (also memory-efficient version) implemented (/infer dir)
+* Simulated tempering algorithm implemented (mrf.h)
+* Block inference and learning implemented
+* Bug fix involving flipping weights of unit clauses in inference
+* Bug fix involving checking constants in parser
+* Removal of default values in array.h/hasharray.h
+* Lazy flag added to parser for lazy versions of inference
+* Bug fix involving assert in groundpredicate.h and growToSize() in
+database.h
+
+May 5, 2006
+------------
+* Hard clause weights handled correctly in LazySat
+* Bug fix involving equality predicate and inverted index
+* Bug fix involving use of constants in internal functions/predicates
+* Time limit check added while burning in during Gibbs sampling
+* Output of integer constants in MAP inference fixed
+* Removal of extraneous debugging code
+
+May 3, 2006
+------------
+* LazySat algorithm (Memory-efficient MAP inference) implemented (/infer dir)
+* Inverted index of partially grounded atoms to true / active ground
+atoms implemented in database.h, clause.h to speed up LazySat
+* Hash table of true ground atoms implemented in database.h to
+save memory
+* VotedPerceptron algorithm: LazySat implemented as inference step
+* VotedPerceptron algorithm: True counts calculated from MRF
+* VotedPerceptron algorithm: Log-odds of clauses calculated from 
+aggregation of clauses across all databases
+* Bug causing loop out on 64-bit architecture fixed
+* Memory leak in groundclause.cpp fixed
+* Types of variables in internal functions and predicates determined
+during parsing
+* Bug fix in pseudologlikelihood.h (Different order of .mln files was
+producing different weights)
+
+Mar 15, 2006
+------------
+* Added support for linked-in and internally implemented predicates and
+functions.
+
+Mar 10, 2006
+------------
+* Fix a bug causing the weights of some ground clauses to be considered more
+  than once when constructing the MRF for inference.
+* Fix a bug affecting discriminative learning. It causes a ground predicate
+  to be affected only by the weight of the first ground clause that contains it,
+  when it should be affected by all the ground clauses that contain it.
+
+Mar 7, 2006
+-----------
+* Bug fixes from the release from March 1st, which was not packaged correctly.
+
+Mar 1, 2006
+-----------
+* Support for functions in Markov Logic Networks.
+* Fix a bug in learnwts/votedperceptron.h. Previously, the code did not set 
+  all the non-evidence atoms to UNKNOWN in the database before constructing the
+  MRF. Now, it does.
+
+Feb 13, 2006
+------------
+* Fix a bug in structure learning that occasionally prevents a clause in an MLN 
+  from being replaced with a longer/shorter one.
+
+Feb 4, 2006
+-----------
+* Fix a bug causing a negated equality predicate (e.g., !(a=b)) to give a parse
+  error.
+
+Jan 29, 2006
+------------
+* The conditional log-likelihood of the equality predicate ('=') is no longer
+  included in the pseudo-log-likelihood during weight learning. 
+
+Jan 24, 2006
+------------
+* Formatted the printing of clauses so that equality predicates appear at the
+  end.
+
+Jan 23, 2006
+------------
+* Allow the equality predicate ('=') to be added during structure learning
+(e.g., person(a) v person(b) v a = b).
+
+Jan 12, 2006
+------------
+* Allow a formula weight in scientific notation to have an explicit positive 
+  exponent e.g. 1.0e+2.
+
+Jan 10, 2006
+------------
+* In a Gibbs pass during inference, when we sample the value of a ground atom, 
+  we used the values of the ground atoms in its Markov blanket in the previous
+  Gibbs pass. Now we use the values in the current Gibbs pass.
+
+* When counting the number of true groundings of a clause, its literals are 
+  now sorted in decreasing (rather than increasing) order of their fraction of
+  true groundings. This change may speed up the counting.
+
+Jan 5, 2006
+-----------
+* Previously, when drawing the first sample during inference, the probability 
+  that a ground atom is true is set to 0.5 independent of its Markov blanket.
+  Now that probability is set to a value that is dependent on its Markov 
+  blanket.
+
+Dec 30, 2005
+------------
+* Previously, during inference, when an undeclared constant appeared in a query
+  predicate, we gave an error message, ignored the constant and proceeded with
+  the inference. Now we halt the program after the error message.
+
+* Fix the bug in which the terms of a formula containing only conjunctions
+  are not tied.
+
+Dec 27, 2005
+------------
+* Previously, during inference, when neither -c or -o was specified, 
+  all predicates other than the query ones were closed world. Now the 
+  predicates are open-world by default.
+
+Dec 22, 2005
+------------
+* During inference, a unit formula containing variables with mutually exclusive
+  and exhaustive values is now allowed to be neither preceded by a weight nor
+  terminated by a period in a .mln file.
+
+* The type of a variable that is marked with the '+' operator no longer needs
+  to have its constants appear in the same order across multiple databases.
+

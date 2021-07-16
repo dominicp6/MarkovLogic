@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>2 Installation</TITLE>
+<META NAME="description" CONTENT="2 Installation">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="3Quick_Start.html">
+<LINK REL="previous" HREF="1Introduction.html">
+<LINK REL="up" HREF="manual.html">
+<LINK REL="next" HREF="3Quick_Start.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html38"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html36"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html30"
+  HREF="1Introduction.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html39"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Up:</B> <A NAME="tex2html37"
+  HREF="manual.html">The Alchemy System for</A>
+<B> Previous:</B> <A NAME="tex2html31"
+  HREF="1Introduction.html">1 Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00020000000000000000"></A>
+<A NAME="install"></A>
+<BR>
+2 Installation
+</H1>
+
+<P>
+This release is meant for the Linux platform. If you wish to use it
+on Windows or OS X, you will have to make some code changes 
+(e.g., use platform-specific C++ system calls).
+
+<P>
+We compiled and tested the code using:
+
+<UL>
+<LI>Fedora Core 5
+</LI>
+<LI>Bison 2.0
+</LI>
+<LI>Flex 2.5.4
+</LI>
+<LI>g++ 4.1.1
+</LI>
+<LI>Perl 5.2.1
+</LI>
+</UL>
+
+<P>
+We assume you have placed the <TT>alchemy.tgz</TT> file in the directory 
+<TT>/home</TT>. Unzip and untar the file with the command 
+<TT>tar xvfz alchemy.tgz</TT>. 
+The <TT>/home/alchemy</TT> directory should be created. 
+Henceforth we refer to <TT>/home/alchemy</TT> as <TT>ALCHDIR</TT>.
+
+<P>
+In <TT>ALCHDIR/src/makefile</TT>, you should ensure that the <TT>GCC</TT>, <TT>FLEX</TT>, 
+and <TT>BISON</TT> variables are correctly set to your g++ compiler, 
+Flex lexical analyzer generator, and Bison parser generator, respectively. 
+(If you do not have Flex and Bison installed on your system, 
+you can obtain them from: <TT>http://www.gnu.org/software/flex</TT>
+and <TT>www.gnu.org/software/bison</TT>.)
+
+<P>
+To compile the code, simply type <TT>make depend; make</TT> in the 
+<TT>ALCHDIR/src</TT> directory. The executables will be compiled into 
+<TT>ALCHDIR/bin</TT>. You may wish to change the <TT>BIN</TT> variable in  
+<TT>makefile</TT> to place the compiled executables in a different directory.
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html38"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html36"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html30"
+  HREF="1Introduction.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html39"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Up:</B> <A NAME="tex2html37"
+  HREF="manual.html">The Alchemy System for</A>
+<B> Previous:</B> <A NAME="tex2html31"
+  HREF="1Introduction.html">1 Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

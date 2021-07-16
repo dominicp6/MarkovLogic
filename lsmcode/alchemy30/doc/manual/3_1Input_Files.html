@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>3.1 Input Files</TITLE>
+<META NAME="description" CONTENT="3.1 Input Files">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="3_2Weight_Learning.html">
+<LINK REL="previous" HREF="3Quick_Start.html">
+<LINK REL="up" HREF="3Quick_Start.html">
+<LINK REL="next" HREF="3_2Weight_Learning.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html63"
+  HREF="3_2Weight_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html61"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html55"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html64"
+  HREF="3_2Weight_Learning.html">3.2 Weight Learning</A>
+<B> Up:</B> <A NAME="tex2html62"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html56"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00031000000000000000">
+3.1 Input Files</A>
+</H2>
+Predicates and functions are declared and first-order formulas are specified 
+in <TT>.mln</TT> files. For example, at the top of <TT>univ.mln</TT>, 
+we declare the predicates <TT>professor</TT>, <TT>student</TT>, etc., and the
+function <TT>motherOf</TT> as well as the types of their parameters. 
+The first appearance of a predicate or function in a <TT>.mln</TT> file is taken 
+to be its declaration. You can express arbitrary first-order 
+formulas in a <TT>.mln</TT> file (more on this in Section&nbsp;<A HREF="4Syntax.html#syntax">4</A>). 
+Note that a variable must begin with a lowercase character, and 
+a constant with an uppercase one in a formula. A formula can be preceded 
+by a weight or terminated by a period, but not both. A period signifies 
+that a formula is &quot;hard&quot; (i.e., worlds that violate it should have zero 
+or negligible probability).
+
+<P>
+Types and constants are also declared in <TT>.mln</TT> files. 
+For example, in <TT>univ-train.mln</TT> we declare the types 
+<TT>person</TT>, <TT>title</TT>, etc., and their associated constants.
+
+<P>
+Ground atoms are defined in <TT>.db</TT> (database) files. 
+Ground atoms preceded by <TT>!</TT> 
+(e.g., <TT>!professor(Bart)</TT>) are false, 
+by <TT>?</TT> are unknown, and by neither are true. 
+If the closed-world assumption is made for a predicate, its 
+ground atoms that are not defined in a <TT>.db</TT> file are false, while if 
+the open world assumption is made, its undefined ground atoms are 
+unknown. In <TT>univ-train.db</TT>, we specified all the true ground atoms of 
+the predicates <TT>professor</TT>, <TT>student</TT>, etc.
+Function mappings are defined in the <TT>.db</TT> file, as well.
+
+<P>
+Linked-in functions and predicates are defined in a separate
+C++ file. An example file, <TT>functions.cpp</TT> is supplied. There are
+certain guidelines which must be followed when defining linked-in functions.
+This is discussed in Section&nbsp;<A HREF="5Predicates_Functions.html#predfunc">5</A>.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html63"
+  HREF="3_2Weight_Learning.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html61"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html55"
+  HREF="3Quick_Start.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html64"
+  HREF="3_2Weight_Learning.html">3.2 Weight Learning</A>
+<B> Up:</B> <A NAME="tex2html62"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<B> Previous:</B> <A NAME="tex2html56"
+  HREF="3Quick_Start.html">3 Quick Start</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

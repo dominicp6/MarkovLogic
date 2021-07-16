@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>5.2 Internal Functions and Predicates</TITLE>
+<META NAME="description" CONTENT="5.2 Internal Functions and Predicates">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="5_3Linked_In_Functions_Pred.html">
+<LINK REL="previous" HREF="5_1User_defined_Predicates_.html">
+<LINK REL="up" HREF="5Predicates_Functions.html">
+<LINK REL="next" HREF="5_3Linked_In_Functions_Pred.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html163"
+  HREF="5_3Linked_In_Functions_Pred.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html161"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html155"
+  HREF="5_1User_defined_Predicates_.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html164"
+  HREF="5_3Linked_In_Functions_Pred.html">5.3 Linked-In Functions and</A>
+<B> Up:</B> <A NAME="tex2html162"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Previous:</B> <A NAME="tex2html156"
+  HREF="5_1User_defined_Predicates_.html">5.1 User-defined Predicates and</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00052000000000000000">
+5.2 Internal Functions and Predicates</A>
+</H2>
+
+<P>
+Alchemy implements several internal predicates and functions. These are
+widely used operators such as those from arithmetic, string concatenation,
+etc. The common arithmetic and comparison operators found in most programming
+languages can also be used in infix notation. Note, the equality predicate,
+introduced in the previous section, is not internally computed, but rather it is
+something you can do inference over and can be used with any type.
+Here is a list of the internally implemented predicates and functions with the
+infix notation where available:
+
+<P>
+<DIV ALIGN="CENTER">
+ 
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="CENTER" COLSPAN=3><B>Internal Predicates</B></TD>
+</TR>
+<TR><TD ALIGN="CENTER"><B>Symbol</B></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><B>Declaration</B></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241><B>Explanation</B></TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>&gt;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>greaterThan(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Tests if first argument is greater than the second</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>&lt;</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>lessThan(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Tests if first argument is less than the second</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>&gt;=</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>greaterThanEq(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Tests if first argument is greater than or equal to the second</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>&lt;=</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>lessThanEq(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Tests if first argument is less than or equal to the second</TD>
+</TR>
+<TR><TD ALIGN="CENTER">(none)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>substr(string, string)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Tests if first argument is a substring of the second</TD>
+</TR>
+</TABLE>
+</DIV>
+<P>
+<DIV ALIGN="CENTER"> 
+</DIV>
+<P>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="CENTER" COLSPAN=3><B>Internal Functions</B></TD>
+</TR>
+<TR><TD ALIGN="CENTER"><B>Symbol</B></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142><B>Declaration</B></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241><B>Explanation</B></TD>
+</TR>
+<TR><TD ALIGN="CENTER">(none)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>int succ(int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the successor of the argument (+1)</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>+</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>int plus(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the addition of the two arguments</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>-</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>int minus(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the first argument minus the second argument</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>*</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>int times(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the multiplication of the two arguments</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>/</TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>int dividedBy(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the first argument divided by the second argument</TD>
+</TR>
+<TR><TD ALIGN="CENTER"><TT>% </TT></TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>int mod(int, int)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the remainder of the first argument divided by the second argument</TD>
+</TR>
+<TR><TD ALIGN="CENTER">(none)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=142>string concat(string, string)</TD>
+<TD ALIGN="LEFT" VALIGN="TOP" WIDTH=241>Returns the concatenation of the two arguments</TD>
+</TR>
+</TABLE>
+</DIV>
+<P>
+<DIV ALIGN="CENTER"> 
+
+</DIV>
+
+<P>
+The types of the variables used in internal functions and predicates (and the return type of
+functions) are determined by the parser as it encounters each formula. This information is used,
+for example, to count the number of groundings during inference or learning. If the type can not
+be determined, an error is thrown and Alchemy exits. For example, if the formula <TT>name(x) ^
+substr(y,x) =&gt; name(y)</TT> is given, the type of variables <TT>x</TT> and <TT>y</TT> can be determined
+from the declaration of the predicate <TT>name</TT>.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html163"
+  HREF="5_3Linked_In_Functions_Pred.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html161"
+  HREF="5Predicates_Functions.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html155"
+  HREF="5_1User_defined_Predicates_.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html164"
+  HREF="5_3Linked_In_Functions_Pred.html">5.3 Linked-In Functions and</A>
+<B> Up:</B> <A NAME="tex2html162"
+  HREF="5Predicates_Functions.html">5 Predicates and Functions</A>
+<B> Previous:</B> <A NAME="tex2html156"
+  HREF="5_1User_defined_Predicates_.html">5.1 User-defined Predicates and</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

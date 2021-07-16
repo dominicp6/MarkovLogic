@@ -1,0 +1,87 @@
+\begin{thebibliography}{10}
+
+\bibitem{pjacklam03}
+P.~J. Acklam.
+\newblock An algorithm for computing the inverse normal cumulative distribution
+  function.
+\newblock 2003.
+\newblock
+  http://home.online.no/\~\,pjacklam/notes/invnorm/impl/misra/normsinv.html.
+
+\bibitem{kautz&al97b}
+H.~Kautz, B.~Selman, and Y.~Jiang.
+\newblock A general stochastic approach to solving problems with hard and soft
+  constraints.
+\newblock In D.~Gu, J.~Du, and P.~Pardalos, editors, {\em The Satisfiability
+  Problem: Theory and Applications}, pages 573--586. American Mathematical
+  Society, New York, NY, 1997.
+\newblock http://www.cs.washington.edu/homes/kautz/walksat/.
+
+\bibitem{kok&domingos05}
+S.~Kok and P.~Domingos.
+\newblock Learning the structure of {M}arkov logic networks.
+\newblock In {\em Proceedings of the {T}wenty-{S}econd {I}nternational
+  {C}onference on {M}achine {L}earning}, pages 441--448, Bonn, Germany, 2005.
+  ACM Press.
+
+\bibitem{kok&al05}
+S.~Kok, P.~Singla, M.~Richardson, and P.~Domingos.
+\newblock The {A}lchemy system for statistical relational {A}{I}.
+\newblock Technical report, Department of Computer Science and Engineering,
+  University of Washington, Seattle, WA, 2005.
+\newblock http://www.cs.washington.edu/ai/alchemy/.
+
+\bibitem{marinari&parisi92}
+E.~Marinari and G.~Parisi.
+\newblock Simulated tempering: {A} new {M}onte {C}arlo scheme.
+\newblock {\em Europhysics Letters}, 19:451--458, 1992.
+
+\bibitem{poon&domingos06}
+H.~Poon and P.~Domingos.
+\newblock Sound and efficient inference with probabilistic and deterministic
+  dependencies.
+\newblock In {\em Proceedings of the {T}wenty-{F}irst {N}ational {C}onference
+  on {A}rtificial {I}ntelligence}, Boston, MA, 2006. AAAI Press.
+\newblock To appear.
+
+\bibitem{richardson&domingos05}
+M.~Richardson and P.~Domingos.
+\newblock {M}arkov logic networks.
+\newblock {\em Machine Learning}, 2005.
+\newblock To appear.
+
+\bibitem{russell&norvig02}
+S.~Russell and P.~Norvig.
+\newblock {\em Artificial Intelligence: A Modern Approach}, chapter~8.
+\newblock Prentice Hall, Upper Saddle River, NJ, 2002.
+\newblock http://aima.cs.berkeley.edu/lisp/doc/overview-LOGIC.html.
+
+\bibitem{singla&domingos05}
+P.~Singla and P.~Domingos.
+\newblock Discriminative training of {M}arkov logic networks.
+\newblock In {\em Proceedings of the {T}wentieth {N}ational {C}onference on
+  {A}rtificial {I}ntelligence}, pages 868--873, Pittsburgh, PA, 2005. AAAI
+  Press.
+
+\bibitem{singla&domingos06}
+P.~Singla and P.~Domingos.
+\newblock Memory-efficient inference in relational domains.
+\newblock In {\em Proceedings of the {T}wenty-{F}irst {N}ational {C}onference
+  on {A}rtificial {I}ntelligence}, Boston, MA, 2006. AAAI Press.
+\newblock To appear.
+
+\bibitem{wei&al04}
+W.~Wei, J.~Erenrich, and B.~Selman.
+\newblock Towards efficient sampling: {E}xploiting random walk strategies.
+\newblock In {\em Proceedings of the {N}ineteenth {N}ational {C}onference on
+  {A}rtificial {I}ntelligence}. AAAI Press, 2004.
+
+\bibitem{zhu&al97}
+C.~Zhu, R.~H. Byrd, P.~Lu, and J.~Nocedal.
+\newblock Algorithm 778: {L-BFGS-B}, {FORTRAN} routines for large scale bound
+  constrained optimization.
+\newblock {\em ACM Transactions on Mathematical Software}, 23(4):550--560,
+  1997.
+\newblock http://www.ece.northwestern.edu/\~\,nocedal/lbfgsb.html.
+
+\end{thebibliography}

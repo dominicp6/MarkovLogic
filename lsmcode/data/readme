@@ -1,0 +1,132 @@
+
+This data and this README has been adapted from
+http://www.biostat.wisc.edu/~craven/webkb to work with Alchemy.
+This directory contains the "University Computer Science Department" data set
+used for the experiments in the publications:
+
+  @article{craven.mlj01
+     ,author      = "M. Craven and S. Slattery"
+     ,title       = "Relational Learning with Statistical Predicate Invention:
+                     Better Models for Hypertext"
+     ,journal     = "Machine Learning"
+     ,year        = 2001
+     ,volume      = 43
+     ,number      = "1-2"
+     ,pages       = "97--119"
+  }
+
+   @inproceedings{slattery.ilp98
+     ,author = "S. Slattery and M. Craven"
+     ,title = "Combining Statistical and Relational Methods for Learning in
+               Hypertext Domains"
+     ,booktitle = "Proceedings of the Eighth International Conference on
+                   Inductive Logic Programming"
+     ,year = 1998
+   }
+
+This data set consists of Web pages and hyperlinks collected from four
+computer science departments: Cornell University, The University of
+Texas, The University of Washington, and The University of Wisconsin.
+
+The following files contain data in the input format for Alchemy:
+
+   common.<univ>.db
+      The background relations defined in this file are "LinkTo" which
+      specifies hyperlink connections, and "AllWordsCapitalized" and
+      "HasAlphanumericWord" which are Boolean predicates characterizing the
+      anchor text of hyperlinks.
+
+   page-words.<univ>.db
+      This set of files provides a bag-of-words representation of the words
+      that occur in pages in the data set.  Each predicate in these files
+      specifies a stemmed word, and the instances of the predicate are those
+      pages that contain the word.  There are four files in this set -- one
+      for each university.  The files differ for each training/test partition
+      because the vocabulary was pruned by considering the frequency of
+      word occurrences only in the training set.
+
+   anchor-words.<univ>.db
+      This is the analogous set of files for words that occur in the anchor
+      text of hyperlinks.
+
+   neighborhood-words.<univ>.db
+      This is the analogous set of files for words that occur in the
+      "neighboring" text of hyperlinks.  The neighborhood of a hyperlink
+      includes words in a single paragraph, list item, table entry, title
+      or heading in which the hyperlink is contained.
+		              
+   page-classes.<univ>.db
+      This set of files contains a set of predicates indicating the class
+      of each page in the data set.  For training-set instances, the true
+      class labels are used.  For test-set instances, predicted class labels
+      are used.  These predictions were made using a method that combined
+      statistical text classifiers with a URL-based clustering method.
+      IMPORTANT: these files should be used only for the binary target
+      relations (DepartmentOf, InstructorsOf, and membersOfProject).
+
+   department-of.<univ>.db
+      These are the training and test set instances for the target relation
+      "DepartmentOf".
+
+   instructors-of.<univ>.db
+      These are the training and test set instances for the target relation
+      "InstructorsOf".
+
+   members-of-project.<univ>.db
+      These are the training and test set instances for the target relation
+      "MembersOfProject".
+
+   student.<univ>.db 
+      These are the training and test set instances for the target relation
+      "StudentPage".
+
+   course.<univ>.db 
+      These are the training and test set instances for the target relation
+      "CoursePage".
+
+   research.project.<univ>.db 
+      These are the training and test set instances for the target relation
+      "ResearchProjectPage".
+
+   faculty.<univ>.db
+      These are the training and test set instances for the target relation
+      "FacultyPage".
+      
+To set up an input file for Alchemy, you should 
+concatenate the right set of files together.  For example, to train
+on Cornell, Texas and Washington while testing on Wisconsin for the
+"InstructorsOf" relation, you should concatenate the following files:
+   common.db
+   page-words.cornell.db
+   page-words.texas.db
+   page-words.washington.db
+   anchor-words.cornell.db
+   anchor-words.texas.db
+   anchor-words.washington.db
+   neighborhood-words.cornell.db
+   neighborhood-words.texas.db
+   neighborhood-words.washington.db
+   page-classes.cornell.db
+   page-classes.texas.db
+   page-classes.washington.db
+   instructors-of.cornell.db
+   instructors-of.texas.db
+   instructors-of.washington.db
+
+To learn the "Student" target relation using the same training/test partition, 
+you should concatenate the following files:
+   common.db
+   page-words.cornell.db
+   page-words.texas.db
+   page-words.washington.db
+   anchor-words.cornell.db
+   anchor-words.texas.db
+   anchor-words.washington.db
+   neighborhood-words.cornell.db
+   neighborhood-words.texas.db
+   neighborhood-words.washington.db
+   student.cornell.db
+   student.texas.db
+   student.washington.db
+
+

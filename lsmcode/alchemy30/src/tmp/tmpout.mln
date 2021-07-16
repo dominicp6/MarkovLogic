@@ -1,0 +1,40 @@
+//predicate declarations
+A(xtype)
+B(xtype)
+C(xtype)
+
+//function declarations
+
+// 0       !A(x) v !B(x) v !C(x)
+0       !A(a1) v !B(a1) v !C(a1)
+
+// 0       A(x) v !B(x) v !C(x)
+0       A(a1) v !B(a1) v !C(a1)
+
+// 0       !A(x) v B(x) v !C(x)
+0       !A(a1) v B(a1) v !C(a1)
+
+// 5.59939  !A(x) v !B(x) v C(x)
+5.59939  !A(a1) v !B(a1) v C(a1)
+
+// 0       !A(x) v B(x) v C(x)
+0       !A(a1) v B(a1) v C(a1)
+
+// 0       A(x) v !B(x) v C(x)
+0       A(a1) v !B(a1) v C(a1)
+
+// 0       A(x) v B(x) v !C(x)
+0       A(a1) v B(a1) v !C(a1)
+
+// 0       A(x) v B(x) v C(x)
+0       A(a1) v B(a1) v C(a1)
+
+// -0.014682  A(a1)
+-0.014682  A(a1)
+
+// -0.014682  B(a1)
+-0.014682  B(a1)
+
+// 0.014682  C(a1)
+0.014682  C(a1)
+

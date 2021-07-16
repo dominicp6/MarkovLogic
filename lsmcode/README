@@ -1,0 +1,43 @@
+Copyright Stanley Kok and Pedro Domingos. All rights reserved.
+Use of source is permitted provided that your publications acknowledge the
+use or contribution made by the software to your research using the following
+citation: Stanley Kok and Pedro Domingos (2010). "Learning Markov Logic Networks
+Using Structural Motifs". Proceedings of the Twenty-Seventh International
+Conference on Machine Learning.
+
+Steps to compile code:
+* In rwl/, getcom/, pfind2/ and mlncreator/, execute "make depend; make" to compile the code.
+* In alchemy30/src/, execute "make depend; make learnwts".
+
+A README file describes the code in each directory .
+
+
+Sequence in which to run executables.
+1 In rwl/, estimate the truncated hitting times with respect to each node as the source.
+  For example, the following commands estimate the hitting times for each fold of the 
+  IMDB dataset in data/. (Fold 5 is excluded because it is the test set.)  
+  ./rwl ../data/imdb.info ../data/imdb1.db ../data/imdb.type 10000 5 0.05 0.1 4.9 0.1 1 3 1 imdb1.ldb imdb1.uldb imdb1.srcnclusts > imdb1-rwl.log
+  ./rwl ../data/imdb.info ../data/imdb2.db ../data/imdb.type 10000 5 0.05 0.1 4.9 0.1 1 3 1 imdb2.ldb imdb2.uldb imdb2.srcnclusts > imdb2-rwl.log
+  ./rwl ../data/imdb.info ../data/imdb3.db ../data/imdb.type 10000 5 0.05 0.1 4.9 0.1 1 3 1 imdb3.ldb imdb3.uldb imdb3.srcnclusts > imdb3-rwl.log
+  ./rwl ../data/imdb.info ../data/imdb4.db ../data/imdb.type 10000 5 0.05 0.1 4.9 0.1 1 3 1 imdb4.ldb imdb4.uldb imdb4.srcnclusts > imdb4-rwl.log
+
+
+2 In getcom/, remove motifs with too few true groundings.
+  For example, the following command removes poorly-supported motifs that are learned from folds 1-4 of the IMDB dataset.
+  ./getcom  ../rwl/imdb1.ldb,../rwl/imdb2.ldb,../rwl/imdb3.ldb,../rwl/imdb4.ldb  ../rwl/imdb1.uldb,../rwl/imdb2.uldb,../rwl/imdb3.uldb,../rwl/imdb4.uldb  ../rwl/imdb1.srcnclusts,../rwl/imdb2.srcnclusts,../rwl/imdb3.srcnclusts,../rwl/imdb4.srcnclusts  ../data/imdb.info  10 imdb.comb.ldb NOOP true 1 > imdb-getcom.log 
+
+
+3 In pfind2/, run pathfinding on the motifs to create candidate paths
+  Example command:
+  ./pfind ../getcom/imdb.comb.ldb 5 0 5 -1.0 ../data/imdb.info imdb.rules  > imdb-findpath.log
+
+
+4 In createrules/, create rules from the candidate paths 
+  Example command:
+  ./createrules  ../pfind2/imdb.rules 0 ../data/imdb1.db,../data/imdb2.db,../data/imdb3.db,../data/imdb4.db ../getcom/imdb.comb.ldb  ../rwl/imdb1.uldb,../rwl/imdb2.uldb,../rwl/imdb3.uldb,../rwl/imdb4.uldb  ../data/imdb.info  ../alchemy30/bin/learnwts tmpdir 0.5 0.1 0.1 100 5  100  1000 5 imdb-rules.mln  1  -  -  true  false  40 > imdb-createrules.log
+  alchemy30 is a modified version of alchemy that has added functionality for counting true groundings of clauses.
+
+
+5 Download the latest version of alchemy at http://alchemy.cs.washington.edu. 
+  Learn the weights of the rules and prune them as described in the LSM paper.
+

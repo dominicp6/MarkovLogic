@@ -1,0 +1,11 @@
+//predicate declarations
+R(term,person,person)
+
+//function declarations
+
+// -1.182373149  R(t0,p1,p1)
+-1.182373149  R(a1,a2,a2)
+
+// -3.175497702  R(v0,v1,v2)
+-3.175497702  R(a1,a2,a3)
+

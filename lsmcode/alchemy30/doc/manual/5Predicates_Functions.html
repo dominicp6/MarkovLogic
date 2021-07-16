@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.70)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>5 Predicates and Functions</TITLE>
+<META NAME="description" CONTENT="5 Predicates and Functions">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="Bibliography.html">
+<LINK REL="previous" HREF="4Syntax.html">
+<LINK REL="up" HREF="manual.html">
+<LINK REL="next" HREF="5_1User_defined_Predicates_.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html140"
+  HREF="5_1User_defined_Predicates_.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html138"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html132"
+  HREF="4_2MLN_Syntax.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html141"
+  HREF="5_1User_defined_Predicates_.html">5.1 User-defined Predicates and</A>
+<B> Up:</B> <A NAME="tex2html139"
+  HREF="manual.html">The Alchemy System for</A>
+<B> Previous:</B> <A NAME="tex2html133"
+  HREF="4_2MLN_Syntax.html">4.2 MLN Syntax</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00050000000000000000"></A>
+<A NAME="predfunc"></A>
+<BR>
+5 Predicates and Functions
+</H1>
+
+<P>
+Predicates and functions can be used in three distinct ways in Alchemy:
+user-defined, linked-in or internally implemented. For most applications,
+the user provides a finite set of predicates and functions along with some
+true/false groundings (user-defined); however,
+Alchemy also allows for the user to define his/her own functions and predicates
+as C++ code (linked-in) and supplies the user with the most commonly used
+functions and predicates (internal), as discussed in the previous section.
+The internal handling of functions and predicates is essentially the same,
+as predicates can be treated as boolean functions.
+
+<P>
+In Alchemy, atoms (predicates applied to a tuple of terms) can be certain or
+uncertain. An atom is certain if it appears in a <TT>.db</TT> (database) file.
+If a closed-world assumption is made and the atom does not appear, then the
+atom is assumed to be false. The equality predicate is always treated as an
+uncertain predicate. In the current version of Alchemy, functions must be
+certain. In future versions it will be possible to implement uncertain functions
+and perform inference on them.
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html142"
+  HREF="5_1User_defined_Predicates_.html">5.1 User-defined Predicates and Functions</A>
+<LI><A NAME="tex2html143"
+  HREF="5_2Internal_Functions_Predi.html">5.2 Internal Functions and Predicates</A>
+<LI><A NAME="tex2html144"
+  HREF="5_3Linked_In_Functions_Pred.html">5.3 Linked-In Functions and Predicates</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html140"
+  HREF="5_1User_defined_Predicates_.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html138"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html132"
+  HREF="4_2MLN_Syntax.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html141"
+  HREF="5_1User_defined_Predicates_.html">5.1 User-defined Predicates and</A>
+<B> Up:</B> <A NAME="tex2html139"
+  HREF="manual.html">The Alchemy System for</A>
+<B> Previous:</B> <A NAME="tex2html133"
+  HREF="4_2MLN_Syntax.html">4.2 MLN Syntax</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Marc Sumner
+2007-01-16
+</ADDRESS>
+</BODY>
+</HTML>

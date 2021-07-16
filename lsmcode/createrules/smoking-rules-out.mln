@@ -1,0 +1,19 @@
+//predicate declarations
+Cancer(person)
+Friends(person,person)
+Smokes(person)
+
+//function declarations
+
+// -4.604867777  Friends(p0,p0)
+-4.604867777  Friends(a1,a1)
+
+// -1.100732431  Cancer(v0)
+-1.100732431  Cancer(a1)
+
+// -0.9200018936  Friends(v0,v1)
+-0.9200018936  Friends(a1,a2)
+
+// 0           Smokes(v0)
+0           Smokes(a1)
+
