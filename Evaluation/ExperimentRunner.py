@@ -12,24 +12,24 @@ class ExperimentRunner(object):
         self.config = {}
 
         # Hierarchical Clustering Parameters -----------------
-        self.max_lambda2s = [0.8]  # [0.7, 0.8, 0.9]
-        self.min_cluster_sizes = [10]  # [5, 10, 15]
+        self.max_lambda2s = [0.8]  # In EXP 2: [0.6, 0.7, 0.8, 0.9, 1.0]
+        self.min_cluster_sizes = [10]  # In EXP 2: [6, 8, 10, 12, 14, 16]
 
         # Random Walk Parameters -----------------------------
-        self.epsilons = [0.01, 0.10]
-        self.theta_ps = [0.05, 0.10]
-        self.number_of_random_walks = [1000, 5000]
-        self.length_of_random_walks = [3, 6]
-        self.theta_hits = [0.95, 1]
-        self.theta_syms = [0.01, 0.2]
-        self.theta_jss = [0.03, 3]
-        self.num_tops = [2, 4]
+        self.epsilons = [0.01, 0.025, 0.075, 0.1] # Run with best performing value(s) in EXP 2
+        self.theta_ps = [0.001, 0.003, 0.03, 0.10, 0.30] # Run with best performing value(s) in EXP 2
+        self.number_of_random_walks = [] # [1000, 5000]  # Keep all these empty in EXP 2
+        self.length_of_random_walks = [] # [3, 6]
+        self.theta_hits = [] # [0.95, 1]
+        self.theta_syms = [] # [0.01, 0.2]
+        self.theta_jss = [] # [0.03, 3]
+        self.num_tops = [] # [2, 4]
 
         # Path Similarity Clustering Parameters --------------
-        self.clustering_types = ['JS']  # , 'kmeans', 'birch']  # , 'kmeans', 'birch']
+        self.clustering_types = ['JS', 'kmeans']  # , 'kmeans', 'birch'] # Select best performing clustering for EXP 2
 
         # Pruning Parameter ----------------------------------
-        self.pruning_values = [None]  # [None, 6]
+        self.pruning_values = [None, 6]  # [None, 6]
 
         self.default_values = {
             'max_num_paths': 3,
@@ -65,7 +65,7 @@ class ExperimentRunner(object):
     def _initialise_table(self, table_name, hierarchical_clustering=True):
         with open(f'{table_name}', 'w') as file:
             file.write('\\begin{longtable}{| p{0.2\linewidth} | p{0.10\linewidth}  p{0.10\linewidth}'
-                       '  p{0.10\linewidth}  p{0.10\linewidth}  p{0.10\linewidth}  p{0.10\linewidth}} \n')
+                       '  p{0.10\linewidth}  p{0.10\linewidth}  p{0.10\linewidth}  p{0.10\linewidth} p{0.10\linewidth}} \n')
             if hierarchical_clustering:
                 file.write(f'\\caption{{Structure learning {self.database} '
                            f'\\color{{red}} with Hierarchical Clustering \\color{{black}} and '
@@ -77,7 +77,7 @@ class ExperimentRunner(object):
                            f'{self.number_of_repeats} repeats.'
                            f'Default hyperparameters: {self.default_values}}}')
             file.write('\centering \n')
-            file.write('& & $N_{SN}$ & $N_{clust}$ & $t_{RW}$ (s) & $t_{SL}$ (s) & $\\bar{L}$ & $\\bar{N}$\\\\ \n')
+            file.write('& & $N_{SN}$ & $N_{clust}$ & $t_{RW}$ (s) & $t_{SL}$ (s) & $\\bar{L}$ &  $\\bar{L}_{w}$ & $\\bar{N}$\\\\ \n')
             file.close()
 
         return table_name
@@ -114,6 +114,7 @@ class ExperimentRunner(object):
                         f'${round(average_data["time_random_walks"][0], 2)}\\pm{round(average_data["time_random_walks"][1], 2)}$ '
                         f'& ${round(average_data["time_structure_learning"][0], 2)}\\pm {round(average_data["time_structure_learning"][1], 2)}$& '
                         f'${round(average_data["length_of_formulas"][0], 2)}\\pm{round(average_data["length_of_formulas"][1], 2)}$& '
+                        f'${round(average_data["weighted_ave_formula_length"][0], 2)}\\pm{round(average_data["weighted_ave_formula_length"][1], 2)}$& '
                         f'${round(average_data["number_of_formulas"][0], 2)}\\pm{round(average_data["number_of_formulas"][1], 2)}$& \n')
                 else:
                     file.write(
@@ -122,6 +123,7 @@ class ExperimentRunner(object):
                         f'${round(average_data["num_clusters"][0], 2)}\\pm{round(average_data["num_clusters"][1], 2)}$ & '
                         f'${round(average_data["time_random_walks"][0], 2)}\\pm{round(average_data["time_random_walks"][1], 2)}$ '
                         f'& \\color{{red}} LONG \\color{{black}} & '
+                        f'$\\color{{red}} LONG \\color{{black}}& '
                         f'$\\color{{red}} LONG \\color{{black}}& '
                         f'$\\color{{red}} LONG \\color{{black}}& \n')
 
@@ -192,4 +194,4 @@ class ExperimentRunner(object):
 
 if __name__ == "__main__":
     experiment_runner = ExperimentRunner(database='imdb4.db', info_file='imdb.info')
-    experiment_runner.run_experiments(number_of_repeats=2)
+    experiment_runner.run_experiments(number_of_repeats=10)

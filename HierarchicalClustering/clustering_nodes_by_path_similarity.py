@@ -522,7 +522,7 @@ def compute_optimal_birch_clustering(node_path_counts: np.array,
         elif clustering_type == 'birch':
             clusterer = Birch(n_clusters=number_of_clusters, threshold=0.05)
         else:
-            clusterer = None
+            raise ValueError('Invalid clustering type configuration')
         cluster_labels = clusterer.fit_predict(feature_vectors)
         node_path_counts_of_clusters = get_node_path_counts_of_clusters(node_path_counts, cluster_labels)
         if test_quality_of_clusters(node_path_counts_of_clusters, number_of_walks, significance_level):

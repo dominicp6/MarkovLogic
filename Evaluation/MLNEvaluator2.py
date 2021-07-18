@@ -99,6 +99,7 @@ class MLNEvaluator(object):
                 'time_random_walks': self.time_statistics['clustering_and_RWs'],
                 'time_structure_learning': self.time_statistics['total_structure_learning'],
                 'length_of_formulas': self.mln_statistics['formula_length'],
+                'weighted_ave_formula_length' : self.mln_statistics['weighted_ave_formula_length'],
                 'number_of_formulas': self.mln_statistics['number_of_formulas']}
 
     # STRUCTURE LEARNING FUNCTIONS ------------------------------------------------------------------------------------
@@ -211,28 +212,37 @@ class MLNEvaluator(object):
         """
         Computes the average formula length and number of formulas for each MLN associated with each database file.
         """
-        fl, std_fl, nf = self.compute_average_and_std_formula_length_and_number_of_formulas(database)
+        fl, std_fl, wfl, nf = self.compute_average_and_std_formula_length_and_number_of_formulas(database)
         self.mln_statistics["formula_length"] = fl
         self.mln_statistics["number_of_formulas"] = nf
+        self.mln_statistics["weighted_ave_formula_length"] = wfl
 
     def compute_average_and_std_formula_length_and_number_of_formulas(self, database):
         mln_file_name = database.rstrip('.db') + f'{self.file_suffix}-rules-out.mln'
         with open(os.path.join(self.mln_dir, mln_file_name), 'r') as mln_file:
             formula_lengths = []
+            weighted_formula_lengths = []
+            formula_weights = []
             for line in mln_file.readlines():
                 split_line = line.split('  ')
                 try:
-                    float(split_line[
+                    w = float(split_line[
                               0])  # Line corresponds to a formula if it starts with a floating point number (formula
                     # weight)
                     formula = split_line[1]
                     formula_length = len(formula.split(' '))
+                    formula_weight = np.exp(w)
+                    weighted_formula_length = formula_length * formula_weight
+                    formula_weights.append(formula_weight)
                     formula_lengths.append(formula_length)
+                    weighted_formula_lengths.append(weighted_formula_length)
                 except:
                     continue  # Line was not a formula
             number_of_formulas = len(formula_lengths)
 
-        return np.mean(formula_lengths), np.std(formula_lengths), number_of_formulas
+        mean_weighted_formula_length = sum(weighted_formula_lengths)/sum(formula_weights)
+
+        return np.mean(formula_lengths), np.std(formula_lengths), mean_weighted_formula_length, number_of_formulas
 
     def write_log_file(self, database: str, info_file: str):
         current_time = datetime.now()
