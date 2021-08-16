@@ -3,26 +3,30 @@ import unittest
 import numpy as np
 import math
 
-from GraphObjects import Hypergraph
-from NodeRandomWalkData import NodeClusterRandomWalkData
-from js_divergence_utils import kl_divergence, js_divergence, compute_js_divergence_of_top_n_paths
-from Communities import Communities
-from RandomWalker import RandomWalker
-from clustering_nodes_by_path_similarity import get_close_nodes_based_on_truncated_hitting_time
+from MarkovLogic.HierarchicalClustering.GraphObjects import Hypergraph
+from MarkovLogic.HierarchicalClustering.NodeRandomWalkData import NodeClusterRandomWalkData
+from MarkovLogic.HierarchicalClustering.probability_distance_metrics import kl_divergence, \
+    js_divergence, \
+    sk_divergence, \
+    compute_divergence_of_top_n_paths
+from MarkovLogic.HierarchicalClustering.Communities import Communities
+from MarkovLogic.HierarchicalClustering.RandomWalker import RandomWalker
+from MarkovLogic.HierarchicalClustering.cluster_by_path_similarity import get_close_nodes_based_on_truncated_hitting_time
 
 H = Hypergraph(database_file='./Databases/smoking.db', info_file='./Databases/smoking.info')
+
 config = {  'epsilon': 0.05,
+            'pruning_value' : None,
             'max_num_paths': 3,
-            'alpha_sym': 0.1,
+            'alpha': 0.01,
             'pca_dim': 2,
             'clustering_method_threshold': 50,
             'k': 1.25,
             'max_path_length': 5,
-            'theta_p': 0.5,
             'multiprocessing': False,
             'num_walks': 10000,
             'max_length': 5,
-            'theta_hit': 4.9,
+            'theta_hit': 4.9/5,
             'theta_sym': 0.1,
             'theta_js': 1}
 
@@ -31,23 +35,28 @@ communities = Communities(H,
                           num_walks=config['num_walks'],
                           theta_hit=config['theta_hit'],
                           theta_sym=config['theta_sym'],
-                          theta_js=config['theta_js']).communities
+                          merging_threshold=config['theta_js']).communities
 
-H2 = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
-config2 = { 'epsilon': 0.05,
+H2 = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info') #imdb1
+
+config2 = { 'epsilon': 0.035,
+            'alpha': 0.1,
+            'use_js_div': True,
+            'computed_hyperparameters' : False,
             'max_num_paths': 3,
-            'alpha_sym': 0.1,
+            'pruning_value' : None,
             'pca_dim': 2,
+            'clustering_type' : 'agglomerative_clustering',
             'clustering_method_threshold': 50,
-            'k': 1.25,
+            #'k': 1.25,
             'max_path_length': 5,
             'theta_p': 0.5,
-            'multiprocessing': False,
+            'multiprocessing': True,
             'num_walks': 10000,
             'max_length': 5,
-            'theta_hit': 4.9,
+            'theta_hit': 4.9/5,
             'theta_sym': 0.1,
-            'theta_js': 1
+            'theta_js': 1,
             }
 
 RW1 = RandomWalker(hypergraph=H, config=config, num_walks=10000, walk_length=5)
@@ -59,7 +68,9 @@ class TestRandomWalks(unittest.TestCase):
     def test_correct_node_cluster_merging(self):
         for node in H.nodes.keys():
             nodes_rw_data = RW1.generate_node_random_walk_data(source_node=node)
-            close_nodes = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data, theta_hit=5)
+            close_nodes = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data,
+                                                                          length_of_random_walks=5,
+                                                                          theta_hit=5)
             # MERGE SOME CLUSTERS ------------------------------------------------------------------------------
             js_clusters = [NodeClusterRandomWalkData([node]) for node in close_nodes]
 
@@ -71,9 +82,12 @@ class TestRandomWalks(unittest.TestCase):
                 smallest_divergence = max_divergence
                 for i in range(len(js_clusters)):
                     for j in range(i + 1, len(js_clusters)):
-                        js_div, _ = compute_js_divergence_of_top_n_paths(js_clusters[i], js_clusters[j], 20, 10000, 2)
+                        js_div = compute_divergence_of_top_n_paths(node_cluster1=js_clusters[i],
+                                                                   node_cluster2=js_clusters[j],
+                                                                   number_of_walks=10000,
+                                                                   number_of_top_paths=20)
 
-                        if js_div < smallest_divergence and js_div < 0.25:
+                        if js_div < smallest_divergence and js_div < 0.01:
                             smallest_divergence = js_div
                             cluster_to_merge1 = i
                             cluster_to_merge2 = j
@@ -92,10 +106,8 @@ class TestRandomWalks(unittest.TestCase):
                 assert sum(node_cluster.path_counts.values()) == node_cluster.total_count
 
                 # verify that the probability distribution of path counts is correctly normalised
-                assert math.isclose(
-                    sum(node_cluster.get_top_n_path_probabilities(len(node_cluster.path_counts),
-                                                                  number_of_walks=node_cluster.total_count).values()),
-                    1)
+                assert sum(node_cluster.get_top_n_path_probabilities(len(node_cluster.path_counts),
+                                                                     number_of_walks=10000).values()) < 1
 
     def test_valid_average_hitting_time(self):
         max_path_length = 5
@@ -150,12 +162,16 @@ class TestRandomWalks(unittest.TestCase):
         q1 = {'d': 0.1, 'a': 0.7, 'b': 0.1, 'c': 0.1}
 
         assert math.isclose(js_divergence(p1, q1), 0.0776870668)
+        assert math.isclose(js_divergence(p1, q1), js_divergence(q1, p1))
+        assert math.isclose(sk_divergence(p1, q1), 0.1781658116)
+        assert math.isclose(sk_divergence(p1, q1), sk_divergence(q1, p1))
 
     def test_number_of_close_nodes_same_as_SOTA(self):
         len_of_close_nodes = []
         for node in H2.nodes.keys():
             nodes_rw_data = RW2.generate_node_random_walk_data(source_node=node)
             close_nodes_rw_data = get_close_nodes_based_on_truncated_hitting_time(nodes_rw_data,
+                                                                                  length_of_random_walks=config2['max_path_length'],
                                                                                   theta_hit=config2['theta_hit'])
             len_of_close_nodes.append(len(close_nodes_rw_data))
 
@@ -167,12 +183,20 @@ class TestRandomWalks(unittest.TestCase):
     def test_average_number_of_clusters_and_single_nodes_same_as_SOTA(self):
         clusters_and_single_nodes = []
         nodes = []
+        print(config2)
+        print('num_walks', config2['num_walks'])
+        print('theta_hit', config2['theta_hit'])
+        print('theta_sym', config2['theta_sym'])
+        print('theta_js', config2['theta_js'])
         communities2 = Communities(H2,
                                    config2,
+                                   use_js_div=True,
+                                   walk_length=5,
                                    num_walks=config2['num_walks'],
                                    theta_hit=config2['theta_hit'],
                                    theta_sym=config2['theta_sym'],
-                                   theta_js=config2['theta_js']).communities
+                                   merging_threshold=config2['theta_js']
+                                   ).communities
         for node_name, community in communities2.items():
             num_c_and_sn = community.number_of_single_nodes + community.number_of_clusters
             num_nodes = community.number_of_nodes

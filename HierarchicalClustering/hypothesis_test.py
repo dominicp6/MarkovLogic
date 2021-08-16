@@ -37,63 +37,66 @@ def hypothesis_test_path_symmetric_nodes(node_path_counts, number_of_walks, sign
 
     node_path_count_means = np.mean(node_path_counts, axis=1)
 
-    # For one path, a different statistical test is required than when there is more than one path
-    if number_of_paths == 1:
-        Q_max = chi2.isf(significance_level, df=number_of_nodes)
-        return Q_test_if_single_path(Q_max,
-                                     node_path_counts[0],
-                                     node_path_count_means[0],
-                                     number_of_nodes,
-                                     number_of_walks)
-    else:
-        number_of_hits = np.sum(node_path_counts, axis=0)
-        mean_number_of_hits = np.mean(number_of_hits)
+    # # For one path, a different statistical test is required than when there is more than one path
+    # if number_of_paths == 1:
+    #     Q_max = chi2.isf(significance_level, df=number_of_nodes)
+    #     return Q_test_if_single_path(Q_max,
+    #                                  node_path_counts[0],
+    #                                  node_path_count_means[0],
+    #                                  number_of_nodes,
+    #                                  number_of_walks)
+    # else:
+    #     number_of_hits = np.sum(node_path_counts, axis=0)
+    #     mean_number_of_hits = np.mean(number_of_hits)
 
-        Q_max = chi2.isf(significance_level, df=number_of_nodes * number_of_paths)
-        return Q_test_if_multiple_paths(Q_max,
-                                        node_path_counts,
-                                        node_path_count_means,
-                                        number_of_nodes,
-                                        number_of_paths,
-                                        mean_number_of_hits)
+    Q_max = chi2.isf(significance_level, df=number_of_nodes * number_of_paths)
+    return Q_test_if_multiple_paths(Q_max,
+                                    node_path_counts,
+                                    node_path_count_means,
+                                    number_of_nodes,
+                                    number_of_paths,
+                                    number_of_walks)
 
 
-def Q_test_if_single_path(Q_max: float, node_path_counts: np.array, mean_path_count: int, number_of_nodes: int,
-                          number_of_walks: int):
-    """
-    Tests whether the counts of a particular path are statistically similar for all nodes.
-
-    node_path_counts: (1) x (number_of_nodes)
-    returns: True/False
-    """
-
-    Q = 0
-    prefactor = 1 / ((1 + 1 / number_of_nodes) * mean_path_count * (1 - mean_path_count / number_of_walks))
-
-    for j in range(number_of_nodes):
-        Q += prefactor * (mean_path_count - node_path_counts[j]) ** 2
-
-        if Q > Q_max:
-            return False
-
-    return True
+# def Q_test_if_single_path(Q_max: float, node_path_counts: np.array, mean_path_count: int, number_of_nodes: int,
+#                           number_of_walks: int):
+#     """
+#     Tests whether the counts of a particular path are statistically similar for all nodes.
+#
+#     node_path_counts: (1) x (number_of_nodes)
+#     returns: True/False
+#     """
+#
+#     Q = 0
+#     prefactor = 1 / ((1 - 1 / number_of_nodes) * mean_path_count * (1 - mean_path_count / number_of_walks))
+#
+#     for j in range(number_of_nodes):
+#         Q += prefactor * (mean_path_count - node_path_counts[j]) ** 2
+#
+#         if Q > Q_max:
+#             return False
+#
+#     return True
 
 
 def Q_test_if_multiple_paths(Q_max: float, node_path_counts: np.array, node_path_count_means: np.array,
-                             number_of_nodes: int, number_of_paths: int, mean_number_of_hits: np.array):
+                             number_of_nodes: int, number_of_paths: int, number_of_walks: int):
     """
     Tests whether the path count distributions are statistically similar for all nodes.
 
-    node_path_counts: (number of paths) x (number of nodes)
+    Q_max:                 maximum permitted Q value before the null hypothesis is violated
+    node_path_counts:      (number of paths) x (number of nodes)
     node_path_count_means: (1) x (number of paths)
-    mean_number_of_hits: (1) x (number of nodes)
+    number_of_nodes:       number of distinct nodes who's path counts are being tested for similarity
+    number_of_paths:       number of distinct paths amongst the nodes
+    number_of_walks:       number of random walks run on the hypergraph to generate the path count data
     returns: True/False
     """
 
     Q = 0
     for i in range(number_of_paths):
-        prefactor = 1 / (node_path_count_means[i] * (1 + 1 / number_of_nodes) *
-                         (1 - node_path_count_means[i] / mean_number_of_hits))
+        prefactor = 1 / (node_path_count_means[i] * (1 - 1 / number_of_nodes) *
+                         (1 - node_path_count_means[i] / number_of_walks))
         for j in range(number_of_nodes):
             Q += prefactor * (node_path_count_means[i] - node_path_counts[i][j]) ** 2
 

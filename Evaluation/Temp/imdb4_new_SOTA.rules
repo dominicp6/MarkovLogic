@@ -1,93 +1,105 @@
-//LEN 2  #PATHS 15
+//LEN 2  #PATHS 17
 //LEN 3  #PATHS 2
 //LEN 4  #PATHS 9
-//LEN 5  #PATHS 17
+//LEN 5  #PATHS 21
 
 //INDEX  LEN  SUP  RULE
-0 2 32 director(0) workedUnder(1,0) 
-    DB_IDS  0 1 2 3
-1 2 32 movie(0,1) workedUnder(2,1) 
-    DB_IDS  0 1 2 3
-2 2 32 actor(0) movie(1,0) 
-    DB_IDS  0 1 2 3
-3 2 32 director(0) movie(1,0) 
-    DB_IDS  0 1 2 3
-4 2 32 workedUnder(0,1) workedUnder(2,1) 
-    DB_IDS  0 1 2 3
-5 2 32 movie(0,1) movie(0,2) 
-    DB_IDS  0 1 2 3
-6 2 32 actor(0) workedUnder(0,1) 
-    DB_IDS  0 1 2 3
-7 2 32 movie(0,1) workedUnder(1,2) 
-    DB_IDS  0 1 2 3
-8 3 32 director(0) actor(1) workedUnder(1,0) 
-    DB_IDS  0 1 2 3
-9 3 32 movie(0,1) movie(0,2) workedUnder(2,1) 
-    DB_IDS  0 1 2 3
-10 4 32 movie(0,1) movie(0,2) workedUnder(1,3) workedUnder(2,3) 
-    DB_IDS  0 1 2 3
-11 4 32 director(0) actor(1) movie(2,0) movie(2,1) 
-    DB_IDS  0 1 2 3
-12 4 32 actor(0) actor(1) movie(2,0) movie(2,1) 
-    DB_IDS  0 1 2 3
-13 4 32 actor(0) movie(1,0) movie(1,2) workedUnder(0,2) 
-    DB_IDS  0 1 2 3
-14 4 32 actor(0) actor(1) workedUnder(0,2) workedUnder(1,2) 
-    DB_IDS  0 1 2 3
-15 4 32 director(0) movie(1,0) movie(1,2) workedUnder(2,0) 
-    DB_IDS  0 1 2 3
-16 5 32 actor(0) movie(1,2) movie(1,3) workedUnder(0,2) workedUnder(3,2) 
-    DB_IDS  0 1 2 3
-17 5 32 director(0) movie(1,2) movie(1,3) workedUnder(2,0) workedUnder(3,0) 
-    DB_IDS  0 1 2 3
-18 5 32 movie(0,1) movie(0,2) movie(0,3) workedUnder(2,1) workedUnder(3,1) 
-    DB_IDS  0 1 2 3
-19 5 32 director(0) actor(1) actor(2) workedUnder(1,0) workedUnder(2,0) 
-    DB_IDS  0 1 2 3
-20 5 32 actor(0) movie(1,0) movie(1,2) workedUnder(0,3) workedUnder(2,3) 
-    DB_IDS  0 1 2 3
-21 5 32 director(0) actor(1) movie(2,1) movie(2,3) workedUnder(3,0) 
-    DB_IDS  0 1 2 3
-22 5 32 actor(0) movie(1,0) movie(1,2) movie(1,3) workedUnder(3,2) 
-    DB_IDS  0 1 2 3
-23 5 32 actor(0) actor(1) movie(2,1) movie(2,3) workedUnder(0,3) 
-    DB_IDS  0 1 2 3
-24 5 32 actor(0) actor(1) movie(2,0) movie(2,3) workedUnder(1,3) 
-    DB_IDS  0 1 2 3
-25 5 32 director(0) actor(1) movie(2,0) movie(2,1) workedUnder(1,0) 
-    DB_IDS  0 1 2 3
-26 2 19 gender(0,1) workedUnder(0,2) 
-    DB_IDS  0 1 2
-27 2 19 gender(0,1) gender(2,1) 
-    DB_IDS  0 1 2
-28 2 19 actor(0) gender(0,1) 
-    DB_IDS  0 1 2
-29 2 19 movie(0,1) gender(1,2) 
-    DB_IDS  0 1 2
-30 4 19 actor(0) actor(1) gender(0,2) gender(1,2) 
-    DB_IDS  0 1 2
-31 4 19 movie(0,1) movie(0,2) gender(1,3) gender(2,3) 
-    DB_IDS  0 1 2
-32 4 19 gender(0,1) gender(2,1) workedUnder(0,3) workedUnder(2,3) 
-    DB_IDS  0 1 2
-33 5 19 director(0) actor(1) gender(1,2) gender(3,2) workedUnder(3,0) 
-    DB_IDS  0 1 2
-34 5 19 director(0) actor(1) gender(1,3) gender(2,3) workedUnder(2,0) 
-    DB_IDS  0 1 2
-35 5 19 director(0) gender(1,2) gender(3,2) workedUnder(1,0) workedUnder(3,0) 
-    DB_IDS  0 1 2
-36 5 19 actor(0) gender(0,1) gender(2,1) workedUnder(0,3) workedUnder(2,3) 
-    DB_IDS  0 1 2
-37 5 19 actor(0) movie(1,0) movie(1,2) gender(0,3) gender(2,3) 
-    DB_IDS  0 1 2
-38 5 19 movie(0,1) movie(0,2) gender(2,4) gender(3,4) workedUnder(3,1) 
-    DB_IDS  0 1 2
-39 5 19 movie(0,1) movie(0,2) gender(2,3) gender(4,3) workedUnder(4,1) 
-    DB_IDS  0 1 2
-40 2 13 genre(0,1) workedUnder(2,0) 
-    DB_IDS  3
-41 2 13 director(0) genre(0,1) 
-    DB_IDS  3
-42 2 13 movie(0,1) genre(1,2) 
-    DB_IDS  3
+0 2 20 director(0) workedUnder(1,0) 
+    DB_IDS  0 1
+1 2 20 actor(0) movie(1,0) 
+    DB_IDS  0 1
+2 2 20 movie(0,1) workedUnder(2,1) 
+    DB_IDS  0 1
+3 2 20 director(0) movie(1,0) 
+    DB_IDS  0 1
+4 2 20 movie(0,1) movie(2,1) 
+    DB_IDS  0 1
+5 2 20 workedUnder(0,1) workedUnder(2,1) 
+    DB_IDS  0 1
+6 2 20 movie(0,1) movie(0,2) 
+    DB_IDS  0 1
+7 2 20 workedUnder(0,1) workedUnder(0,2) 
+    DB_IDS  0 1
+8 2 20 actor(0) workedUnder(0,1) 
+    DB_IDS  0 1
+9 2 20 movie(0,1) workedUnder(1,2) 
+    DB_IDS  0 1
+10 3 20 director(0) actor(1) workedUnder(1,0) 
+    DB_IDS  0 1
+11 3 20 movie(0,1) movie(0,2) workedUnder(2,1) 
+    DB_IDS  0 1
+12 4 20 movie(0,1) movie(0,2) workedUnder(1,3) workedUnder(2,3) 
+    DB_IDS  0 1
+13 4 20 director(0) actor(1) movie(2,0) movie(2,1) 
+    DB_IDS  0 1
+14 4 20 actor(0) actor(1) movie(2,0) movie(2,1) 
+    DB_IDS  0 1
+15 4 20 actor(0) movie(1,0) movie(1,2) workedUnder(0,2) 
+    DB_IDS  0 1
+16 4 20 actor(0) actor(1) workedUnder(0,2) workedUnder(1,2) 
+    DB_IDS  0 1
+17 4 20 director(0) movie(1,0) movie(1,2) workedUnder(2,0) 
+    DB_IDS  0 1
+18 5 20 actor(0) movie(1,2) movie(1,3) workedUnder(0,2) workedUnder(3,2) 
+    DB_IDS  0 1
+19 5 20 director(0) movie(1,2) movie(1,3) workedUnder(2,0) workedUnder(3,0) 
+    DB_IDS  0 1
+20 5 20 movie(0,1) movie(0,2) movie(0,3) workedUnder(2,1) workedUnder(3,1) 
+    DB_IDS  0 1
+21 5 20 director(0) actor(1) actor(2) workedUnder(1,0) workedUnder(2,0) 
+    DB_IDS  0 1
+22 5 20 actor(0) movie(1,0) movie(1,2) workedUnder(0,3) workedUnder(2,3) 
+    DB_IDS  0 1
+23 5 20 director(0) actor(1) movie(2,1) movie(2,3) workedUnder(3,0) 
+    DB_IDS  0 1
+24 5 20 actor(0) movie(1,0) movie(1,2) movie(1,3) workedUnder(3,2) 
+    DB_IDS  0 1
+25 5 20 actor(0) actor(1) movie(2,1) movie(2,3) workedUnder(0,3) 
+    DB_IDS  0 1
+26 5 20 actor(0) actor(1) movie(2,0) movie(2,3) workedUnder(1,3) 
+    DB_IDS  0 1
+27 5 20 director(0) actor(1) movie(2,0) movie(2,1) workedUnder(1,0) 
+    DB_IDS  0 1
+28 2 13 gender(0,1) workedUnder(0,2) 
+    DB_IDS  0
+29 2 13 actor(0) gender(0,1) 
+    DB_IDS  0
+30 2 13 movie(0,1) gender(1,2) 
+    DB_IDS  0
+31 2 11 genre(0,1) workedUnder(2,0) 
+    DB_IDS  1
+32 2 11 genre(0,1) genre(2,1) 
+    DB_IDS  1
+33 2 11 director(0) genre(0,1) 
+    DB_IDS  1
+34 2 11 movie(0,1) genre(1,2) 
+    DB_IDS  1
+35 4 11 director(0) director(1) workedUnder(2,0) workedUnder(2,1) 
+    DB_IDS  1
+36 4 11 genre(0,1) genre(2,1) workedUnder(3,0) workedUnder(3,2) 
+    DB_IDS  1
+37 4 11 director(0) director(1) genre(0,2) genre(1,2) 
+    DB_IDS  1
+38 5 11 director(0) actor(1) genre(0,2) genre(3,2) workedUnder(1,3) 
+    DB_IDS  1
+39 5 11 director(0) director(1) actor(2) workedUnder(2,0) workedUnder(2,1) 
+    DB_IDS  1
+40 5 11 director(0) actor(1) genre(0,3) genre(2,3) workedUnder(1,2) 
+    DB_IDS  1
+41 5 11 director(0) director(1) movie(2,1) movie(2,3) workedUnder(3,0) 
+    DB_IDS  1
+42 5 11 director(0) genre(0,1) genre(2,1) workedUnder(3,0) workedUnder(3,2) 
+    DB_IDS  1
+43 5 11 director(0) director(1) movie(2,0) movie(2,3) workedUnder(3,1) 
+    DB_IDS  1
+44 5 11 actor(0) genre(1,2) genre(3,2) workedUnder(0,1) workedUnder(0,3) 
+    DB_IDS  1
+45 5 11 movie(0,1) movie(0,2) genre(1,3) genre(4,3) workedUnder(2,4) 
+    DB_IDS  1
+46 5 11 movie(0,1) movie(0,2) genre(1,4) genre(3,4) workedUnder(2,3) 
+    DB_IDS  1
+47 5 11 director(0) actor(1) workedUnder(1,3) workedUnder(2,0) workedUnder(2,3) 
+    DB_IDS  1
+48 5 11 director(0) movie(1,2) movie(1,3) workedUnder(2,0) workedUnder(2,3) 
+    DB_IDS  1
 

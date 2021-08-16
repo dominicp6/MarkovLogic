@@ -79,7 +79,7 @@ class Hypergraph(object):
         Cancer(person)
     """
 
-    def __init__(self, database_file=None, info_file=None):
+    def __init__(self, database_file=None, info_file=None, assert_connected=True):
         self.singleton_edges = defaultdict(set)  # dict(node_name: set(predicate)), all edges with one node
         self.edges = {}                          # dict(edge_id: list(node_name)), all edges joining two or more nodes
         self.predicates = {}                     # dict(edge_id: predicate_name), the predicate name of each edge
@@ -98,7 +98,9 @@ class Hypergraph(object):
         elif info_file and not database_file:
             raise ValueError("Cannot generate hypergraph. Info file provided but no database file provided.")
         elif info_file and database_file:
-            self.construct_from_database(path_to_db_file=database_file, path_to_info_file=info_file)
+            self.construct_from_database(path_to_db_file=database_file,
+                                         path_to_info_file=info_file,
+                                         assert_connected=assert_connected)
         # if no .db and .info files provided, create an empty hypergraph object
         else:
             pass
@@ -111,7 +113,29 @@ class Hypergraph(object):
 
         return is_connected
 
-    def construct_from_database(self, path_to_db_file: str, path_to_info_file=None):
+    def get_database_of_hypergraph(self):
+        """
+        Returns a string representation of the database that corresponds to the hypergraph.
+        """
+        database_string = ""
+
+        # Get the ground atoms of each predicate
+        for predicate in self.predicate_argument_types.keys():
+
+            # Add the string representation of all unary ground atoms
+            for node in self.singleton_edges.keys():
+                if predicate in self.singleton_edges[node]:
+                    database_string += f"{predicate}({node})\n"
+            edge_ids_of_predicate = [edge_id for edge_id, predicate_name
+                                     in self.predicates.items() if predicate_name == predicate]
+
+            # Add the string representation of all non-unary ground atoms
+            for edge_id in edge_ids_of_predicate:
+                database_string += f"{predicate}("+",".join(self.edges[edge_id])+")\n"
+
+        return database_string
+
+    def construct_from_database(self, path_to_db_file: str, path_to_info_file=None, assert_connected=True):
 
         self.predicate_argument_types = self._get_predicate_argument_types_from_info_file(path_to_info_file)
 
@@ -135,7 +159,8 @@ class Hypergraph(object):
         for node_name in self.nodes.keys():
             self.is_source_node[node_name] = True
 
-        assert self.is_connected()
+        if assert_connected:
+            assert self.is_connected()
 
     def _get_predicate_argument_types_from_info_file(self, path_to_info_file: str):
         """
@@ -198,7 +223,7 @@ class Hypergraph(object):
 
         return edge, neighbor
 
-    def convert_to_graph(self, weighted=True):
+    def convert_to_graph(self, weighted=True, assert_connected=True):
         """
         Convert to a weighted graph by replacing each n-ary hyperedge with n-cliques.
 
@@ -220,7 +245,8 @@ class Hypergraph(object):
                 else:
                     graph.add_edge(*edge, weight=1)
 
-        # Check that the graph is connected
-        assert nx.is_connected(graph)
+        if assert_connected:
+            # Check that the graph is connected
+            assert nx.is_connected(graph)
 
         return graph

@@ -1,6 +1,7 @@
 #START_GRAPH  #COMS 67
 
-#START_DB  0  #COMS  1  #NUM_ATOMS 5
+#START_DB  0  #COMS  1  #NUM_ATOMS 6
+movie(NODE_63,CLUST_0)
 gender(CLUST_0,NODE_65)
 workedUnder(CLUST_0,CLUST_0)
 movie(CLUST_1,CLUST_0)
@@ -88,13 +89,12 @@ director(CLUST_0)
 actor(CLUST_1)
 #END_DB
 
-#START_DB  7  #COMS  1  #NUM_ATOMS 11
+#START_DB  7  #COMS  1  #NUM_ATOMS 10
 workedUnder(CLUST_0,NODE_14)
 movie(NODE_64,NODE_14)
 director(NODE_14)
 genre(NODE_14,CLUST_1)
 movie(NODE_64,CLUST_0)
-gender(CLUST_0,NODE_65)
 gender(CLUST_0,NODE_66)
 workedUnder(CLUST_0,CLUST_0)
 director(CLUST_0)
@@ -203,12 +203,13 @@ director(CLUST_0)
 actor(CLUST_1)
 #END_DB
 
-#START_DB  15  #COMS  1  #NUM_ATOMS 10
+#START_DB  15  #COMS  1  #NUM_ATOMS 11
 workedUnder(CLUST_0,NODE_2)
 movie(NODE_64,NODE_2)
 director(NODE_2)
 genre(NODE_2,CLUST_1)
 movie(NODE_64,CLUST_0)
+gender(CLUST_0,NODE_65)
 gender(CLUST_0,NODE_66)
 workedUnder(CLUST_0,CLUST_0)
 director(CLUST_0)
@@ -855,10 +856,9 @@ director(CLUST_0)
 actor(CLUST_0)
 #END_DB
 
-#START_DB  62  #COMS  1  #NUM_ATOMS 7
+#START_DB  62  #COMS  1  #NUM_ATOMS 6
 movie(NODE_62,CLUST_1)
 movie(NODE_62,CLUST_0)
-genre(CLUST_0,NODE_68)
 workedUnder(CLUST_1,CLUST_0)
 director(CLUST_0)
 gender(CLUST_1,CLUST_2)

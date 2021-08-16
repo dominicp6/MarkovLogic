@@ -82,6 +82,7 @@ class RandomWalker:
                   on this value, else an upperbound on the maximum number of unique paths is calculated based on the
                   length of the random walk and the number of predicates in the hypergraph
         """
+        gamma = 0.577  # Euler-Mascheroni constant
         if number_of_unique_paths is None:
             if self.number_of_predicates > 1:
                 max_num_of_unique_paths = 1 + (
@@ -92,8 +93,8 @@ class RandomWalker:
         else:
             max_num_of_unique_paths = number_of_unique_paths
 
-        return int(round(min(M + 1, max_num_of_unique_paths + 1) *
-                         np.log(max_num_of_unique_paths) / (self.epsilon ** 2)))
+        return int(round((min(M + 1, max_num_of_unique_paths + 1) *
+                         (np.log(max_num_of_unique_paths) + gamma) - 1) / (self.epsilon ** 2)))
 
     def generate_node_random_walk_data(self, source_node: str):
         """

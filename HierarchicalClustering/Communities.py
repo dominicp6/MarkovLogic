@@ -1,7 +1,7 @@
 from multiprocessing import Pool, cpu_count
 from typing import List, Set
 from HierarchicalClustering.RandomWalker import RandomWalker
-from HierarchicalClustering.clustering_nodes_by_path_similarity import *
+from HierarchicalClustering.cluster_by_path_similarity import *
 from HierarchicalClustering.GraphObjects import Hypergraph
 from HierarchicalClustering.errors import check_argument
 
@@ -14,8 +14,9 @@ class Communities(object):
                  walk_length=None,
                  theta_hit=None,
                  theta_sym=None,
-                 theta_js=None,
-                 num_top_paths=None):
+                 merging_threshold=None,
+                 num_top_paths=None,
+                 use_js_div=False):
 
         """
         Generates the communities associated with a hypergraph.
@@ -41,20 +42,16 @@ class Communities(object):
 
         self.theta_hit = theta_hit
         self.theta_sym = theta_sym
-
-        # to convert from Alchemy's theta_js to our algorithm's theta_js parameter we need to normalise by the
-        # number of random walks that we run
-        if theta_js is not None and num_walks is not None:
-            self.theta_js = theta_js / num_walks
-        else:
-            self.theta_js = theta_js
+        self.merging_threshold = merging_threshold
 
         self.num_top_paths = num_top_paths
+        self.use_js_div = use_js_div
+
+        if hypergraph.diameter is None:
+            # if hypergraph diameter is not known, then calculate it
+            hypergraph.diameter = hypergraph.convert_to_graph().diameter()
 
         self.hypergraph = hypergraph
-        if hypergraph.diameter is None:
-            print(f"Warning: Graph of the hypergraph not known. Reverting to using default length of random "
-                  f"walks.")
 
         self.random_walker = RandomWalker(hypergraph=hypergraph,
                                           config=config,
@@ -100,8 +97,9 @@ class Communities(object):
                                                      number_of_walks=self.random_walker.number_of_walks_ran,
                                                      theta_sym=theta_sym,
                                                      config=config,
-                                                     theta_js=self.theta_js,
-                                                     num_top_paths=self.num_top_paths)
+                                                     threshold=self.merging_threshold,
+                                                     num_top_paths=self.num_top_paths,
+                                                     use_js_div=self.use_js_div)
                 single_nodes_of_node_type[node_type] = single_nodes_of_type
                 clusters.extend(clusters_of_type)
 
@@ -127,7 +125,7 @@ class Communities(object):
         if self.theta_sym:
             theta_sym = self.theta_sym
         else:
-            theta_sym = compute_theta_sym(config['theta_p'],
+            theta_sym = compute_theta_sym(config['alpha'],
                                           self.random_walker.number_of_walks_ran,
                                           self.random_walker.length_of_walk)
 
@@ -136,17 +134,17 @@ class Communities(object):
     @staticmethod
     def _check_arguments(config):
         check_argument('epsilon', config['epsilon'], float, 0, 1)
+        check_argument('alpha', config['alpha'], float, 0, 1)
         check_argument('max_num_paths', config['max_num_paths'], int, 0)
         check_argument('pca_dim', config['pca_dim'], int, 2, strict_inequalities=False)
         check_argument('clustering_method_threshold', config['clustering_method_threshold'], int, 4,
                        strict_inequalities=False)
         check_argument('max_path_length', config['max_path_length'], int, 0)
-        check_argument('theta_p', config['theta_p'], float, 0, 1)
         check_argument('multiprocessing', config['multiprocessing'], bool)
         if config['pruning_value'] is not None:
             check_argument('pruning_value', config['pruning_value'], int, 0)
         if 'clustering_type' in config:
-            assert config['clustering_type'] in ['JS', 'kmeans', 'birch']
+            assert config['clustering_type'] in ['agglomerative_clustering', 'kmeans', 'birch']
 
 
 class Community(object):

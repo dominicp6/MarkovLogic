@@ -13,10 +13,10 @@ from collections import defaultdict
 from tqdm import tqdm
 from typing import List
 
-from GraphObjects import Hypergraph
-from HierarchicalClusterer import HierarchicalClusterer
-from Communities import Communities
-from CommunityPrinter import CommunityPrinter
+from MarkovLogic.HierarchicalClustering.GraphObjects import Hypergraph
+from MarkovLogic.HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
+from MarkovLogic.HierarchicalClustering.Communities import Communities
+from MarkovLogic.HierarchicalClustering.CommunityPrinter import CommunityPrinter
 
 
 def timeout(seconds=7, error_message=os.strerror(errno.ETIME)):
@@ -106,7 +106,7 @@ class MLNEvaluator(object):
                     'pca_dim': 2,
                     'clustering_method_threshold': 50,
                     'max_path_length': 5,
-                    'theta_p': 0.01,
+                    'alpha': 0.01,
                     'pruning_value': None,
                     'multiprocessing': True
                 }
@@ -120,8 +120,9 @@ class MLNEvaluator(object):
                 "max_length": 5,
                 "theta_hit": 4.9,
                 "theta_sym": 0.1,
-                "theta_js": 1,
+                "merging_threshold": 1,
                 "num_top": 3,
+                "use_js_div": True,
             }
         else:
             self.sm_config = sm_config
@@ -174,7 +175,7 @@ class MLNEvaluator(object):
         random_walks_command = f'{self.lsm_dir}/rwl/rwl {self.data_dir}/{info_file} {self.data_dir}/' \
                                f'{database} {self.data_dir}/{type_file} {self.sm_config["num_walks"]} ' \
                                f'{self.sm_config["max_length"]} 0.05 0.1 {self.sm_config["theta_hit"]} ' \
-                               f'{self.sm_config["theta_sym"]} {self.sm_config["theta_js"]} ' \
+                               f'{self.sm_config["theta_sym"]} {self.sm_config["merging_threshold"]} ' \
                                f'{self.sm_config["num_top"]} {self.seed} {self.temp_dir}/{save_name}.ldb ' \
                                f'{self.temp_dir}/{save_name}.uldb {self.temp_dir}/{save_name}.srcnclusts > ' \
                                f'{self.log_dir}/{save_name}-rwl.log'
@@ -269,9 +270,10 @@ class MLNEvaluator(object):
                     hypergraph_communities.append(Communities(hypergraph, config=self.hc_config['random_walk_params'],
                                                               num_walks=self.sm_config['num_walks'],
                                                               walk_length=self.sm_config['max_length'],
-                                                              theta_hit=self.sm_config['theta_hit'],
+                                                              theta_hit=self.sm_config['theta_hit']/self.sm_config['max_length'],
                                                               theta_sym=self.sm_config['theta_sym'],
-                                                              theta_js=self.sm_config['theta_js']))
+                                                              merging_threshold=self.sm_config['merging_threshold'],
+                                                              use_js_div=True))
                 else:
                     hypergraph_communities.append(Communities(hypergraph, config=self.hc_config['random_walk_params']))
         else:
@@ -279,9 +281,10 @@ class MLNEvaluator(object):
                 hypergraph_communities = [Communities(original_hypergraph, config=self.hc_config['random_walk_params'],
                                                       num_walks=self.sm_config['num_walks'],
                                                       walk_length=self.sm_config['max_length'],
-                                                      theta_hit=self.sm_config['theta_hit'],
+                                                      theta_hit=self.sm_config['theta_hit']/self.sm_config['max_length'],
                                                       theta_sym=self.sm_config['theta_sym'],
-                                                      theta_js=self.sm_config['theta_js'])]
+                                                      merging_threshold=self.sm_config['merging_threshold'],
+                                                      use_js_div=True)]
             else:
                 hypergraph_communities = [Communities(original_hypergraph, config=self.hc_config['random_walk_params'])]
 
@@ -406,7 +409,7 @@ class MLNEvaluator(object):
                               0])  # Line corresponds to a formula if it starts with a floating point number (formula
                     # weight)
                     formula = split_line[1]
-                    formula_length = len(formula.split(' '))
+                    formula_length = len(formula.split(' v'))
                     formula_lengths.append(formula_length)
                 except:
                     continue  # Line was not a formula
@@ -619,10 +622,15 @@ class MLNEvaluator(object):
 
 
 if __name__ == "__main__":
-    evaluator = MLNEvaluator(only_new_algorithm=True, with_clustering=True, with_original_hyperparameters=False)
+    evaluator = MLNEvaluator(only_new_algorithm=False, with_clustering=False, with_original_hyperparameters=True,
+                             seed=3)
     # for database in ['imdb1.db','imdb4.db', 'imdb5.db']:
     evaluator.evaluate(database_files=['imdb1.db'],
                        info_file='imdb.info', type_file='imdb.type')
+    # evaluator.evaluate(database_files=['imdb1.db'],
+    #                    info_file='imdb.info', type_file='imdb.type')
+    # evaluator.evaluate(database_files=['imdb1.db'],
+    #                    info_file='imdb.info', type_file='imdb.type')
     # evaluator.evaluate_MLNs(database_file_names=['imdb1.db', 'imdb2.db'])
     # evaluator.run_inference_on_MLN('imdb1_sm', ['./Data/imdb2.db'])
     #evaluator.evaluate_CLL_of_MLN('imdb3_hc', ['./Data/imdb2.db', './Data/imdb4.db', './Data/imdb5.db'])

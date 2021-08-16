@@ -3,6 +3,7 @@ import operator
 import warnings
 from typing import List
 
+
 class NodeRandomWalkData(object):
     """
     Data structure to store hitting time and path count information for each node during random walks.
@@ -105,7 +106,8 @@ class NodeClusterRandomWalkData(object):
         return len(self.meaningful_paths)
 
     def get_top_n_path_probabilities(self, n, number_of_walks):
-        path_probabilities = {key: value / number_of_walks for key, value in self.path_counts.items()}
+        normalizing_factor = number_of_walks * self.number_of_nodes()
+        path_probabilities = {key: value / normalizing_factor for key, value in self.path_counts.items()}
         sorted_probabilities = sorted(path_probabilities.items(), key=operator.itemgetter(1), reverse=True)
 
         if n < len(sorted_probabilities):

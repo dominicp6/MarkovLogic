@@ -12,14 +12,15 @@ if __name__ == "__main__":
             'max_lambda2': 0.8,
         },
         'random_walk_params': {
-            'epsilon': 0.05,
+            'epsilon': 0.1,
+            'alpha': 0.1,
             'max_num_paths': 3,
             'pca_dim': 2,
             'clustering_method_threshold': 50,
+            'cluctering_type': 'kmeans',
             'max_path_length': 5,
-            'theta_p': 0.01,
-            'pruning_value': 10,
-            'multiprocessing': False
+            'pruning_value': None,
+            'multiprocessing': True
         }
     }
 
@@ -32,17 +33,15 @@ if __name__ == "__main__":
         "num_top": 3,
     }
 
-    original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb.info')
-
-    # cProfile.run("Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')")
-
+    original_hypergraph = Hypergraph(database_file='./Databases/ani.db', info_file='./Databases/ani.info')
+    #cProfile.run("Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')")
     hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
     hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
-    hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params'])
-                              for hypergraph in hypergraph_clusters]
+    #hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params'])
+    #                           for hypergraph in hypergraph_clusters]
 
     # hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]
-    # cProfile.run("Communities(hypergraph_clusters[0], config=config['random_walk_params'])")
+    cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
     # cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
     # for communities in hypergraph_communities:
     #     print(communities)
@@ -52,15 +51,15 @@ if __name__ == "__main__":
     # communities = Communities(original_hypergraph, config=config['random_walk_params'])
     # list_of_communities = [Communities(hypergraph, config=config['random_walk_params'])
     #                        for hypergraph in hypergraph_clusters]
-    list_of_communities = [Communities(original_hypergraph,
-                                        config=config['random_walk_params'],
-                                        )]
+    # list_of_communities = [Communities(original_hypergraph,
+    #                                     config=config['random_walk_params'],
+    #                                     )]
 
-    community_printer = CommunityPrinter(
-        list_of_communities=hypergraph_communities,
-        original_hypergraph=original_hypergraph)
-    for communities in list_of_communities:
-        print(communities)
+    # community_printer = CommunityPrinter(
+    #     list_of_communities=hypergraph_communities,
+    #     original_hypergraph=original_hypergraph)
+    # for communities in list_of_communities:
+    #     print(communities)
     #community_printer.write_files(file_name='imdb')
 
     # print('Average number of single nodes')
