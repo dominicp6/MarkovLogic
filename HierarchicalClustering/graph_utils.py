@@ -10,10 +10,8 @@ def get_second_eigenpair(graph: Graph):
     assert isinstance(graph, nx.Graph)
 
     laplacian_matrix = nx.normalized_laplacian_matrix(graph)
-
     # Compute the second smallest eigenvalue of the laplacian matrix
     eigen_values, eigen_vectors = eigsh(laplacian_matrix, which="SM", k=2)
-
     vector2 = eigen_vectors[:, 1]
     lambda2 = eigen_values[1]
 

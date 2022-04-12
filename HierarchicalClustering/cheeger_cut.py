@@ -72,7 +72,7 @@ def cheeger_cut(graph: Graph, v_2):
     """
     # Compute the key graph matrices
     adjacency_matrix = nx.adjacency_matrix(graph)
-    graph_degrees = [t[1] for t in nx.degree(graph)]
+    graph_degrees = [t[1] for t in nx.degree(graph, weight='weight')]
 
     # Perform the sweep set operation to find the sparsest cut
     vertices_indices1 = sweep_set(adjacency_matrix, v_2, graph_degrees)

@@ -56,8 +56,8 @@ class HierarchicalClusterer(object):
     def get_clusters(self, graph: Graph):
         v_2, lambda2 = get_second_eigenpair(graph)
 
-        # stop splitting if lambda2 stop criterion met
-        if lambda2 > self.max_lambda2:
+        # stop splitting if lambda2 stop criterion met or cluster size criterion surely met
+        if lambda2 > self.max_lambda2 or graph.number_of_nodes() < 2 * self.min_cluster_size:
             self.graph_clusters.append(graph)
             return None
         else:
