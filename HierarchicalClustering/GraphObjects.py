@@ -106,6 +106,12 @@ class Hypergraph(object):
         else:
             pass
 
+    def __str__(self):
+        return f"Hypergraph(vertices: {self.number_of_nodes()}, " \
+               f"edges: {self.number_of_edges()}, " \
+               f"predicates: {self.number_of_predicates()}, " \
+               f"diameter: {self.diameter()})"
+
     def is_connected(self):
         is_connected = True
         # the hypergraph is not connected if there exists a node which only belongs to singleton edges
@@ -227,3 +233,9 @@ class Hypergraph(object):
         assert nx.is_connected(graph)
 
         return graph
+
+    def diameter(self):
+        if self.estimated_graph_diameter is not None:
+            return self.estimated_graph_diameter
+        else:
+            return self.convert_to_graph().get_estimated_diameter()

@@ -17,7 +17,7 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
     return: theta_sym: used as a parameter for clustering based on truncated hitting time
     """
 
-    return ((length_of_walk - 1) / (2 ** 0.5 * number_of_walks_ran)) * t.isf(alpha_sym, df=number_of_walks_ran - 1)
+    return ((length_of_walk - 1) / (2 * number_of_walks_ran) ** 0.5) * t.isf(alpha_sym, df=number_of_walks_ran - 1)
 
 
 def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
