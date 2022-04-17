@@ -17,7 +17,6 @@ if __name__ == "__main__":
             'alpha_sym': 0.1,
             'pca_dim': 2,
             'clustering_method_threshold': 50,
-            'k': 1.25,
             'max_path_length': 5,
             'theta_p': 0.5,
             'multiprocessing': False
