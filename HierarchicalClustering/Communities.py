@@ -68,7 +68,9 @@ class Communities(object):
                                       self.random_walker.number_of_walks_ran,
                                       self.random_walker.length_of_walk)
 
-        close_nodes = get_commonly_encountered_nodes(random_walk_data)
+        close_nodes = get_commonly_encountered_nodes(nodes_random_walk_data=random_walk_data,
+                                                     number_of_walks_ran=self.random_walker.number_of_walks_ran,
+                                                     epsilon=config['epsilon'])
 
         for node_type in self.hypergraph.node_types:
             nodes_of_type = [node for node in close_nodes if node.node_type == node_type]

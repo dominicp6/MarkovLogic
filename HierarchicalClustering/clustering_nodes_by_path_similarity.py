@@ -20,12 +20,15 @@ def compute_theta_sym(alpha_sym, number_of_walks_ran, length_of_walk):
     return ((length_of_walk - 1) / (2 * number_of_walks_ran) ** 0.5) * t.isf(alpha_sym, df=number_of_walks_ran - 1)
 
 
-def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData]):
+def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomWalkData],
+                                   number_of_walks_ran: int,
+                                   epsilon: float):
     """
     Returns those nodes from a list of nodes that have robust enough path count data to be subsequently merged based
     on path count distribution (i.e. their third most common path has at least 10 counts).
     """
-    return {node for node in nodes_random_walk_data.values() if node.get_count_of_nth_path(n=3) >= 10}
+    return {node for node in nodes_random_walk_data.values()
+            if node.get_count_of_nth_path(n=3) >= number_of_walks_ran/(number_of_walks_ran*epsilon**2 + 1)}
 
 
 def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_walks: int, theta_sym: float,

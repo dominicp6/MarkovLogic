@@ -53,8 +53,8 @@ if __name__ == "__main__":
 
 
     print('Original Hypergraph')
-    original_hypergraph = Hypergraph(database_file='./Databases/MovieLensMini.db',
-                                     info_file='./Databases/MovieLensMini.info')
+    original_hypergraph = Hypergraph(database_file='./Databases/imdb1.db',
+                                     info_file='./Databases/imdb1.info')
     print(original_hypergraph)
     hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
     hierarchical_clusterer.run_hierarchical_clustering()
@@ -66,25 +66,22 @@ if __name__ == "__main__":
     compute_speed_up(original_hypergraph, hierarchical_clusterer.hypergraph_clusters)
 
 
+    cProfile.run("Hypergraph(database_file='./Databases/imdb1.db', info_file='./Databases/imdb1.info')")
 
+    hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
+    hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
 
+    hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params'])
+                              for hypergraph in hypergraph_clusters]
 
+    [Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]
 
-
-    #cProfile.run("Hypergraph(database_file='./Databases/kinship.db', info_file='./Databases/kinship.info')")
-
-    #hierarchical_clusterer = HierarchicalClusterer(hypergraph=original_hypergraph, config=config['clustering_params'])
-    #hypergraph_clusters = hierarchical_clusterer.run_hierarchical_clustering()
-
-    # hypergraph_communities = [Communities(hypergraph, config=config['random_walk_params'])
-    #                           for hypergraph in hypergraph_clusters]
-
-    #[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]
     #cProfile.run("Communities(hypergraph_clusters[0], config=config['random_walk_params'])")
-    #cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
+    cProfile.run("[Communities(hypergraph, config=config['random_walk_params']) for hypergraph in hypergraph_clusters]")
 
-    # for communities in hypergraph_communities:
-    #     print(communities)
+    for communities in hypergraph_communities:
+        print(communities)
+
     # communities = Communities(original_hypergraph, config=config['random_walk_params'])
     # community_printer = CommunityPrinter(list_of_communities=hypergraph_communities,
     #                                      original_hypergraph=original_hypergraph)

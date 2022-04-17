@@ -87,7 +87,7 @@ class Hypergraph(object):
         self.edges = {}                          # dict(edge_id: list(node_name)), all edges joining two or more nodes
         self.predicates = {}                     # dict(edge_id: predicate_name), the predicate name of each edge
         self.nodes = {}                          # dict(node_name: node_type), each node and their type
-        self.memberships = defaultdict(set)      # dict(node_name: set(edge_id)), the edges each node is a member of
+        self.memberships = defaultdict(list)     # dict(node_name: list(edge_id)), the edges each node is a member of
         self.predicate_argument_types = {}       # dict(predicate_name: list(node_type)), the node types that go into
                                                  # arguments of the predicate
         self.node_types = set()                  # set(node_types), all unique node types in the hypergraph
@@ -175,7 +175,7 @@ class Hypergraph(object):
         else:
             self.edges[edge_id] = nodes
             self.predicates[edge_id] = predicate
-            [self.memberships[node].add(edge_id) for node in nodes]
+            [self.memberships[node].append(edge_id) for node in nodes]
             for node_position, node in enumerate(nodes):
                 node_type = self.predicate_argument_types[predicate][node_position]
                 self.nodes[node] = node_type
@@ -200,7 +200,7 @@ class Hypergraph(object):
         from the other nodes in that hyperedge (neighbor). Returns the hyperedge and the neighbor.
         """
         edges = self.memberships[node]
-        edge = random.choice(list(edges))
+        edge = random.choice(edges)
         nodes_of_edge = self.edges[edge].copy()
         nodes_of_edge.remove(node)
         neighbor = random.choice(nodes_of_edge)

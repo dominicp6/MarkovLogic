@@ -30,7 +30,6 @@ class RandomWalker:
         self.number_of_paths = config['max_num_paths']
         self.max_path_length = config['max_path_length']
         self.epsilon = config['epsilon']
-        self.k = config['k']
         self.alpha_sym = config['alpha_sym']
 
         self.fraction_of_max_walks_to_always_complete = 0.25
@@ -58,7 +57,8 @@ class RandomWalker:
         that generated the hypergraph.
         """
         if self.hypergraph.estimated_graph_diameter is not None:
-            length_of_walk = int(round(self.k * self.hypergraph.estimated_graph_diameter))
+            # Add +1 to account for the estimated graph diameter being a lower bound
+            length_of_walk = int(self.hypergraph.estimated_graph_diameter + 1)
         else:
             length_of_walk = self.max_path_length
 
