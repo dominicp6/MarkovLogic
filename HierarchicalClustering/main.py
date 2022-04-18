@@ -1,10 +1,5 @@
 from GraphObjects import Hypergraph
-from HierarchicalClusterer import HierarchicalClusterer
-from Communities import Communities
-from CommunityPrinter import CommunityPrinter
-import cProfile
-import numpy as np
-from diagnostics import hierarchical_clustering_diagnostics, hypergraph_diagnostics
+from HierarchicalClustering.diagnostics import hierarchical_clustering_diagnostics, hypergraph_diagnostics
 
 if __name__ == "__main__":
     config = {
