@@ -27,6 +27,7 @@ class MLNEvaluator(object):
                  combined_database_evaluation=False,
                  FASTER_parameters=None,
                  master_results_file=None,
+                 individual_query_predicates=False,
                  FASTER_timeout=5):
 
         assert not (only_FASTER and only_ALCHEMY), "only_FASTER and only_ALCHEMY cannot both be True!"
@@ -60,6 +61,7 @@ class MLNEvaluator(object):
             self.FASTER_parameters = [0.1, 0.001, 1, 0.8, 10]
         else:
             self.FASTER_parameters = FASTER_parameters
+        self.individual_query_predicates = individual_query_predicates
 
         self.delete_generated_files = delete_generated_files
         self.FASTER_timeout = FASTER_timeout
@@ -172,14 +174,27 @@ class MLNEvaluator(object):
         else:
             algorithms = ('alchemy', 'FASTER')
 
-        inference_exp_params = itertools.product(self.database_files[:self.number_to_run], algorithms)
 
-        pool = Pool(processes=cpu_count())
-        pool.starmap(self.run_inference_on_MLN_by_method,
-                     [(test_database.rstrip('.db'), test_database, query_predicates, algorithm)
-                      for (test_database, algorithm)
-                      in inference_exp_params])
-        pool.close()
+        if not self.individual_query_predicates:
+            inference_exp_params = itertools.product(self.database_files[:self.number_to_run], algorithms)
+
+            pool = Pool(processes=cpu_count())
+            pool.starmap(self.run_inference_on_MLN_by_method,
+                         [(test_database.rstrip('.db'), test_database, query_predicates, algorithm)
+                          for (test_database, algorithm)
+                          in inference_exp_params])
+            pool.close()
+        else:
+            query_predicate_list = query_predicates.split(',')
+            inference_exp_params = itertools.product(self.database_files[:self.number_to_run], algorithms, query_predicate_list)
+            print(inference_exp_params)
+            pool = Pool(processes=cpu_count())
+            pool.starmap(self.run_inference_on_MLN_by_method,
+                         [(test_database.rstrip('.db'), test_database, query_predicate, algorithm)
+                          for (test_database, algorithm, query_predicate)
+                          in inference_exp_params])
+            pool.close()
+
 
     def run_inference_on_MLN_by_method(self, mln: str, test_database: str,
                                        query_predicates: str, method: str):
@@ -522,15 +537,16 @@ if __name__ == "__main__":
                                     results_dir='/home/dominic/CLionProjects/FASTER/Experiments/cora/results',
                                     log_dir='/home/dominic/CLionProjects/FASTER/Experiments/cora',
                                     inference_calculations_dir='/home/dominic/CLionProjects/FASTER/Experiments/cora/results/inference',
-                                    database_files=['cora0_filtered.db', 'cora1_filtered.db', 'cora2_filtered.db'],
+                                    database_files=['micro1.db', 'micro2.db'],
                                     delete_generated_files=False,
-                                    info_file='cora.info',
-                                    type_file='cora.type',
+                                    info_file='micro.info',
+                                    type_file='micro.type',
                                     FASTER_parameters=[0.2, 0.01, 1, 0.8, 10],
                                     only_FASTER=False,
                                     only_ALCHEMY=False,
                                     parallel_structure_learning=True,
                                     combined_database_evaluation=False,
                                     master_results_file='/home/dominic/CLionProjects/FASTER/Experiments/cora',
+                                    individual_query_predicates=True,
                                     FASTER_timeout=1800)
     cora_evaluator.execute_experiments(skip_structure_learning=False, skip_inference=False, skip_evaluation=False)
