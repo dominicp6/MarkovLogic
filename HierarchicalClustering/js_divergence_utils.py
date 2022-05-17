@@ -2,13 +2,13 @@ import numpy as np
 from NodeRandomWalkData import NodeClusterRandomWalkData
 
 
-def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkData,
+def compute_sk_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkData,
                                          node_cluster2: NodeClusterRandomWalkData,
                                          number_of_top_paths: int,
                                          number_of_walks: int,
                                          z_score=None):
     """
-    Computes the Jensen-Shannon divergence between the probability distributions of the top n most common
+    Computes the symmetric Kulbeck-Liebler divergence between the probability distributions of the top n most common
     paths in the path distributions of two node clusters.
 
     If a z-score is provided, then also computes the corresponding threshold JS divergence at which the null hypothesis
@@ -19,49 +19,38 @@ def compute_js_divergence_of_top_n_paths(node_cluster1: NodeClusterRandomWalkDat
 
     m = compute_average_distribution(p, q)
 
-    js_div = js_divergence(p, q, m)
+    sk_div = sk_divergence(p, q, m)
 
     if z_score is not None:
-        theta_js = compute_threshold_js_divergence(number_of_walks=number_of_walks,
-                                                   average_path_probabilities=m,
+        theta_sk = compute_threshold_sk_divergence(N=number_of_walks,
+                                                   m=m,
                                                    number_of_top_paths=number_of_top_paths,
-                                                   z_score=z_score)
-        return js_div, theta_js
+                                                   significance_level=significance_level)
+        return sk_div, theta_sk
     else:
-        return js_div
+        return sk_div
 
 
-def compute_threshold_js_divergence(number_of_walks: int,
-                                    average_path_probabilities: dict,
-                                    number_of_top_paths: int,
-                                    z_score: float):
+def compute_threshold_sk_divergence(N: int, m: dict, number_of_top_paths: int, significance_level: float):
     """
     Given the number of random walks ran, and the average path distribution of the two clusters, calculates a
-    Jensen-Shannon divergence threshold for merger of the node clusters.
-
-    Computing the threshold requires additionally specifying
-    (1) the number of top paths used when calculating the Jensen-Shannon divergence
-    (2) the threshold z-score (defines how extreme the deviations between the Jensen-Shannon divergence of
-       two distributions is permitted to be before the differences are no longer assumed to be explainable
-       due to chance alone)
+    symmetric Kulbeck-Liebler divergence threshold for merger of the node clusters.
     """
+    m_values = np.sort(np.array(m.values()), reversed=True)
 
-    average_probability = list(average_path_probabilities.values())
-    average_probability.sort(reverse=True)
-    k = min(len(average_probability), number_of_top_paths)
-    sigma_J_squared = (13/(8*number_of_walks))*sum([average_probability[i] * (1-average_probability[i])
-                                                    for i in range(k)])
-    sigma_J = np.sqrt(sigma_J_squared)
-    mu_J = (1/(2*number_of_walks))*sum([(1-average_probability[i]) for i in range(k)])
+    # number of paths to include in calculation of the critical value
+    n = min(len(m_values), number_of_top_paths)
+    weight_vector = (1/N) * (1 - m_values[:n])
+    dof_vector = [1] * n
 
-    theta_JS = mu_J + z_score * sigma_J
+
 
     return theta_JS
 
 
-def js_divergence(p: dict, q: dict, m=None):
+def sk_divergence(p: dict, q: dict, m=None):
     """
-    Computes the Jensen-Shannon divergence between two discrete probability distributions p and q.
+    Computes the symmetric Kulbeck-Liebler divergence between two discrete probability distributions p and q.
     If the average distribution of p and q has been pre-computed then it can be provided as an argument.
     """
     if m is None:

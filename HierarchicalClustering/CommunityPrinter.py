@@ -21,7 +21,7 @@ class CommunityPrinter(object):
                                                                                  f"original_hypergraph. More " \
                                                                                  f"communities found (" \
                                                                                  f"{self.num_of_communities}) than " \
-                                                                                 f"the number of node in " \
+                                                                                 f"the number of nodes in " \
                                                                                  f"original_hypergraph (" \
                                                                                  f"{original_hypergraph.number_of_nodes()})."
 

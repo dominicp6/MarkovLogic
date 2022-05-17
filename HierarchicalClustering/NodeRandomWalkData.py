@@ -40,26 +40,31 @@ class NodeRandomWalkData(object):
         """
         paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)
         if n < len(self.path_counts):
-            count = paths[n-1][1]  # get the count of the nth most common path
+            count = paths[n - 1][1]  # get the count of the nth most common path
         elif len(self.path_counts) >= 1:
-            count = paths[-1][1]   # get the count of the least common path
+            count = paths[-1][1]  # get the count of the least common path
         else:
-            count = 0              # no paths found - node was never hit
+            count = 0  # no paths found - node was never hit
 
         return count
 
-    def get_top_paths(self, number_of_paths, as_list=False):
-        if number_of_paths < len(self.path_counts):
-            top_paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)[:number_of_paths]
+    def get_top_paths(self, number_of_paths, path_length=None):
+        if path_length is not None:
+            # filter paths based on desired path length
+            path_counts = {path: path_count for (path, path_count)
+                           in self.path_counts.items() if path.count(',') == path_length}
         else:
-            top_paths = sorted(self.path_counts.items(), key=lambda x: x[1], reverse=True)
+            # keep all paths
+            path_counts = self.path_counts
+
+        if number_of_paths < len(path_counts):
+            # only output the top number_of_paths most common
+            top_paths = sorted(path_counts.items(), key=lambda x: x[1], reverse=True)[:number_of_paths]
+        else:
+            # output all paths
+            top_paths = sorted(path_counts.items(), key=lambda x: x[1], reverse=True)
 
         top_paths = dict(top_paths)
-
-        if as_list:
-            top_paths = list(top_paths.values())
-            while len(top_paths) < number_of_paths:
-                top_paths.append(0)
 
         return top_paths
 

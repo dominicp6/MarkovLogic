@@ -78,6 +78,7 @@ class Communities(object):
                 single_nodes_of_type, clusters_of_type = \
                     cluster_nodes_by_path_similarity(nodes=nodes_of_type,
                                                      number_of_walks=self.random_walker.number_of_walks_ran,
+                                                     length_of_walks=self.random_walker.length_of_walk,
                                                      theta_sym=theta_sym,
                                                      config=config)
 

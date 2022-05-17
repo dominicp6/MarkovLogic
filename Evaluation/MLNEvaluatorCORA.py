@@ -4,150 +4,7 @@ import numpy as np
 import subprocess
 import time
 import itertools
-from collections import defaultdict
 from multiprocessing import Pool, cpu_count
-
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-def compute_mean_statisics(directory, experiment_title):
-    quantities = ['motif_time', 'structure_learning_time', 'mln_statistics', 'inference_result', 'errors']
-    algorithms = ['FASTER']
-    file_suffixes = ["_".join(pair) for pair in itertools.product(algorithms, quantities)]
-    experiment_prefix = os.path.join(directory, experiment_title)
-    average_statistics = os.path.join(directory, "RESULTS" + experiment_title)
-
-    with open(average_statistics, "a") as f:
-        for file_suffix in file_suffixes:
-            if "errors" in file_suffix:
-                try:
-                    with open(experiment_prefix+file_suffix, "r") as results_file:
-                        for line in results_file.readlines():
-                            print(f"ERROR: {line}", file=f)
-                except:
-                    pass
-            else:
-                with open(experiment_prefix+file_suffix, "r") as results_file:
-                    if "motif_time" in file_suffix:
-                        append_motif_time_data_to_file(results_file, file_suffix, f)
-
-                    elif "structure_learning_time" in file_suffix:
-                        append_structure_learning_time_to_file(results_file, file_suffix, f)
-
-                    elif "mln_statistics" in file_suffix:
-                        append_MLN_statistics_to_file(results_file, file_suffix, f)
-
-                    elif "inference_result" in file_suffix:
-                        append_inference_results_to_file(results_file, file_suffix, f)
-
-
-
-def append_inference_results_to_file(results_file, file_suffix, f):
-    data_dictionary = defaultdict(lambda: defaultdict(lambda: []))
-    for line in results_file:
-        database, CLL = line.split(',')
-        if 'alchemy' in file_suffix:
-            data_dictionary['alchemy'][database].append(float(CLL))
-        elif 'FASTER' in file_suffix:
-            data_dictionary['FASTER'][database].append(float(CLL))
-    print("INFERENCE CLL RESULTS ---------------------", file=f)
-    print(" Alchemy", file=f)
-    all_CLL = []
-    for array in data_dictionary['alchemy'].items():
-        all_CLL.append(array[1][0])
-    print(f"  Overall : {round(float(np.mean(all_CLL)), 4)} +/- {round(float(np.std(all_CLL)), 4)}", file=f)
-    print("", file=f)
-    print(" FASTER", file=f)
-    all_CLL = []
-    for array in data_dictionary['FASTER'].items():
-        all_CLL.append(array[1][0])
-    print(f"  Overall : {round(float(np.mean(all_CLL)), 4)} +/- {round(float(np.std(all_CLL)), 4)}", file=f)
-    print("", file=f)
-
-
-def append_motif_time_data_to_file(results_file, file_suffix, f):
-    data_dictionary = defaultdict(lambda: defaultdict(lambda: []))
-    for line in results_file:
-        database, time = line.split(',')
-        if 'alchemy' in file_suffix:
-            data_dictionary['alchemy'][database].append(float(time))
-        elif 'FASTER' in file_suffix:
-            data_dictionary['FASTER'][database].append(float(time))
-    print("MOTIF FINDING TIMES (s) ---------------------", file=f)
-    print(" Alchemy", file=f)
-    all_times = []
-    for array in data_dictionary['alchemy'].items():
-        print(f"  {array[0]} : {round(array[1][0],4)}", file=f)
-        all_times.append(array[1][0])
-    print(f"  Overall : {round(float(np.mean(all_times)),4)} +/- {round(float(np.std(all_times)),4)}", file=f)
-    print("", file=f)
-    print(" FASTER", file=f)
-    all_times = []
-    for array in data_dictionary['FASTER'].items():
-        print(f"  {array[0]} : {round(float(array[1][0]),4)}", file=f)
-        all_times.append(array[1][0])
-    print(f"  Overall : {round(float(np.mean(all_times)),4)} +/- {round(float(np.std(all_times)),4)}", file=f)
-    print("", file=f)
-
-
-def append_structure_learning_time_to_file(results_file, file_suffix, f):
-    data_dictionary = defaultdict(lambda: defaultdict(lambda: []))
-    for line in results_file:
-        database, time = line.split(',')
-        if 'alchemy' in file_suffix:
-            data_dictionary['alchemy'][database].append(float(time))
-        elif 'FASTER' in file_suffix:
-            data_dictionary['FASTER'][database].append(float(time))
-    print("STRUCTURE LEARNING TIMES (s) ---------------------", file=f)
-    print(" Alchemy", file=f)
-    all_times = []
-    for array in data_dictionary['alchemy'].items():
-        print(f"  {array[0]} : {round(float(array[1][0]),4)}", file=f)
-        all_times.append(array[1][0])
-    print(f"  Overall : {round(float(np.mean(all_times)),4)} +/- {round(float(np.std(all_times)),4)}", file=f)
-    print("", file=f)
-    print(" FASTER", file=f)
-    all_times = []
-    for array in data_dictionary['FASTER'].items():
-        print(f"  {array[0]} : {round(float(array[1][0]),4)}", file=f)
-        all_times.append(array[1][0])
-    print(f"  Overall : {round(float(np.mean(all_times)),4)} +/- {round(float(np.std(all_times)),4)}", file=f)
-    print("", file=f)
-
-
-def append_MLN_statistics_to_file(results_file, file_suffix, f):
-    data_dictionary = defaultdict(lambda: defaultdict(lambda: []))
-    for line in results_file:
-        database, results = line.split(',')
-        result_fragments = results.split(" ")
-        data = [float(fragment) for fragment in result_fragments if is_number(fragment)]
-        if 'alchemy' in file_suffix:
-            data_dictionary['alchemy']['num_formulas'].append(data[0])
-            data_dictionary['alchemy']['formula_length'].append(data[1])
-        elif 'FASTER' in file_suffix:
-            data_dictionary['FASTER']['num_formulas'].append(data[0])
-            data_dictionary['FASTER']['formula_length'].append(data[1])
-    print("MLN STATISTICS ---------------------", file=f)
-    print(" Alchemy", file=f)
-    print("  Number of formulas", file=f)
-    num_formulas = data_dictionary['alchemy']['num_formulas']
-    print(f"   Overall : {round(float(np.mean(num_formulas)),4)} +/- {round(float(np.std(num_formulas)),4)}", file=f)
-    print("  Formula Length", file=f)
-    formulas_lengths = np.array(num_formulas) * np.array(data_dictionary['alchemy']['formula_length'])
-    print(f"   Overall : {round(float(np.sum(formulas_lengths)/np.sum(num_formulas)),4)} +/- {round(float(np.std(formulas_lengths/num_formulas)),4)}", file=f)
-    print("", file=f)
-    print(" FASTER", file=f)
-    print("  Number of formulas", file=f)
-    num_formulas = data_dictionary['FASTER']['num_formulas']
-    print(f"   Overall : {round(float(np.mean(num_formulas)),4)} +/- {round(float(np.std(num_formulas)),4)}", file=f)
-    print("  Formula Length", file=f)
-    formulas_lengths = np.array(num_formulas) * np.array(data_dictionary['FASTER']['formula_length'])
-    print(f"   Overall : {round(float(np.sum(formulas_lengths)/np.sum(num_formulas)),4)} +/- {round(float(np.std(formulas_lengths/num_formulas)),4)}", file=f)
-    print("", file=f)
 
 
 class MLNEvaluator(object):
@@ -246,9 +103,8 @@ class MLNEvaluator(object):
             self._structure_learn_with_FASTER()
 
     def _structure_learn_with_alchemy(self):
-        #print(f'Structure Learning {database} (Alchemy)')
-        #print(' Random walks...')
         self._run_alchemy_random_walks()
+        print("Alchemy Random Walks Finished")
         self._run_rest_of_structure_learning_pipeline('alchemy')
         print(".", end="")
 
@@ -267,6 +123,7 @@ class MLNEvaluator(object):
             time1 = time.time()
             motif_times.append(time1 - time0)
             self._log_to_master_file(method='alchemy', quantity='motif_time', database=database, result=time1 - time0)
+            print('.', end="")
 
         self._log_to_master_file(method='alchemy', quantity='motif_time',
                                  database='database average and std:',
@@ -274,10 +131,9 @@ class MLNEvaluator(object):
 
 
     def _structure_learn_with_FASTER(self):
-        #print(f'Structure Learning {database} (FASTER)')
         self._run_FASTER_random_walks()
+        print("FASTER Random Walks Finished")
         self._run_rest_of_structure_learning_pipeline('FASTER')
-        #self._remove_temporary_files_produced_during_structure_learning()
         print(".", end="")
 
     def _run_FASTER_random_walks(self):
@@ -302,6 +158,7 @@ class MLNEvaluator(object):
             time1 = time.time()
             motif_times.append(time1-time0)
             self._log_to_master_file(method='FASTER', quantity='motif_time', database=database, result=time1-time0)
+            print('.', end="")
 
         self._log_to_master_file(method='FASTER', quantity='motif_time',
                                  database='database average and std:',
@@ -310,7 +167,6 @@ class MLNEvaluator(object):
 
     def run_inference_on_MLNs(self):
         query_predicates = self.get_query_predicates()
-        #print('Running inference')
         if self.only_FASTER:
             algorithms = [('FASTER')]
         else:
@@ -332,7 +188,6 @@ class MLNEvaluator(object):
         self.run_inference_on_MLN(prefixed_mln, test_database, query_predicates)
 
     def evaluate_MLNs(self):
-        #print('Evaluating')
         if not self.only_FASTER:
             self.evaluate_MLNs_by_method('alchemy')
         self.evaluate_MLNs_by_method('FASTER')
@@ -342,6 +197,7 @@ class MLNEvaluator(object):
         pool.starmap(self._evaluate_MLN, [(database, method) for database in self.database_files[:self.number_to_run]])
 
     def _evaluate_MLN(self, test_database, method):
+        print(f' Evaluating {method} on {test_database}...')
         CLL = self.compute_CLL_on_test_database(method, test_database)
         self._log_to_master_file(method=method, quantity='inference_result', database='NOT'+test_database, result=CLL, test_database=test_database)
         print(".", end="")
@@ -383,12 +239,13 @@ class MLNEvaluator(object):
             save_name = database.rstrip('.db') + self.FASTER_suffix
             suffix = self.FASTER_suffix
         time0 = time.time()
+        print(f' Getting Communities ({algorithm})...')
         self._run_get_communities(database, save_name, suffix)
-        # print(' Paths...')
+        print(f' Getting Paths ({algorithm})...')
         self._run_path_finding(save_name)
-        # print(' Finding formulas...')
+        print(f' Finding formulas ({algorithm})...')
         self._run_create_MLN_rules(database, save_name, suffix)
-        # print(' Calculating weights..')
+        print(f' Calculating weights ({algorithm})...')
         self._run_learn_MLN_weights(database, save_name)
         time1 = time.time()
 
@@ -396,19 +253,6 @@ class MLNEvaluator(object):
                                  result=time1-time0, test_database=database)
 
         return algorithm, time1-time0, database
-
-    # def _append_structure_learning_time(self, method, result, database):
-    #     global alchemy_structure_learning_times
-    #     global FASTER_structure_learning_times
-    #
-    #     if method == "alchemy":
-    #         alchemy_structure_learning_times.append(result)
-    #     elif method == "FASTER":
-    #         FASTER_structure_learning_times.append(result)
-    #
-    #     self._log_to_master_file(method=method, quantity='structure_learning_time', database='all others',
-    #                              result=result, test_database=database)
-    #     print(".", end="")
 
     def _remove_temporary_files_produced_during_structure_learning(self):
         cwd = os.getcwd()
@@ -431,8 +275,10 @@ class MLNEvaluator(object):
                                      f'{os.path.join(self.data_dir, test_database)} -q {query_predicates} -maxSteps 300'
         inference_command_positive = f'{self.infer_dir}/infer -i {mln_to_evaluate} -r {inference_file}.positive -e ' \
                                      f'{os.path.join(self.data_dir, test_database)} -q {query_predicates} -maxSteps 300 -queryEvidence 1'
+        print(f' Running +ve inference on {mln}...')
         subprocess.call(inference_command_positive, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         print(".", end="")
+        print(f' Running -ve inference on {mln}...')
         subprocess.call(inference_command_negative, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
         print(".", end="")
 
@@ -579,6 +425,7 @@ class MLNEvaluator(object):
                 else:
                     print(f"{database}, {result}", file=f)
 
+    # TODO remove after debug
     def print_commands(self, database, test_database):
         save_name = database.rstrip('.db') + self.FASTER_suffix
         mln = database.rstrip('.db')
@@ -661,25 +508,16 @@ class MLNEvaluator(object):
 
 
 if __name__ == "__main__":
-    # imdb_evaluator = MLNEvaluator(data_dir='/home/dominic/CLionProjects/FASTER/Databases/imdb',
-    #                               mln_dir='/home/dominic/CLionProjects/FASTER/Experiments/imdb_final/mlns',
-    #                               results_dir='/home/dominic/CLionProjects/FASTER/Experiments/imdb_final/results',
-    #                               log_dir='/home/dominic/CLionProjects/FASTER/Experiments/imdb_final',
-    #                               inference_calculations_dir='/home/dominic/CLionProjects/FASTER/Experiments/imdb_final/results/inference',
-    #                               database_files=['imdb.1.db', 'imdb.2.db', 'imdb.3.db', 'imdb.4.db', 'imdb.5.db'],
-    #                               delete_generated_files=False,
-    #                               info_file='imdb.info',
-    #                               type_file='imdb.type',
-    #                               FASTER_parameters=[0.2, 0.01, 1, 0.8, 10],
-    #                               only_FASTER=True,
-    #                               parallel_structure_learning=False,
-    #                               combined_database_evaluation=False,
-    #                               master_results_file='/home/dominic/CLionProjects/FASTER/Experiments/imdb_final',
-    #                               FASTER_timeout=60)
-    # imdb_evaluator.print_commands('imdb.1.db', 'imdb.2.db')
-    #imdb_evaluator.execute_experiments(skip_structure_learning=False, skip_inference=False, skip_evaluation=False)
+    # CHECKLIST FOR GETTING EXPERIMENTS WORKING
+    # 1) Install and compile Alchemy
+    # 2) Install and compile FASTER
+    # 3) Download datasets
+    # 4) Create correct directory structure
+    # 5) Modify this .py file to make sure that the paths are all correct
+    # 6) Check the code by running this file on dummy datasets that are quick to structure learn
+    # 6) Run it on the real dataset!
 
-    uw_cse_evaluator = MLNEvaluator(data_dir='/home/dominic/CLionProjects/FASTER/Databases/cora.ie',
+    cora_evaluator = MLNEvaluator(data_dir='/home/dominic/CLionProjects/FASTER/Databases/cora.ie',
                                     mln_dir='/home/dominic/CLionProjects/FASTER/Experiments/cora/mlns',
                                     results_dir='/home/dominic/CLionProjects/FASTER/Experiments/cora/results',
                                     log_dir='/home/dominic/CLionProjects/FASTER/Experiments/cora',
@@ -690,178 +528,9 @@ if __name__ == "__main__":
                                     type_file='cora.type',
                                     FASTER_parameters=[0.2, 0.01, 1, 0.8, 10],
                                     only_FASTER=False,
-                                    only_ALCHEMY=True,
-                                    number_to_run=1,
+                                    only_ALCHEMY=False,
                                     parallel_structure_learning=True,
                                     combined_database_evaluation=False,
-                                    master_results_file='/home/dominic/CLionProjects/FASTER/Experiments/uw_cse_final',
-                                    FASTER_timeout=60)
-    #protein_evaluator.print_commands('imdb.1.db', 'imdb.2.db')
-    uw_cse_evaluator.execute_experiments(skip_structure_learning=False, skip_inference=False, skip_evaluation=False)
-
-    #compute_mean_statisics("/home/dominic/CLionProjects/FASTER/Experiments", f"uw_cse_")
-
-
-    # print('Experiment 0.1 0.001')
-    # imdb_evaluator = MLNEvaluator(data_dir='/home/dominic/CLionProjects/FASTER/Databases/old_imdb',
-    #                               mln_dir='/home/dominic/CLionProjects/FASTER/Experiments/old_imdb/results0.1_0.001/mlns',
-    #                               results_dir='/home/dominic/CLionProjects/FASTER/Experiments/old_imdb/results0.1_0.001',
-    #                               inference_calculations_dir='/home/dominic/CLionProjects/FASTER/Experiments/old_imdb/results0.1_0.001/inference',
-    #                               database_files=['imdb1.db', 'imdb2.db', 'imdb3.db', 'imdb4.db', 'imdb5.db'],
-    #                               delete_generated_files=False,
-    #                               info_file='imdb1.info',
-    #                               type_file='imdb1.type',
-    #                               FASTER_parameters=[0.1, 0.001, 1, 0.8, 10],
-    #                               only_FASTER=False,
-    #                               parallel_structure_learning=True,
-    #                               combined_database_evaluation=False,
-    #                               master_results_file='/home/dominic/CLionProjects/FASTER/old_imdb_e0.1_a0.001',
-    #                               FASTER_timeout=5)
-    #
-    # imdb_evaluator.execute_experiments(skip_structure_learning=False, skip_inference=False, skip_evaluation=False)
-    #
-    # for e in [0.3, 0.2, 0.1, 0.05, 0.01]:
-    #     for a in [0.001, 0.01, 0.05, 0.1, 0.3]:
-    #         if e == 0.1 and a == 0.001:
-    #             continue
-    #         print(f'Experiment {e} {a}')
-    #         imdb_evaluator = MLNEvaluator(data_dir='/home/dominic/CLionProjects/FASTER/Databases/old_imdb',
-    #                                       mln_dir=f'/home/dominic/CLionProjects/FASTER/Experiments/old_imdb/results{e}_{a}/mlns',
-    #                                       results_dir=f'/home/dominic/CLionProjects/FASTER/Experiments/old_imdb/results{e}_{a}',
-    #                                       inference_calculations_dir=f'/home/dominic/CLionProjects/FASTER/Experiments/old_imdb/results{e}_{a}/inference',
-    #                                       database_files=['imdb1.db', 'imdb2.db', 'imdb3.db', 'imdb4.db', 'imdb5.db'],
-    #                                       delete_generated_files=False,
-    #                                       info_file='imdb1.info',
-    #                                       type_file='imdb1.type',
-    #                                       FASTER_parameters=[e, a, 1, 0.8, 10],
-    #                                       only_FASTER=True,
-    #                                       parallel_structure_learning=True,
-    #                                       combined_database_evaluation=False,
-    #                                       master_results_file=f'/home/dominic/CLionProjects/FASTER/old_imdb_e{e}_a{a}',
-    #                                       FASTER_timeout=5)
-    #
-    #         imdb_evaluator.execute_experiments(skip_structure_learning=False, skip_inference=False, skip_evaluation=False)
-
-
-
-# sel
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++f.time_statistics = {
-#     'FASTER': {
-#         'clustering': [],
-#         'getting_communities': [],
-#         'path_finding': [],
-#         'creating_rules': [],
-#         'learning_weights': [],
-#         'total_structure_learning': [],
-#         'performing_inference': [],
-#         'performing_evaluation': [],
-#     },
-#     'alchemy': {
-#         'clustering': [],
-#         'getting_communities': [],
-#         'path_finding': [],
-#         'creating_rules': [],
-#         'learning_weights': [],
-#         'total_structure_learning': [],
-#         'performing_inference': [],
-#         'performing_evaluation': [],
-#     }
-# }
-
-# self.evaluation_statistics = {
-#     'alchemy': {
-#         'average_CLL': None,
-#         'average_formula_length': None,
-#         'average_number_of_formulas': None,
-#     },
-#     'FASTER': {
-#         'average_CLL': None,
-#         'average_formula_length': None,
-#         'average_number_of_formulas': None,
-#     },
-# }
-
-
-# @staticmethod
-# def _write_data_files_log(log_file, database_files, info_file, type_file):
-#     log_file.write('\n')
-#     log_file.write('DATA FILES ------------------------------- \n')
-#     log_file.write(f'database_file_names = {database_files} \n')
-#     log_file.write(f'info_file = {info_file} \n')
-#     log_file.write(f'type_file = {type_file} \n \n')
-#
-# def _write_config_log(self, log_file):
-#     log_file.write('\n')
-#     log_file.write('CONFIG ----------------------------------- \n')
-#     json.dump(self.config, log_file, indent=4)
-#     log_file.write('FASTER PARAMS ---------------------------- \n')
-#     json.dump(self.FASTER_parameters, log_file, indent=4)
-#     log_file.write('\n')
-#
-# def _write_timings_log(self, log_file):
-#     log_file.write('\n')
-#     log_file.write('TIMINGS ---------------------------------- \n')
-#     json.dump(self.time_statistics, log_file, indent=4)
-#     log_file.write('\n')
-#
-# def _write_evaluation_log(self, log_file):
-#     log_file.write('\n')
-#     log_file.write('EVALUATION ------------------------------- \n')
-#     json.dump(self.evaluation_statistics, log_file, indent=4)
-#     log_file.write('\n')
-
-
-# if not self.only_FASTER:
-#     self.evaluation_statistics['alchemy']['average_CLL'] = alchemy_statistics[0]
-#     self.evaluation_statistics['alchemy']['average_formula_length'] = alchemy_statistics[1]
-#     self.evaluation_statistics['alchemy']['average_number_of_formulas'] = alchemy_statistics[2]
-#     self.evaluation_statistics['alchemy']['max_formula_length'] = alchemy_statistics[3]
-#     self.evaluation_statistics['alchemy']['max_number_formulas'] = alchemy_statistics[4]
-#
-# self.evaluation_statistics['FASTER']['average_CLL'] = alchemy_statistics[0]
-# self.evaluation_statistics['FASTER']['average_formula_length'] = alchemy_statistics[1]
-# self.evaluation_statistics['FASTER']['average_number_of_formulas'] = alchemy_statistics[2]
-# self.evaluation_statistics['FASTER']['max_formula_length'] = alchemy_statistics[3]
-# self.evaluation_statistics['FASTER']['max_number_formulas'] = alchemy_statistics[4]
-
-
-# def write_log_file(self, database_files, info_file, type_file):
-#     current_time = datetime.now()
-#     timestampStr = current_time.strftime("%d-%b-%Y (%H:%M:%S.%f)")
-#     with open(timestampStr + '.log', 'w') as log_file:
-#         self._write_data_files_log(log_file, database_files, info_file, type_file)
-#         self._write_config_log(log_file)
-#         self._write_timings_log(log_file)
-#         self._write_evaluation_log(log_file)
-
-
-# for e in [0.05, 0.1, 0.2, 0.3]:
-#     for a in [0.001, 0.01, 0.05, 0.10, 0.20, 0.30]:
-#         for l in [1.7, 1.3, 0.8, 0.5, 0.2]:
-#             for mcs in [3,5,10,200]:
-#                 evaluator = MLNEvaluator(only_FASTER=True,
-#                                          FASTER_timeout=5,
-#                                          parallel_structure_learning=True,
-#                                          FASTER_parameters=[e,a,1,l,mcs],
-#                                          master_results_file='/home/dominic/CLionProjects/FASTER/results_no_inference.txt',
-#                                          )
-#                 evaluator.evaluate(database_files=['imdb1.db', 'imdb2.db', 'imdb3.db', 'imdb4.db', 'imdb5.db'],
-#                                    info_file='imdb1.info',
-#                                    type_file='imdb1.type',
-#                                    skip_structure_learning=False,
-#                                    skip_inference=True)
-
-
-# if self.combined_database_evaluation:
-#     # e.g. imdb1 tested simultaneously on imdb2, imdb3, imdb4, imdb5 (more accurate; takes more memory)
-#     evidence_database_files = [','.join(
-#         [os.path.join(self.data_dir, database_file) for database_file in self.database_files if
-#          database_file != database]) for database in self.database_files]
-#     inference_exp_params = [(database, algorithm, evidence) for (database, evidence), algorithm in
-#                             itertools.product(zip(self.database_files, evidence_database_files), algorithms)]
-# else:
-#     # e.g. imdb1 test on imdb2, then imdb3, etc. (less accurate; takes less memory)
-#     evidence_databases = [[database_file
-#                            for database_file in self.database_files if database_file != database]
-#                           for database in self.database_files
-#                           ]
+                                    master_results_file='/home/dominic/CLionProjects/FASTER/Experiments/cora',
+                                    FASTER_timeout=1800)
+    cora_evaluator.execute_experiments(skip_structure_learning=False, skip_inference=False, skip_evaluation=False)

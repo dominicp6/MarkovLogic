@@ -1,5 +1,8 @@
 import numpy as np
-from scipy.stats import chi2
+
+from HierarchicalClustering.NodeRandomWalkData import NodeRandomWalkData
+from HierarchicalClustering.stats_utils import compute_generalised_chi_squared_critical_value
+from clustering_nodes_by_path_similarity import compute_top_paths
 
 
 def test_quality_of_clusters(cluster_node_path_counts: list[np.array], number_of_walks: int, significance_level: float):
@@ -17,7 +20,50 @@ def test_quality_of_clusters(cluster_node_path_counts: list[np.array], number_of
     return True
 
 
-def hypothesis_test_path_symmetric_nodes(node_path_counts, number_of_walks, significance_level=0.5):
+def covariance_matrix_of_count_residues(N: int, V: int, P: int, c_vector: np.array):
+    """
+    N - number of walks ran
+    V - number of nodes
+    P - number of paths
+    c_vector - vector of average path counts
+
+    """
+
+    Sigma = np.zeros((P, P))
+    for i in range(P):
+        for j in range(P):
+            if i == j:
+                Sigma[i][j] = (c_vector[i] / N) * (1 - c_vector[j] / N)
+            else:
+                Sigma[i][j] = - (c_vector[i] * c_vector[j]) / (N ** 2)
+
+    Sigma *= N * (1 - 1 / V)
+
+    return Sigma
+
+
+def compute_critical_Q_value(lambda_ks: np.array, N: int, V: int, P: int, significance_level: float):
+    # construct weight and degree vectors of length V * P
+    weight_vector = [lambda_ks] * V
+    dof_vector = [V] * P * V
+    centrality_vector = [0] * P * V
+    normal_coefficient = 0
+
+    return compute_generalised_chi_squared_critical_value(weight_vector, centrality_vector, dof_vector,
+                                                          normal_coefficient, significance_level, V * N)
+
+
+def append_null_counts(node_path_counts: np.array, number_of_walks: int):
+    # size (1, number_of_nodes)
+    zero_counts = number_of_walks - np.sum(node_path_counts, axis=0)
+
+    return np.vstack([node_path_counts, zero_counts])
+
+
+def hypothesis_test_path_symmetric_nodes(nodes: list[NodeRandomWalkData],
+                                         number_of_walks: int,
+                                         max_path_length: int,
+                                         significance_level: float):
     """
     Given an array of node path counts, runs a statistical test on the path count distributions to test whether they
     violate the null hypothesis of being path symmetric.
@@ -28,77 +74,60 @@ def hypothesis_test_path_symmetric_nodes(node_path_counts, number_of_walks, sign
     and for them to still be considered as path symmetric.
     """
 
-    number_of_paths, number_of_nodes = node_path_counts.shape
-
     # A single node is trivially of the same probability distribution as itself
-    if number_of_nodes == 1:
+    if len(nodes) == 1:
         return True
 
-    node_path_count_means = np.mean(node_path_counts, axis=1)
+    # Attempt to run a hypothesis test on paths of decreasing length
+    for path_length in range(max_path_length, 1):
+        node_path_counts = compute_top_paths(nodes, , path_length)
 
-    # For one path, a different statistical test is required than when there is more than one path
-    if number_of_paths == 1:
-        Q_max = chi2.isf(significance_level, df=number_of_nodes)
-        return Q_test_if_single_path(Q_max,
-                                     node_path_counts[0],
-                                     node_path_count_means[0],
-                                     number_of_nodes,
-                                     number_of_walks)
-    else:
-        number_of_hits = np.sum(node_path_counts, axis=0)
-        mean_number_of_hits = np.mean(number_of_hits)
+        # If the nodes have no paths of this length then continue; try will a smaller path length
+        if node_path_counts is None:
+            continue
 
-        Q_max = chi2.isf(significance_level, df=number_of_nodes * number_of_paths)
-        return Q_test_if_multiple_paths(Q_max,
-                                        node_path_counts,
-                                        node_path_count_means,
-                                        number_of_nodes,
-                                        number_of_paths,
-                                        mean_number_of_hits)
+        # Otherwise run a hypothesis test
+        else:
+            node_path_counts = append_null_counts(node_path_counts, number_of_walks)
+            number_of_paths, number_of_nodes = node_path_counts.shape
+            mean_path_counts = np.mean(node_path_counts, axis=1)
+            cov_matrix = covariance_matrix_of_count_residues(N=number_of_walks,
+                                                             V=number_of_nodes,
+                                                             P=number_of_paths,
+                                                             c_vector=mean_path_counts)
+            covariance_eigenvalues = np.linalg.eigvals(cov_matrix)
 
+            Q_critical = compute_critical_Q_value(lambda_ks=covariance_eigenvalues,
+                                                  N=number_of_walks,
+                                                  V=number_of_nodes,
+                                                  P=number_of_paths,
+                                                  significance_level=significance_level)
 
-def Q_test_if_single_path(Q_max: float, node_path_counts: np.array, mean_path_count: int, number_of_nodes: int,
-                          number_of_walks: int):
-    """
-    Tests whether the counts of a particular path are statistically similar for all nodes.
-
-    node_path_counts: (1) x (number_of_nodes)
-    returns: True/False
-    """
-
-    Q = 0
-    prefactor = 1 / ((1 + 1 / number_of_nodes) * mean_path_count * (1 - mean_path_count / number_of_walks))
-
-    for j in range(number_of_nodes):
-        Q += prefactor * (mean_path_count - node_path_counts[j]) ** 2
-
-        if Q > Q_max:
-            return False
-
-    return True
+            return Q_test(Q_critical=Q_critical,
+                          c_matrix=node_path_counts,
+                          c_vector=mean_path_counts,
+                          V=number_of_nodes,
+                          P=number_of_paths)
 
 
-def Q_test_if_multiple_paths(Q_max: float, node_path_counts: np.array, node_path_count_means: np.array,
-                             number_of_nodes: int, number_of_paths: int, mean_number_of_hits: np.array):
+def Q_test(Q_critical: float, c_matrix: np.array, c_vector: np.array, V: int, P: int):
     """
     Tests whether the path count distributions are statistically similar for all nodes.
 
-    node_path_counts: (number of paths) x (number of nodes)
-    node_path_count_means: (1) x (number of paths)
-    mean_number_of_hits: (1) x (number of nodes)
+    c_matrix: counts of number of hits of each path for each node
+    c_vector: mean count of each path averaged over the set of nodes
+    V: the number of nodes
+    P: the number of paths
+
     returns: True/False
     """
 
     Q = 0
-    for i in range(number_of_paths):
-        prefactor = 1 / (node_path_count_means[i] * (1 + 1 / number_of_nodes) *
-                         (1 - node_path_count_means[i] / mean_number_of_hits))
-        for j in range(number_of_nodes):
-            Q += prefactor * (node_path_count_means[i] - node_path_counts[i][j]) ** 2
+    for i in range(P):
+        for k in range(V):
+            Q += (c_vector[i] - c_matrix[i][k]) ** 2
 
-            if Q > Q_max:
+            if Q > Q_critical:
                 return False
 
     return True
-
-

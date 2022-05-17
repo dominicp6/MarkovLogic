@@ -3,7 +3,7 @@ from NodeRandomWalkData import *
 from sklearn.decomposition import PCA
 from sklearn.cluster import Birch
 from scipy.stats import norm, t
-from js_divergence_utils import compute_js_divergence_of_top_n_paths
+from js_divergence_utils import compute_sk_divergence_of_top_n_paths
 
 from hypothesis_test import hypothesis_test_path_symmetric_nodes, test_quality_of_clusters
 import matplotlib.pyplot as plt
@@ -31,7 +31,10 @@ def get_commonly_encountered_nodes(nodes_random_walk_data: dict[str, NodeRandomW
             if node.get_count_of_nth_path(n=3) >= number_of_walks_ran/(number_of_walks_ran*epsilon**2 + 1)}
 
 
-def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_walks: int, theta_sym: float,
+def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData],
+                                     number_of_walks: int,
+                                     length_of_walks: int,
+                                     theta_sym: float,
                                      config: dict):
     """
     Clusters nodes from a hypergraph into groups which are symmetrically related relative to a source node.
@@ -57,6 +60,7 @@ def cluster_nodes_by_path_similarity(nodes: list[NodeRandomWalkData], number_of_
         path_symmetric_single_nodes, path_symmetric_clusters = cluster_nodes_by_path_distributions(
             distance_symmetric_cluster,
             number_of_walks,
+            length_of_walks,
             config
         )
 
@@ -80,8 +84,8 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     nodes = sorted(nodes, key=lambda n: n.average_hitting_time)
     current_hitting_time = nodes[0].average_hitting_time
     distance_symmetric_clusters = []
-    distance_symmetric_single_nodes = set()
     distance_symmetric_cluster = []
+    distance_symmetric_single_nodes = set()
     for node in nodes:
         if (node.average_hitting_time - current_hitting_time) < threshold_hitting_time_difference:
             distance_symmetric_cluster.append(node)
@@ -106,7 +110,9 @@ def cluster_nodes_by_truncated_hitting_times(nodes: list[NodeRandomWalkData], th
     return distance_symmetric_single_nodes, distance_symmetric_clusters
 
 
-def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_of_walks: int,
+def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData],
+                                        number_of_walks: int,
+                                        length_of_walks: int,
                                         config: dict):
     """
     Clusters a list of nodes based on their empirical path distributions into path-symmetric clusters as follows
@@ -119,10 +125,9 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
     """
     assert len(nodes) > 1, "Clustering by path distribution requires more than one node"
 
-    node_path_counts = compute_top_paths(nodes, max_number_of_paths=config['max_num_paths'])
-
-    if hypothesis_test_path_symmetric_nodes(node_path_counts,
+    if hypothesis_test_path_symmetric_nodes(nodes,
                                             number_of_walks=number_of_walks,
+                                            max_path_length=length_of_walks,
                                             significance_level=config['theta_p']):
         single_nodes = set()
         clusters = [[node.name for node in nodes]]
@@ -133,9 +138,10 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
             single_nodes, clusters = cluster_nodes_by_js_divergence(nodes=nodes,
                                                                     significance_level=config['theta_p'],
                                                                     number_of_walks=number_of_walks,
-                                                                    max_number_of_paths=3)
+                                                                    max_number_of_paths=config['max_number_of_paths'])
         # else cluster based k-means cluster on a PCA reduction of the path counts features
         else:
+            pass
             single_nodes, clusters = cluster_nodes_by_birch(nodes=nodes,
                                                             pca_target_dimension=config['pca_dim'],
                                                             max_number_of_paths=config['max_num_paths'],
@@ -145,35 +151,40 @@ def cluster_nodes_by_path_distributions(nodes: list[NodeRandomWalkData], number_
     return single_nodes, clusters
 
 
-def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int):
+def compute_top_paths(nodes: list[NodeRandomWalkData], max_number_of_paths: int, path_length=None):
     """
     From each node in the list, finds the most common paths and constructs a path count vector.
     Returns a path-count feature array of the nodes of size (number of paths) x (number of nodes) where the (i,j) entry
     corresponds to the number of times that the ith indexed path occurred for the jth indexed node.
+
+    :param path_length: if not None, then only computes top path counts for paths of a specified length (int)
     """
 
     top_paths_of_each_node = []  # list[dict(path: path_counts)]
-    [top_paths_of_each_node.append(node.get_top_paths(max_number_of_paths)) for node in nodes]
+    [top_paths_of_each_node.append(node.get_top_paths(max_number_of_paths, path_length)) for node in nodes]
 
     unique_paths = set()
     [unique_paths.update(paths.keys()) for paths in top_paths_of_each_node]
     number_unique_paths = len(unique_paths)
     del unique_paths
 
-    path_string_to_path_index = {}
-    # Array size (number of paths) x (number of nodes), each entry is the count of that path for that node:
-    node_path_counts = np.zeros([number_unique_paths, len(nodes)])
-    for node_index, node_paths in enumerate(top_paths_of_each_node):
-        for path, path_count in node_paths.items():
-            if path not in path_string_to_path_index.keys():
-                path_index = len(path_string_to_path_index)
-                path_string_to_path_index[path] = path_index
-            else:
-                path_index = path_string_to_path_index[path]
+    if number_unique_paths > 0:
+        path_string_to_path_index = {}
+        # Array size (number of paths) x (number of nodes), each entry is the count of that path for that node:
+        node_path_counts = np.zeros([number_unique_paths, len(nodes)])
+        for node_index, node_paths in enumerate(top_paths_of_each_node):
+            for path, path_count in node_paths.items():
+                if path not in path_string_to_path_index.keys():
+                    path_index = len(path_string_to_path_index)
+                    path_string_to_path_index[path] = path_index
+                else:
+                    path_index = path_string_to_path_index[path]
 
-            node_path_counts[path_index][node_index] = path_count
+                node_path_counts[path_index][node_index] = path_count
 
-    return node_path_counts
+        return node_path_counts
+    else:
+        return None
 
 
 def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
@@ -211,7 +222,7 @@ def cluster_nodes_by_js_divergence(nodes: list[NodeRandomWalkData],
         for i in range(len(js_clusters)):
             for j in range(i + 1, len(js_clusters)):
                 js_divergence, threshold_js_divergence = \
-                    compute_js_divergence_of_top_n_paths(js_clusters[i],
+                    compute_sk_divergence_of_top_n_paths(js_clusters[i],
                                                          js_clusters[j],
                                                          max_number_of_paths,
                                                          number_of_walks,

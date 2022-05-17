@@ -4,6 +4,9 @@ import numpy as np
 from HierarchicalClustering.HierarchicalClusterer import HierarchicalClusterer
 from tqdm import tqdm
 
+from HierarchicalClustering.RandomWalker import RandomWalker
+
+
 def P_star(n, L):
     if n > 1:
         return 1 + (n * (n ** L - 1) / (n - 1))
@@ -69,3 +72,74 @@ def hypergraph_diagnostics(hypergraph):
     plt.show()
 
 
+def random_walk_diagnostics(hypergraph):
+    rsd_dict = dict()
+    average_number_of_paths = dict()
+    for path_length in tqdm(np.arange(2, 10)):
+        config = {
+            'random_walk_params': {
+                'epsilon': 0.1,
+                'max_num_paths': 3,
+                'alpha_sym': 0.1,
+                'pca_dim': 2,
+                'clustering_method_threshold': 50,
+                'max_path_length': int(path_length),
+                'theta_p': 0.5,
+            }
+        }
+        rw = RandomWalker(hypergraph=hypergraph, config=config['random_walk_params'])
+        rw_data = [rw.generate_node_random_walk_data(source_node=node) for node in hypergraph.nodes.keys()]
+        rsd_data = []
+        num_paths_data = []
+        max_number_of_paths = 0
+        entries = 0
+        for rw_data_from_a_node in rw_data:
+            for node_data in rw_data_from_a_node.values():
+                entries = len(rw_data)*len(rw_data_from_a_node.values())
+                paths = sorted(node_data.path_counts.items(), key=lambda x: x[1], reverse=True)
+                path_counts = [path_tuple[1] for path_tuple in paths]
+                total_path_count = sum(path_counts)
+                path_probabilities = np.array([path_count/total_path_count for path_count in path_counts])
+                Z = sum([1/(k+1) for k in range(len(path_counts))])
+                ziphian_probabilities = np.array([1/((k+1)*Z) for k in range(len(path_counts))])
+                rsd_diff = np.sqrt(np.sum((path_probabilities-ziphian_probabilities)**2))
+                rsd_data.append(rsd_diff)
+                num_paths_data.append(len(path_counts))
+                max_number_of_paths = max(max_number_of_paths, len(path_counts))
+
+        experimental_prob_array = np.zeros((entries, max_number_of_paths))
+        ziphian_prob_array = np.zeros((entries, max_number_of_paths))
+        entry = 0
+        for rw_data_from_a_node in rw_data:
+            for node_data in rw_data_from_a_node.values():
+                paths = sorted(node_data.path_counts.items(), key=lambda x: x[1], reverse=True)
+                path_counts = [path_tuple[1] for path_tuple in paths]
+                total_path_count = sum(path_counts)
+                path_probabilities = np.array([path_count/total_path_count for path_count in path_counts])
+                Z = sum([1/(k+1) for k in range(len(path_counts))])
+                ziphian_probabilities = np.array([1/((k+1)*Z) for k in range(len(path_counts))])
+
+                experimental_prob_array[entry][0:len(path_probabilities)] = path_probabilities
+                ziphian_prob_array[entry][0:len(ziphian_probabilities)] = ziphian_probabilities
+                entry += 1
+
+        rsd_dict[int(path_length)] = np.mean(rsd_data)
+        average_number_of_paths[int(path_length)] = np.mean(num_paths_data)
+        plt.plot([1/(x+1) for x in np.arange(0, np.shape(experimental_prob_array)[1])], np.mean(experimental_prob_array, axis=0), label='experiment')
+        plt.plot([1/(x+1) for x in np.arange(0, np.shape(ziphian_prob_array)[1])], np.mean(ziphian_prob_array, axis=0), label='ziphian')
+        plt.xlabel('1 / Path Index')
+        plt.ylabel('log(P)')
+        plt.title(f'Path Length: {int(path_length)}')
+        plt.legend()
+        plt.show()
+
+    plt.plot(rsd_dict.keys(), rsd_dict.values())
+    plt.xlabel('Path Length')
+    plt.ylabel('RSS')
+    plt.title('Root-Sum-Square Deviation between Ziphian and Experimental')
+    plt.show()
+    plt.plot(rsd_dict.keys(), average_number_of_paths.values())
+    plt.xlabel('Path Length')
+    plt.ylabel('Average Number of Paths')
+    plt.title('Number of Path Trends with Path Length')
+    plt.show()
